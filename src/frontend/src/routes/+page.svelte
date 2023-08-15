@@ -1,5 +1,59 @@
 <script lang="ts">
   import { createActor } from "../../../declarations/backend";
+  import { AuthClient } from "@dfinity/auth-client";
+  import { onMount } from "svelte";
+
+  let client;
+  let loggedIn: boolean = false;
+
+  const init = async () => {
+    console.log("Init");
+    client = await AuthClient.create();
+    if (await client.isAuthenticated()) {
+      loggedIn = true;
+      console.log(
+        "Init, identity: ",
+        client,
+        client.getIdentity().getPrincipal().toString()
+      );
+      if (import.meta.env.MODE != "development") {
+        // Only assign identity on the mainnet to the agent, send anonymouse call locally for now
+        //Actor.agentOf($actor).replaceIdentity(client.getIdentity());
+      }
+      //userId.set(client.getIdentity().getPrincipal().toString());
+      //loggedIn.set(true);
+    } else {
+      console.log("Init, not logged in");
+    }
+  };
+
+  const login = async () => {
+    client.login({
+      //identityProvider: "https://nfid.one" + AUTH_PATH,
+      identityProvider: "https://identity.ic0.app/#authorize",
+      onSuccess: handleAuth,
+      windowOpenerFeatures: `
+      left=${window.screen.width / 2 - 525 / 2},
+      top=${window.screen.height / 2 - 705 / 2},
+      toolbar=0,location=0,menubar=0,width=525,height=705
+    `,
+    });
+  };
+
+  function handleAuth() {
+    loggedIn = true;
+    if (import.meta.env.MODE != "development") {
+      //Actor.agentOf($actor).replaceIdentity(client.getIdentity());
+    } else {
+      console.log("Logged in");
+    }
+  }
+
+  async function logout() {
+    await client.logout();
+    loggedIn = false;
+    console.log("Logged out");
+  }
 
   let input = "";
   let disabled = false;
@@ -26,6 +80,7 @@
 
     disabled = false;
   };
+  onMount(init);
 </script>
 
 <main>
@@ -42,6 +97,11 @@
   <section id="greeting">
     {greeting}
   </section>
+  {#if !loggedIn}
+    <button class="btn btn-lg variant-filled" on:click={login}>Log in</button>
+  {:else}
+    <button class="btn btn-lg variant-filled" on:click={logout}>Log out</button>
+  {/if}
 </main>
 
 <style lang="scss">
