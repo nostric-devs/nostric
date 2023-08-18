@@ -1,28 +1,40 @@
 {
   "canisters": {
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
+    },
     "backend": {
+      "dependencies": [
+        "vetkd_system_api"
+      ],
       "main": "src/backend/main.mo",
       "type": "motoko"
     },
     "frontend": {
-      "dependencies": ["backend"],
+      "dependencies": [
+        "backend",
+        "vetkd_system_api"
+      ],
       "frontend": {
-        "entrypoint": "build/index.html"
+        "entrypoint": "src/frontend/public/index.html"
       },
-      "source": ["build/"],
+      "source": [
+        "src/frontend/public/"
+      ],
       "type": "assets"
+    },
+    "internet_identity": {
+      "candid": "internet_identity.did",
+      "type": "custom",
+      "wasm": "internet_identity.wasm"
     }
   },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
-    }
-  },
-  "dfx": "0.14.0",
+  "dfx": "0.14.2",
   "networks": {
     "local": {
-      "bind": "127.0.0.1:8000",
+      "bind": "localhost:8000",
       "type": "ephemeral"
     }
   },

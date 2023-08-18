@@ -7,7 +7,7 @@ service : {
       canister_id : opt canister_id;
       derivation_path : vec blob;
       key_id : record { curve : vetkd_curve; name : text };
-    },
+    }
   ) -> (record { public_key : blob });
   vetkd_encrypted_key : (
     record {
@@ -15,6 +15,6 @@ service : {
       derivation_id : blob;
       key_id : record { curve : vetkd_curve; name : text };
       encryption_public_key : blob;
-    },
+    }
   ) -> (record { encrypted_key : blob });
 };

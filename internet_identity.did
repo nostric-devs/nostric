@@ -7,64 +7,64 @@ type SessionKey = PublicKey;
 type FrontendHostname = text;
 type Timestamp = nat64;
 
-type HeaderField = record { text; text };
+type HeaderField = record { text; text; };
 
 type HttpRequest = record {
-  method : text;
-  url : text;
-  headers : vec HeaderField;
-  body : blob;
+  method: text;
+  url: text;
+  headers: vec HeaderField;
+  body: blob;
 };
 
 type HttpResponse = record {
-  status_code : nat16;
-  headers : vec HeaderField;
-  body : blob;
-  streaming_strategy : opt StreamingStrategy;
+  status_code: nat16;
+  headers: vec HeaderField;
+  body: blob;
+  streaming_strategy: opt StreamingStrategy;
 };
 
 type StreamingCallbackHttpResponse = record {
-  body : blob;
-  token : opt Token;
+  body: blob;
+  token: opt Token;
 };
 
 type Token = record {};
 
 type StreamingStrategy = variant {
-  Callback : record {
-    callback : func(Token) -> (StreamingCallbackHttpResponse) query;
-    token : Token;
+  Callback: record {
+    callback: func (Token) -> (StreamingCallbackHttpResponse) query;
+    token: Token;
   };
 };
 
 type Purpose = variant {
-  recovery;
-  authentication;
+    recovery;
+    authentication;
 };
 
 type KeyType = variant {
-  unknown;
-  platform;
-  cross_platform;
-  seed_phrase;
+    unknown;
+    platform;
+    cross_platform;
+    seed_phrase;
 };
 
 type Challenge = record {
-  png_base64 : text;
-  challenge_key : ChallengeKey;
+    png_base64: text;
+    challenge_key: ChallengeKey;
 };
 
 type DeviceData = record {
   pubkey : DeviceKey;
   alias : text;
   credential_id : opt CredentialId;
-  purpose : Purpose;
-  key_type : KeyType;
+  purpose: Purpose;
+  key_type: KeyType;
 };
 
 type RegisterResponse = variant {
   // A new user was successfully registered.
-  registered : record { user_number : UserNumber };
+  registered: record { user_number: UserNumber; };
   // No more registrations are possible in this instance of the II service canister.
   canister_full;
   // The challenge was not successful.
@@ -72,31 +72,31 @@ type RegisterResponse = variant {
 };
 
 type Delegation = record {
-  pubkey : PublicKey;
-  expiration : Timestamp;
-  targets : opt vec principal;
+  pubkey: PublicKey;
+  expiration: Timestamp;
+  targets: opt vec principal;
 };
 
 type SignedDelegation = record {
-  delegation : Delegation;
-  signature : blob;
+  delegation: Delegation;
+  signature: blob;
 };
 
 type GetDelegationResponse = variant {
   // The signed delegation was successfully retrieved.
-  signed_delegation : SignedDelegation;
+  signed_delegation: SignedDelegation;
 
   // The signature is not ready. Maybe retry by calling `prepare_delegation`
-  no_such_delegation;
+  no_such_delegation
 };
 
 type InternetIdentityStats = record {
-  users_registered : nat64;
-  assigned_user_number_range : record { nat64; nat64 };
+  users_registered: nat64;
+  assigned_user_number_range: record { nat64; nat64; };
 };
 
 type InternetIdentityInit = record {
-  assigned_user_number_range : record { nat64; nat64 };
+  assigned_user_number_range : record { nat64; nat64; };
 };
 
 type ProofOfWork = record {
@@ -107,12 +107,12 @@ type ProofOfWork = record {
 type ChallengeKey = text;
 
 type ChallengeResult = record {
-  key : ChallengeKey;
-  chars : text;
+    key : ChallengeKey;
+    chars : text;
 };
 
 service : (opt InternetIdentityInit) -> {
-  init_salt : () -> ();
+  init_salt: () -> ();
   create_challenge : (ProofOfWork) -> (Challenge);
   register : (DeviceData, ChallengeResult) -> (RegisterResponse);
   add : (UserNumber, DeviceData) -> ();
@@ -122,7 +122,7 @@ service : (opt InternetIdentityInit) -> {
   stats : () -> (InternetIdentityStats) query;
 
   prepare_delegation : (UserNumber, FrontendHostname, SessionKey, maxTimeToLive : opt nat64) -> (UserKey, Timestamp);
-  get_delegation : (UserNumber, FrontendHostname, SessionKey, Timestamp) -> (GetDelegationResponse) query;
+  get_delegation: (UserNumber, FrontendHostname, SessionKey, Timestamp) -> (GetDelegationResponse) query;
 
-  http_request : (request : HttpRequest) -> (HttpResponse) query;
-};
+  http_request: (request: HttpRequest) -> (HttpResponse) query;
+}
