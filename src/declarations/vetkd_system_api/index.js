@@ -39,3 +39,5 @@ export const createActor = (canisterId, options = {}) => {
     ...options.actorOptions,
   });
 };
+
+export const vetkd_system_api = createActor(canisterId);
