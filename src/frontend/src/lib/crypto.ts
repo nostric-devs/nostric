@@ -24,7 +24,7 @@ export class CryptoService {
     const ek_bytes_hex = await this.actor.encrypted_symmetric_key_for_caller(tsk.public_key());
     const pk_bytes_hex = await this.actor.symmetric_key_verification_key();
     const principal = await agent.Actor.agentOf(this.actor).getPrincipal();
-
+    console.log(ek_bytes_hex,pk_bytes_hex,principal)
     const aes_256_gcm_key_raw = tsk.decrypt_and_hash(
       hex_decode(ek_bytes_hex),
       hex_decode(pk_bytes_hex),
