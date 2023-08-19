@@ -1,5 +1,12 @@
-import type { ActorMethod } from "@dfinity/agent";
+import type { Principal } from '@dfinity/principal';
+import type { ActorMethod } from '@dfinity/agent';
 
-export interface _SERVICE {
-  greet: ActorMethod<[string], string>;
+export interface anon_class_20_1 {
+  'app_vetkd_public_key' : ActorMethod<[Array<Uint8Array | number[]>], string>,
+  'encrypted_symmetric_key_for_caller' : ActorMethod<
+    [Uint8Array | number[]],
+    string
+  >,
+  'symmetric_key_verification_key' : ActorMethod<[], string>,
 }
+export interface _SERVICE extends anon_class_20_1 {}
