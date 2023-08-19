@@ -10,3 +10,5 @@ src/frontend/declarations
 src/frontend/public/build/*
 **/target
 .dfx
+**/.svelte-kit
+**/build
