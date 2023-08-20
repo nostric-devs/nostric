@@ -2,19 +2,11 @@
   import { onMount } from "svelte";
   import Login from "./components/Login.svelte"
   import { crypto_service, auth_state, AuthStates } from "./store/auth";
-  import { generatePrivateKey, getPublicKey, validateEvent, verifySignature, getSignature, getEventHash, relayInit, SimplePool} from 'nostr-tools'
+  import { generatePrivateKey, getPublicKey, validateEvent, verifySignature, getSignature, getEventHash, relayInit} from 'nostr-tools'
  
   // initiate nostr relay
   const relay = relayInit('wss://relay.nostr.band')
-  // const pool = new SimplePool()
 
-  // let relays = [
-  //     'wss://relay.plebstr.com',
-	// 		'wss://relay.plebstr.com',
-	// 		'wss://relay.nostr.band',
-	// 		'wss://relay.damus.io',
-	// 		'wss://relayable.org'
-  // ];
 
   relay.on('connect', () => {
     console.log(`connected to ${relay.url}`)

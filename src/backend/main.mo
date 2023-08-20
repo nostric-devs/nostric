@@ -13,11 +13,53 @@ import Option "mo:base/Option";
 import Debug "mo:base/Debug";
 import Order "mo:base/Order";
 import Blob "mo:base/Blob";
+import Hash "mo:base/Hash";
 import Hex "./utils/Hex";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
 shared({ caller = initializer }) actor class() {
+
+    type Profile = {
+        pk: Text;
+        encrypted_sk: Text;
+        username: Text;
+        about: Text;
+        avatar_url: Text;
+    };
+
+    type Error = {
+        #NotAuthenticated;
+        #ProfileNotFound;
+    };
+
+    private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
+
+    public shared (msg) func addProfile(p: Profile) : async Result.Result<(Profile), Error> {
+
+        if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
+            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+        };
+
+        let id = msg.caller;
+
+        let profile : Profile = {
+            pk = p.pk;
+            encrypted_sk = p.encrypted_sk;
+            username = p.username;
+            about = p.about;
+            avatar_url = p.avatar_url
+        };
+
+        profiles.put(id, profile);
+        return #ok(profile);
+        // Return an OK result
+    };
+
+    public query func getProfile(principal : Principal) : async Result.Result<Profile, Error> {
+        let profile = profiles.get(principal);
+        return Result.fromOption(profile, #ProfileNotFound);
+    };
 
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
