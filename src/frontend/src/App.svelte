@@ -3,7 +3,9 @@
   import Login from "./components/Login.svelte"
   import { crypto_service, auth_state, AuthStates } from "./store/auth";
   import { generatePrivateKey, getPublicKey, validateEvent, verifySignature, getSignature, getEventHash, relayInit} from 'nostr-tools'
- 
+  import Profile from "./components/Profile.svelte";
+
+
   // initiate nostr relay
   const relay = relayInit('wss://relay.nostr.band')
 
@@ -18,9 +20,7 @@
   const connectRelay = async () => {
     await relay.connect()
   }
-  
-  
- 
+
   // generate nostr sk and pk
   //let sk = generatePrivateKey() // `sk` is a hex string
   //let pk = getPublicKey(sk) // `pk` is a hex string
@@ -74,12 +74,12 @@
     encrypted = await crypto_service.encrypt(key);
     decrypted = await crypto_service.decrypt(encrypted);
   }
-  onMount(connectRelay)
+  //onMount(connectRelay)
 </script>
 
 {#if $auth_state === AuthStates.AUTHENTICATED}
 
-  <div>
+  <!-- <div>
     <div>key value: { key }</div>
     <button class="btn btn-primary" on:click={plug_and_play}>
       click to showcase encrypt & decrypt the above key
@@ -92,6 +92,11 @@
     Publish event
   </button>
 
+  <button class="btn btn-primary" on:click={getProfile}>
+    get profile
+  </button> -->
+  <!-- {profile} -->
+  <Profile />
 {:else}
   <Login />
 {/if}

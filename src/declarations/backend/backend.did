@@ -1,7 +1,27 @@
-type anon_class_20_1 = 
+type anon_class_21_1 = 
  service {
+   addProfile: (Profile) -> (Result);
    app_vetkd_public_key: (vec blob) -> (text);
    encrypted_symmetric_key_for_caller: (blob) -> (text);
+   getProfile: () -> (Result) query;
    symmetric_key_verification_key: () -> (text);
  };
-service : () -> anon_class_20_1
+type Result = 
+ variant {
+   err: Error;
+   ok: Profile;
+ };
+type Profile = 
+ record {
+   about: text;
+   avatar_url: text;
+   encrypted_sk: text;
+   pk: text;
+   username: text;
+ };
+type Error = 
+ variant {
+   NotAuthenticated;
+   ProfileNotFound;
+ };
+service : () -> anon_class_21_1

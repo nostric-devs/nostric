@@ -56,8 +56,8 @@ shared({ caller = initializer }) actor class() {
         // Return an OK result
     };
 
-    public query func getProfile(principal : Principal) : async Result.Result<Profile, Error> {
-        let profile = profiles.get(principal);
+    public query (msg) func getProfile() : async Result.Result<Profile, Error> {
+        let profile = profiles.get(msg.caller);
         return Result.fromOption(profile, #ProfileNotFound);
     };
 
