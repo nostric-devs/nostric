@@ -24,6 +24,7 @@ shared({ caller = initializer }) actor class() {
         pk: Text;
         encrypted_sk: Text;
         username: Text;
+        about: Text;
         avatar_url: Text;
     };
 
@@ -46,6 +47,7 @@ shared({ caller = initializer }) actor class() {
             pk = p.pk;
             encrypted_sk = p.encrypted_sk;
             username = p.username;
+            about = p.about;
             avatar_url = p.avatar_url
         };
 
