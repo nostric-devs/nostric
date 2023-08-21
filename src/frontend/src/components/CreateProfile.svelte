@@ -10,6 +10,7 @@
 
   const createProfile = async () => {
     // Encrypt the private key before storing in backend
+    console.log(sk)
     let encrypted = "";
     encrypted = await crypto_service.encrypt(pk);
 

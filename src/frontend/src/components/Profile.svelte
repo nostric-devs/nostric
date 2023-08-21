@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { actor } from "../store/auth";
+  import { actor, crypto_service } from "../store/auth";
   import CreateProfile from "./CreateProfile.svelte";
 
   let profile = null;
@@ -11,10 +11,15 @@
       // go to the profile view if there is profile associated to this identity
       console.log(res)
       profile = res.ok;
+      let decrypted = "";
+      decrypted = await crypto_service.decrypt(profile.encrypted_sk);
+      console.log(decrypted)
     } else {
       // go to the createProfile view to create a new nostr account
     }
   }
+
+  
 
   onMount(getProfile)
 </script>
