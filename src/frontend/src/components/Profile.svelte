@@ -11,16 +11,15 @@
       // go to the profile view if there is profile associated to this identity
       console.log(res)
       profile = res.ok;
-      let decrypted = "";
-      decrypted = await crypto_service.decrypt(profile.encrypted_sk);
-      console.log(decrypted)
+      let decrypted_sk = "";
+      decrypted_sk = await crypto_service.decrypt(profile.encrypted_sk);
+      console.log(decrypted_sk)
     } else {
       // go to the createProfile view to create a new nostr account
     }
   }
 
   
-
   onMount(getProfile)
 </script>
 

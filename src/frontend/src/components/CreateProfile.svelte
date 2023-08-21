@@ -10,14 +10,13 @@
 
   const createProfile = async () => {
     // Encrypt the private key before storing in backend
+    let encrypted_sk = "";
+    encrypted_sk = await crypto_service.encrypt(sk);
     console.log(sk)
-    let encrypted = "";
-    encrypted = await crypto_service.encrypt(pk);
-
     let res = await actor.addProfile({
       "about": bio,
       "avatar_url": avatar_url,
-      "encrypted_sk": encrypted,
+      "encrypted_sk": encrypted_sk,
       "pk": pk,
       "username": username
     })
