@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { actor, crypto_service } from "../store/auth";
   import CreateProfile from "./CreateProfile.svelte";
+  import { space } from "svelte/internal";
 
   let profile = null;
 
@@ -27,11 +28,25 @@
   <div class="hero-content text-center">
     <div class="max-w-md">
       {#if profile}
-      <h1 class="text-5xl font-bold mb-8">You have created your profile</h1>
-      {profile.username}
-      <!-- TODO display profile details -->
-      <!-- TODO fetch previous posts from nostr relays -->
-      <!-- TODO add Post functionality -->
+        <h1 class="text-5xl font-bold mb-8">You have created your profile</h1>
+        <div class="profile flex bg-base-100 p-4">
+          <div class="avatar">
+            <div class="w-24 rounded mr-4">
+              <img src="{profile.avatar_url}" />
+            </div>
+          </div>
+          <div class="user-details text-left">
+            <div class="mb-2 text-xl">
+              @{profile.username}
+            </div>
+            <div>
+              {profile.about}
+            </div>
+          </div>
+       </div>
+        <!-- TODO display profile details -->
+        <!-- TODO fetch previous posts from nostr relays -->
+        <!-- TODO add Post functionality -->
       {:else}
         <CreateProfile />
       {/if}      
