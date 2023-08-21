@@ -16,7 +16,7 @@
       <h1
         class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
       >
-        Nostric
+        Welcome!
       </h1>
 
       {#if $auth_state === AuthStates.ANONYMOUS}

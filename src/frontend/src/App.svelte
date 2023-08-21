@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Login from "./components/Login.svelte"
-  import { crypto_service, auth_state, AuthStates } from "./store/auth";
+  import { crypto_service, auth_state, AuthStates, logout_from_ii } from "./store/auth";
   import { generatePrivateKey, getPublicKey, validateEvent, verifySignature, getSignature, getEventHash, relayInit} from 'nostr-tools'
   import Profile from "./components/Profile.svelte";
 
@@ -76,6 +76,18 @@
   }
   //onMount(connectRelay)
 </script>
+<div class="lg:container lg:mx-auto">
+  <div class="navbar bg-primary text-primary-content">
+    <div class="navbar-start">
+    <a href="/" class="btn btn-ghost normal-case text-xl">Nostric</a>
+    </div>
+    <div class="navbar-end">
+      <button on:click={logout_from_ii} class="btn">Logout</button>
+    </div>
+  </div>
+  
+</div>
+
 
 {#if $auth_state === AuthStates.AUTHENTICATED}
 
