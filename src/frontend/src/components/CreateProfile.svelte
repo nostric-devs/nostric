@@ -1,6 +1,6 @@
 <script lang="ts">
   import { generatePrivateKey, getPublicKey,} from 'nostr-tools'
-  import { actor } from '../store/auth';
+  import { actor, crypto_service } from '../store/auth';
 
   let sk = generatePrivateKey() // `sk` is a hex string
   let pk = getPublicKey(sk) // `pk` is a hex string
@@ -9,17 +9,22 @@
   let avatar_url = "";
 
   const createProfile = async () => {
-    // TODO need to encrypt private key before storing on the IC
+    // Encrypt the private key before storing in backend
+    let encrypted = "";
+    encrypted = await crypto_service.encrypt(pk);
+
     let res = await actor.addProfile({
       "about": bio,
       "avatar_url": avatar_url,
-      "encrypted_sk": sk,
+      "encrypted_sk": encrypted,
       "pk": pk,
       "username": username
     })
     // TODO if profile is created return to the profile detail
     console.log(res)
   }
+  
+
 </script>
 
 <div class="hero min-h-screen bg-base-200">
