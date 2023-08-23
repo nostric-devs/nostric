@@ -31,17 +31,16 @@ shared({ caller = initializer }) actor class() {
     type Error = {
         #NotAuthenticated;
         #ProfileNotFound;
+        #UnableToCreate;
     };
 
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
-    public shared (msg) func addProfile(p: Profile) : async Result.Result<(Profile), Error> {
+    public shared (msg) func addProfile(p: Profile) : async Result.Result<Profile, Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
         };
-
-        let id = msg.caller;
 
         let profile : Profile = {
             pk = p.pk;
@@ -51,15 +50,15 @@ shared({ caller = initializer }) actor class() {
             avatar_url = p.avatar_url
         };
 
-        profiles.put(id, profile);
-        return #ok(profile);
-        // Return an OK result
+        profiles.put(msg.caller, profile);
+        let saved_profile = profiles.get(msg.caller);
+        return Result.fromOption(saved_profile, #UnableToCreate);
     };
 
-    public query func getProfile(principal : Principal) : async Result.Result<Profile, Error> {
-        let profile = profiles.get(principal);
-        return Result.fromOption(profile, #ProfileNotFound);
-    };
+    public query (msg) func getProfile() : async Result.Result<Profile, Error> {
+         let profile = profiles.get(msg.caller);
+         return Result.fromOption(profile, #ProfileNotFound);
+     };
 
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
@@ -76,7 +75,7 @@ shared({ caller = initializer }) actor class() {
         }) -> async ({ encrypted_key : Blob });
     };
 
-    let vetkd_system_api : VETKD_SYSTEM_API = actor("bw4dl-smaaa-aaaaa-qaacq-cai");
+    let vetkd_system_api : VETKD_SYSTEM_API = actor("br5f7-7uaaa-aaaaa-qaaca-cai");
 
     public shared({ caller }) func app_vetkd_public_key(derivation_path: [Blob]): async Text {
         let { public_key } = await vetkd_system_api.vetkd_public_key({
