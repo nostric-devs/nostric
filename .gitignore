@@ -5,10 +5,10 @@ dist
 !vetkd_user_lib/*.wasm
 !internet_identity.wasm
 !vetkd_system_api.wasm
-**/src/declarations
-src/frontend/declarations
 src/frontend/public/build/*
 **/target
 .dfx
 **/.svelte-kit
 **/build
+
+src/declarations

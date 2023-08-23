@@ -2,11 +2,15 @@
   import { AuthStates, auth_state, login_to_ii } from "../store/auth";
 
   let disabled = false;
+
   const login = async () => {
     disabled = true;
     await login_to_ii();
     disabled = false;
   }
+
+  export let currentRoute;
+  export let params;
 
 </script>
 

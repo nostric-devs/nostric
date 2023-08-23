@@ -1,0 +1,80 @@
+import {
+  verifySignature,
+  validateEvent,
+  getSignature,
+  getEventHash,
+  getPublicKey,
+  relayInit,
+} from "nostr-tools";
+import type { Relay, Sub } from "nostr-tools/lib/relay";
+import type { Event } from "nostr-tools/lib/event";
+import { nostr_events } from "../store/nostr";
+
+export class NostrHandler {
+
+  relay : Relay | null = null;
+  sub : Sub | null = null;
+  private_key : string;
+  public_key : string;
+
+  constructor() {
+  }
+
+  public async init(private_key : string) {
+    this.private_key = private_key;
+    this.public_key = getPublicKey(private_key);
+
+    this.relay = relayInit("wss://relay.nostr.band");
+
+    // todo mozno stav relay v navbare?
+    // this.relay.on("connect", () => {
+    //   console.log(`connected to ${this.relay.url}`)
+    // })
+
+    this.relay.on("error", () => {
+      // todo notifications
+      throw (`Unable to connect to Nostr relay ${this.relay.url}`);
+    })
+
+    await this.relay.connect();
+
+    this.sub = this.relay.sub([{
+      kinds: [1],
+      authors: [this.public_key]
+    }]);
+
+    this.sub.on("event", event => {
+      console.log("v update");
+      nostr_events.update((events) =>
+        events.concat({
+          ...event,
+          created_at: new Date(event.created_at).toTimeString()
+        }));
+      console.log("po update");
+    });
+
+  }
+
+  public create_event(content : string) {
+    let event = {
+      kind: 1,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [],
+      pubkey: this.public_key,
+      content,
+    };
+    event.id = getEventHash(event);
+    event.sig = getSignature(event, this.private_key);
+
+    if (!validateEvent(event) || !verifySignature(event)) {
+      // todo notifications
+      throw ("Unable to validate Nostr event or verify its signature");
+    }
+    return event;
+  }
+
+  public async publish_event(event : Event) {
+    await this.relay.publish(event);
+  }
+
+}
