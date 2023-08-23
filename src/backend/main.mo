@@ -60,6 +60,33 @@ shared({ caller = initializer }) actor class() {
          return Result.fromOption(profile, #ProfileNotFound);
      };
 
+    public shared (msg) func updateProfile(p: Profile) : async Result.Result<(Profile), Error> {
+
+        if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
+            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+        };
+
+        let id = msg.caller;
+        let result = profiles.get(id);
+
+        switch (result) {
+        case null {
+            return #err(#ProfileNotFound);
+        };
+        case (?v) {
+            let profile : Profile = {
+                pk = v.pk;
+                encrypted_sk = v.encrypted_sk;
+                username = p.username;
+                about = p.about;
+                avatar_url = p.avatar_url
+                };
+                profiles.put(id, profile);
+                return #ok(profile);
+            };
+        };
+    };    
+
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
         vetkd_public_key : ({
