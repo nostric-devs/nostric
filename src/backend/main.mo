@@ -85,7 +85,17 @@ shared({ caller = initializer }) actor class() {
                 return #ok(profile);
             };
         };
-    };    
+    };  
+
+    public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
+
+        if(Principal.isAnonymous(msg.caller)){ 
+            return #err(#NotAuthenticated); 
+        };
+
+        profiles.delete(msg.caller);
+        return #ok(());
+    };      
 
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {

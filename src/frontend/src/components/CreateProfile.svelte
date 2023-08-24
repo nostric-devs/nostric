@@ -1,14 +1,17 @@
 <script>
   import { generatePrivateKey, getPublicKey } from "nostr-tools";
   import { actor, crypto_service, init_nostr_structures } from "../store/auth";
+  import ProfileForm from "./ProfileForm.svelte";
 
   let private_key = generatePrivateKey();
   let pk = getPublicKey(private_key);
   let username = "";
   let about = "";
   let avatar_url = "";
+  let loading = false;
 
   const create_profile = async () => {
+    loading = true;
     let encrypted_sk = await crypto_service.encrypt(private_key);
     let response = await actor.addProfile({ about, avatar_url, encrypted_sk, username, pk });
     if ("ok" in response) {
@@ -17,62 +20,14 @@
       // todo notifications
       console.log(response["UnableToCreate"]);
     }
-
+    loading = false;
   }
 
   export let currentRoute;
   export let params;
 
 </script>
-
-
-<div class="hero min-h-screen bg-base-200">
-  <div class="hero-content text-center py-12">
-    <div class="max-w-md">
-      <h1 class="text-4xl font-bold mb-8">Create a new Nostr profile</h1>
-      <div class="card w-full max-w-md shadow-2xl bg-base-100">
-        <div class="card-body">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Username</span>
-            </label>
-            <input required type="text" bind:value={username} placeholder="Username" class="input input-bordered" />
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Bio</span>
-            </label>
-            <textarea bind:value={about} class="textarea textarea-bordered" placeholder="Bio"></textarea>
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Avatar URL</span>
-            </label>
-            <input type="text" bind:value={avatar_url} placeholder="Avatar URL" class="input input-bordered" />
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Public key</span>
-            </label>
-            <input type="text" bind:value={pk} placeholder="Public key" class="input input-bordered" />
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Private key</span>
-            </label>
-            <input type="password" bind:value={private_key} placeholder="Private key" class="input input-bordered" />
-            <span class="text-left text-sm text-gray-500 mt-4">
-              *You can copy your Public key and Private key. It will be encrypted and securely stored on the IC.
-            </span>
-          </div>
-          <div class="form-control mt-6">
-            <button class="btn btn-primary" on:click={async () => await create_profile()}>
-              Create
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="max-w-xl mx-auto mt-8 text-center">
+  <h1 class="text-4xl font-bold mt-12">Create your profile</h1>
+  <ProfileForm  bind:private_key={private_key} bind:pk={pk} bind:username={username} bind:about={about} bind:avatar_url={avatar_url} loading={loading} submitFunction={create_profile}/>
 </div>
-
