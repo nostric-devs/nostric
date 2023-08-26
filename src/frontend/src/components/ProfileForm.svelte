@@ -1,12 +1,7 @@
 <script>
-  export let private_key;
-  export let pk;
-  export let username;
-  export let about;
-  export let avatar_url;
   export let loading;
-  export let submitFunction;
-
+  export let submit_function;
+  export let profile;
 </script>
 
 
@@ -16,37 +11,37 @@
       <label class="label">
         <span class="label-text">Username</span>
       </label>
-      <input required type="text" bind:value={username} placeholder="Username" class="input input-bordered" disabled={loading}/>
+      <input required type="text" bind:value={profile.username} placeholder="Username" class="input input-bordered" disabled={loading}/>
     </div>
     <div class="form-control">
       <label class="label">
         <span class="label-text">Bio</span>
       </label>
-      <textarea bind:value={about} class="textarea textarea-bordered" placeholder="Bio" rows=5 maxlength="200" disabled={loading}></textarea>
+      <textarea bind:value={profile.about} class="textarea textarea-bordered" placeholder="Bio" rows=5 maxlength="200" disabled={loading}></textarea>
     </div>
     <div class="form-control">
       <label class="label">
         <span class="label-text">Avatar URL</span>
       </label>
-      <input type="text" bind:value={avatar_url} placeholder="Avatar URL" class="input input-bordered" disabled={loading}/>
+      <input type="text" bind:value={profile.avatar_url} placeholder="Avatar URL" class="input input-bordered" disabled={loading}/>
     </div>
     <div class="form-control">
       <label class="label">
         <span class="label-text">Public key</span>
       </label>
-      <input type="text" bind:value={pk} placeholder="Public key" class="input input-bordered" disabled />
+      <input type="text" bind:value={profile.pk} placeholder="Public key" class="input input-bordered" disabled />
     </div>
     <div class="form-control">
       <label class="label">
         <span class="label-text">Private key</span>
       </label>
-      <input type="password" bind:value={private_key} placeholder="Private key" class="input input-bordered" disabled />
+      <input type="password" bind:value={profile.encrypted_sk} placeholder="Private key" class="input input-bordered" disabled />
       <span class="text-left text-sm text-gray-500 mt-4">
         *You can copy your Public key and Private key. It will be encrypted and securely stored on the IC.
       </span>
     </div>
     <div class="form-control mt-6">
-      <button class="btn btn-primary" on:click={async () => await submitFunction()} disabled={ !username }>
+      <button class="btn btn-primary" on:click={async () => await submit_function()} disabled={ !profile.username }>
         {#if loading}
           <span
         class="inline-block h-4 w-4 rounded-full mr-2 border-2 animate-spin border-b-current border-r-current border-t-transparent border-l-transparent">

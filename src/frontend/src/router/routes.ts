@@ -30,8 +30,8 @@ export const routes = [
     layout: BasicLayout,
     component: EditProfile,
     onlyIf: {
-      guard: () => get(auth_state) === AuthStates.NOT_YET_REGISTERED,
-      redirect: get(auth_state) === AuthStates.REGISTERED ? "/posts" : "/login",
+      guard: () => get(auth_state) === AuthStates.REGISTERED,
+      redirect: get(auth_state) === AuthStates.NOT_YET_REGISTERED ? "/create-profile" : "/login",
     }    
   },
 ]

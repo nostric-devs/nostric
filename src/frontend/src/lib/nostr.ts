@@ -48,7 +48,7 @@ export class NostrHandler {
       nostr_events.update((events) =>
         events.concat({
           ...event,
-          created_at: new Date(event.created_at).toTimeString()
+          created_at: new Date(event.created_at * 1000).toLocaleString()
         }));
       console.log("po update");
     });
