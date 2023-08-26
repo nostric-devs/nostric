@@ -1,6 +1,7 @@
 import Posts from "../components/Posts.svelte";
 import Login from "../components/Login.svelte";
 import CreateProfile from "../components/CreateProfile.svelte";
+import EditProfile from "../components/EditProfile.svelte";
 import BasicLayout from "../layouts/BasicLayout.svelte";
 import { auth_state, AuthStates } from "../store/auth";
 import { get } from "svelte/store";
@@ -23,5 +24,14 @@ export const routes = [
       guard: () => get(auth_state) === AuthStates.NOT_YET_REGISTERED,
       redirect: get(auth_state) === AuthStates.REGISTERED ? "/posts" : "/login",
     }
+  },
+  {
+    name: "/edit-profile",
+    layout: BasicLayout,
+    component: EditProfile,
+    onlyIf: {
+      guard: () => get(auth_state) === AuthStates.REGISTERED,
+      redirect: get(auth_state) === AuthStates.NOT_YET_REGISTERED ? "/create-profile" : "/login",
+    }    
   },
 ]

@@ -63,6 +63,7 @@
     "nostr-tools": "^1.14.0",
     "prettier": "^3.0.2",
     "sirv-cli": "^1.0.0",
+    "svelte-feathers": "^0.7.5",
     "svelte-icons": "^2.1.0",
     "svelte-router-spa": "^6.0.3",
     "typewriter-editor": "^0.6.45"

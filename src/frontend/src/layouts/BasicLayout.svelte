@@ -23,6 +23,6 @@
     </div>
   </div>
 
-<div class="lg:container lg:mx-auto">
+<div class="lg:container lg:mx-auto mb-24">
   <Route {currentRoute} {params}/>
 </div>
