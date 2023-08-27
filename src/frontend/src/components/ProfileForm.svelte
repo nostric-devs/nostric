@@ -1,4 +1,6 @@
 <script>
+  import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
+
   export let loading;
   export let submit_function;
   export let profile;
@@ -43,11 +45,9 @@
     <div class="form-control mt-6">
       <button class="btn btn-primary" on:click={async () => await submit_function()} disabled={ !profile.username }>
         {#if loading}
-          <span
-        class="inline-block h-4 w-4 rounded-full mr-2 border-2 animate-spin border-b-current border-r-current border-t-transparent border-l-transparent">
-          </span>
+          <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
         {/if}
-        Save profile
+        <span class="text-white">Save profile</span>
       </button>
     </div>
   </div>

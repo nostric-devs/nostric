@@ -1,9 +1,15 @@
 <script lang="ts">
-  import { AuthStates, auth_state, login_to_ii } from "../store/auth";
+  import { AuthStates, login_to_ii, auth_state } from "../store/auth";
+  import Alert from "./Alert.svelte";
+  import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
+  import { nostric_user } from "../store/auth";
 
   let disabled = false;
+  let current_state;
+  $: current_state = $auth_state;
 
   const login = async () => {
+    auth_state.set_anonymous();
     disabled = true;
     await login_to_ii();
     disabled = false;
@@ -15,32 +21,39 @@
 </script>
 
 <div class="hero min-h-screen pt-8 sm:pt-0 content-start sm:content-center">
-  <div class="text-center hero-content ">
-    <div class="max-w-xl ">
+  <div class="text-center">
+    <div>
       <h1
         class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
       >
         Nostric
       </h1>
 
-      {#if $auth_state === AuthStates.ANONYMOUS}
-        <button class="btn btn-primary" disabled="{disabled}" on:click={() => login()} >
+      {#if current_state === AuthStates.ANONYMOUS }
+        <button class="btn btn-primary" disabled="{ disabled }" on:click={() => login()} >
           {#if disabled}
-            <span
-              class="inline-block h-4 w-4 rounded-full mr-2 border-2 animate-spin border-b-current border-r-current border-t-transparent border-l-transparent"
-            ></span>
+            <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
           {/if}
-          { disabled ? "Identifying" : "Log in with Internet Identity" }
+          <span class="text-white">
+            { disabled ? "Identifying" : "Log in with Internet Identity" }
+          </span>
         </button>
-      {:else if $auth_state === AuthStates.IDENTIFIED}
-        <button class="btn btn-primary btn-disabled">
-          <span
-            class="inline-block h-4 w-4 rounded-full mr-2 border-2 animate-spin border-b-current border-r-current border-t-transparent border-l-transparent"
-          ></span>
-          Identified, initializing
+      {:else if current_state === AuthStates.IDENTIFIED }
+        <button class="btn btn-primary btn-disabled" disabled>
+          <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
+          <span class="text-white">Identified, initializing</span>
         </button>
-      {:else if $auth_state === AuthStates.ERROR}
-        <div class="text-lg font-semibold mt-8">An error occurred.</div>
+      {:else if current_state === AuthStates.ERROR }
+        <button class="btn btn-primary text-white" on:click={() => login()} >
+          Try to login again
+        </button>
+        {#if current_state === AuthStates.ERROR}
+          <div class="mt-3">
+            <Alert />
+          </div>
+        {/if}
+      {:else if current_state === AuthStates.REGISTERED }
+       <span>Welcome, { nostric_user.get_profile().name }</span>
       {/if}
 
     </div>

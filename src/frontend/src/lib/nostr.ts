@@ -9,6 +9,7 @@ import {
 import type { Relay, Sub } from "nostr-tools/lib/relay";
 import type { Event } from "nostr-tools/lib/event";
 import { nostr_events } from "../store/nostr";
+import { alert } from "../store/alert";
 
 export class NostrHandler {
 
@@ -26,14 +27,8 @@ export class NostrHandler {
 
     this.relay = relayInit("wss://relay.nostr.band");
 
-    // todo mozno stav relay v navbare?
-    // this.relay.on("connect", () => {
-    //   console.log(`connected to ${this.relay.url}`)
-    // })
-
     this.relay.on("error", () => {
-      // todo notifications
-      throw (`Unable to connect to Nostr relay ${this.relay.url}`);
+      alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
     })
 
     await this.relay.connect();
@@ -43,15 +38,7 @@ export class NostrHandler {
       authors: [this.public_key]
     }]);
 
-    this.sub.on("event", event => {
-      console.log("v update");
-      nostr_events.update((events) =>
-        events.concat({
-          ...event,
-          created_at: new Date(event.created_at * 1000).toLocaleString()
-        }));
-      console.log("po update");
-    });
+    this.sub.on("event", event => nostr_events.add(event));
 
   }
 
@@ -67,8 +54,7 @@ export class NostrHandler {
     event.sig = getSignature(event, this.private_key);
 
     if (!validateEvent(event) || !verifySignature(event)) {
-      // todo notifications
-      throw ("Unable to validate Nostr event or verify its signature");
+      alert.error("Unable to validate Nostr event or verify its signature");
     }
     return event;
   }

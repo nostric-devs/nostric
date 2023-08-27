@@ -21,4 +21,8 @@ export class NostricUser {
     return this.private_key;
   }
 
+  public set_profile(profile : Profile) {
+    this.profile = profile;
+  }
+
 }
