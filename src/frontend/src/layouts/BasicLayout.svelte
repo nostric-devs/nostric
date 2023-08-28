@@ -15,7 +15,7 @@
     class="navbar flex justify-between bg-base-100/70 md:w-3/4 rounded-3xl mx-5 sm:mx-0 my-12 shadow-md"
   >
     <div class="navbar-start">
-      <div class="text-2xl text-primary font-bold ml-4">
+      <div class="btn btn-ghost normal-case text-2xl text-primary font-bold ml-4">
         <Navigate to={ ROUTES.POSTS }>
           Nostric
         </Navigate>

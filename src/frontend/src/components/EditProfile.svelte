@@ -28,7 +28,7 @@
 </script>
 
 <div class="max-w-xl mx-auto mt-8 text-center">
-  <a href="/" class="link link-primary mt-8">Back</a>
+  <a href="/" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
   <h1 class="text-4xl font-bold mt-12">Update your profile</h1>
   <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ update_profile }/>
 </div>
