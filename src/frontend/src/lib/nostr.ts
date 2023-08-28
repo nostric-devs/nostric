@@ -25,12 +25,12 @@ export class NostrHandler {
     this.private_key = private_key;
     this.public_key = getPublicKey(private_key);
 
-    this.relay = relayInit("wss://relay.nostr.band");
+    this.relay = relayInit("wss://purplepag.es");
 
     this.relay.on("error", () => {
       alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
     })
-
+    
     await this.relay.connect();
 
     this.sub = this.relay.sub([{
@@ -38,13 +38,14 @@ export class NostrHandler {
       authors: [this.public_key]
     }]);
 
-    this.sub.on("event", event => nostr_events.add(event));
+    //this.sub.on("event", event => nostr_events.add(event));
+    this.sub.on("event", event => { nostr_events.add(event) });
 
   }
 
-  public create_event(content : string) {
+  public create_event(content : string, kind : number) {
     let event = {
-      kind: 1,
+      kind: kind,
       created_at: Math.floor(Date.now() / 1000),
       tags: [],
       pubkey: this.public_key,
