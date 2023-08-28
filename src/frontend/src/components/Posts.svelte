@@ -17,8 +17,9 @@
     let event = nostr_service.create_event(message);
     await nostr_service.publish_event(event);
     message = null;
-    publishing = false;
   }
+
+  $: $nostr_events, publishing = false;
 
   export let currentRoute;
   export let params;
