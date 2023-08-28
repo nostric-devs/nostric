@@ -3,26 +3,32 @@ import Login from "../components/Login.svelte";
 import CreateProfile from "../components/CreateProfile.svelte";
 import EditProfile from "../components/EditProfile.svelte";
 import BasicLayout from "../layouts/BasicLayout.svelte";
-import { auth_state, AuthStates } from "../store/auth";
-import { get } from "svelte/store";
+import { is_registered, is_not_registered } from "../store/auth";
+
+export const ROUTES = {
+  POSTS: "/",
+  LOGIN: "/login",
+  CREATE_PROFILE: "/create-profile",
+  EDIT_PROFILE: "/edit-profile",
+}
 
 export const routes = [
   {
-    name: "/",
+    name: ROUTES.POSTS,
     component: Posts,
     layout: BasicLayout,
     onlyIf: {
-      guard: () => get(auth_state) === AuthStates.REGISTERED,
-      redirect: get(auth_state) === AuthStates.NOT_YET_REGISTERED ? "/create-profile" : "/login",
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
     }
   },
-  { name: "/login", component: Login },
+  { name: ROUTES.LOGIN, component: Login },
   {
-    name: "/create-profile",
+    name: ROUTES.CREATE_PROFILE,
     component: CreateProfile,
     onlyIf: {
-      guard: () => get(auth_state) === AuthStates.NOT_YET_REGISTERED,
-      redirect: get(auth_state) === AuthStates.REGISTERED ? "/posts" : "/login",
+      guard: () => is_not_registered(),
+      redirect: is_registered() ? ROUTES.POSTS : ROUTES.LOGIN,
     }
   },
   {
@@ -30,8 +36,8 @@ export const routes = [
     layout: BasicLayout,
     component: EditProfile,
     onlyIf: {
-      guard: () => get(auth_state) === AuthStates.REGISTERED,
-      redirect: get(auth_state) === AuthStates.NOT_YET_REGISTERED ? "/create-profile" : "/login",
-    }    
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
   },
 ]
