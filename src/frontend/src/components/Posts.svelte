@@ -6,7 +6,7 @@
   import Alert from "./Alert.svelte";
   import { ROUTES } from "../router/routes";
   import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
-  import { nip19 } from "nostr-tools";
+  import { Kind, nip19 } from "nostr-tools";
 
   let profile = nostric_user.get_profile();
   let private_key = nostric_user.get_private_key();
@@ -16,7 +16,7 @@
   
   const create_post = async () => {
     publishing = true;
-    let event = nostr_service.create_event(message, 1);
+    let event = nostr_service.create_event(message, Kind.Text);
     await nostr_service.publish_event(event);
     message = null;
   }
@@ -54,9 +54,9 @@
       </div>
     {/if}
     <!-- Username & Bio Container -->
-    <div class="ml-4 overflow-hidden first-letter:">
+    <div class="ml-4 overflow-hidden">
         <h1 class="text-xl font-bold">@{ profile.username }</h1>
-        <span class="npub" title="Your public key.">{npub}</span>
+        <span class="text-gray-500" title="Your public key.">{npub}</span>
         <p class="text-sm mt-1">{ profile.about }</p>
     </div>
   </div>  
@@ -116,9 +116,5 @@
 <style lang="postcss">
  .post {
     background-color:rgb(246, 245, 245);
- }
-
- .npub {
-    color:darkgray;
  }
 </style>

@@ -5,6 +5,7 @@
   import { alert } from "../store/alert";
   import { navigateTo } from "svelte-router-spa";
   import { ROUTES } from "../router/routes";
+  import { Kind } from "nostr-tools";
 
 
   let loading = false;
@@ -16,8 +17,12 @@
     if ("ok" in response) {
       nostric_user.set_profile(response.ok);
       // Publish updated profile to the Nostr relay as well
-      let content = JSON.stringify({"username": profile.username, "about": profile.about, "picture": profile.avatar_url});
-      let event = nostr_service.create_event(content, 0);
+      let content = JSON.stringify({
+        "username": profile.username,
+        "about": profile.about,
+        "picture": profile.avatar_url
+      });
+      let event = nostr_service.create_event(content, Kind.Metadata);
       await nostr_service.publish_event(event);
       await navigateTo(ROUTES.POSTS);
       alert.success("Profile successfully updated");
