@@ -73,7 +73,7 @@
       on:click={ async () => await create_post() }
     >
       {#if publishing}
-        <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
+        <MegaCoolUltraSpinner/>
       {/if}
       <span class="text-white">Create post</span>
     </button>

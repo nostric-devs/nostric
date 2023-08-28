@@ -45,7 +45,7 @@
     <div class="form-control mt-6">
       <button class="btn btn-primary" on:click={async () => await submit_function()} disabled={ !profile.username }>
         {#if loading}
-          <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
+          <MegaCoolUltraSpinner/>
         {/if}
         <span class="text-white">Save profile</span>
       </button>

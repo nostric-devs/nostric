@@ -32,7 +32,7 @@
       {#if current_state === AuthStates.ANONYMOUS }
         <button class="btn btn-primary" disabled="{ disabled }" on:click={() => login()} >
           {#if disabled}
-            <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
+            <MegaCoolUltraSpinner/>
           {/if}
           <span class="text-white">
             { disabled ? "Identifying" : "Log in with Internet Identity" }
@@ -40,7 +40,7 @@
         </button>
       {:else if current_state === AuthStates.IDENTIFIED }
         <button class="btn btn-primary btn-disabled" disabled>
-          <MegaCoolUltraSpinner></MegaCoolUltraSpinner>
+          <MegaCoolUltraSpinner/>
           <span class="text-white">Identified, initializing</span>
         </button>
       {:else if current_state === AuthStates.ERROR }

@@ -33,7 +33,7 @@
   export let params;
 
 </script>
-<div class="max-w-xl mx-auto mt-8 text-center">
+<div class="max-w-xl mx-auto text-center my-12">
   <h1 class="text-4xl font-bold mt-12">Create your profile</h1>
   <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ create_profile }/>
 </div>
