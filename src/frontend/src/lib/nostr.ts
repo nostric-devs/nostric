@@ -25,7 +25,7 @@ export class NostrHandler {
     this.private_key = private_key;
     this.public_key = getPublicKey(private_key);
 
-    this.relay = relayInit("wss://purplepag.es");
+    this.relay = relayInit("wss://relay.nostr.band");
 
     this.relay.on("error", () => {
       alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
