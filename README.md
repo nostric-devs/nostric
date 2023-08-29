@@ -15,7 +15,7 @@ git clone https://github.com/lukasvozda/nostric.git
 ```
 npm install
 ```
-4. Start your local replica
+4. Start your local replica:
 ```
 dfx start --clean
 ```
@@ -35,7 +35,7 @@ If your src/declarations folder does not create run:
 ```
 dfx generate
 ```
-6. Run your development server
+6. Run your development server:
 ```
 npm run dev
 ```

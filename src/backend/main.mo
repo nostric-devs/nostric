@@ -1,19 +1,10 @@
 import Map "mo:base/HashMap";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
-import List "mo:base/List";
-import Iter "mo:base/Iter";
-import Int "mo:base/Int";
-import Nat "mo:base/Nat";
-import Bool "mo:base/Bool";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Option "mo:base/Option";
-import Debug "mo:base/Debug";
-import Order "mo:base/Order";
 import Blob "mo:base/Blob";
-import Hash "mo:base/Hash";
 import Hex "./utils/Hex";
 
 // Declare a shared actor class
