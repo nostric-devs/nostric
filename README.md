@@ -10,7 +10,7 @@ However, there we see more synergies between Nostr and ICP and it would be great
 ```
 git clone https://github.com/lukasvozda/nostric.git
 ```
-2. (Install DFX)[https://sdk.dfinity.org/docs/quickstart/local-quickstart.html]
+2. [Install DFX](https://sdk.dfinity.org/docs/quickstart/local-quickstart.html)
 3. Run npm install to install JS dependencies:
 ```
 npm install
@@ -21,7 +21,7 @@ dfx start --clean
 ```
 5. Now run in the new shell execute the deploy script:
 ```
-./restarter.sh
+sh ./restarter.sh
 ```
 Or you can execute these commands one by one:
 ```
@@ -31,4 +31,14 @@ dfx deploy vetkd_system_api
 dfx deploy backend
 dfx deploy frontend
 ```
+If your src/declarations folder does not create run:
+```
+dfx generate
+```
+6. Run your development server
+```
+npm run dev
+```
+
+
 
