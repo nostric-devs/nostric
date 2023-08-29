@@ -54,7 +54,7 @@
       </div>
     {/if}
     <!-- Username & Bio Container -->
-    <div class="ml-4 overflow-hidden">
+    <div class="ml-4 break-all">
         <h1 class="text-xl font-bold">@{ profile.username }</h1>
         <span class="text-gray-500" title="Your public key.">{npub}</span>
         <p class="text-sm mt-1">{ profile.about }</p>

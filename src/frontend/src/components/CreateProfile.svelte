@@ -3,7 +3,8 @@
   import { actor, crypto_service, init_nostr_structures, nostr_service } from "../store/auth";
   import type { Profile } from "../../../declarations/backend/backend.did";
   import ProfileForm from "./ProfileForm.svelte";
-
+  import { alert } from "../store/alert";
+  
   let private_key = generatePrivateKey();
   let pk = getPublicKey(private_key);
   let loading = false;
@@ -32,8 +33,7 @@
       await nostr_service.publish_event(event);
       await init_nostr_structures(response.ok);
     } else {
-      // todo notifications
-      console.log(response["UnableToCreate"]);
+      alert.error(response["UnableToCreate"]);
     }
     loading = false;
   }
