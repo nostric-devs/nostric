@@ -5,6 +5,7 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Option "mo:base/Option";
 import Blob "mo:base/Blob";
+import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
 
 // Declare a shared actor class
@@ -26,6 +27,8 @@ shared({ caller = initializer }) actor class() {
     };
 
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
+
+    private stable var stableprofiles : [(Principal, Profile)] = [];
 
     public shared (msg) func addProfile(p: Profile) : async Result.Result<Profile, Error> {
 
@@ -134,4 +137,17 @@ shared({ caller = initializer }) actor class() {
         Hex.encode(Blob.toArray(encrypted_key));
     };
 
+    system func preupgrade() {
+        stableprofiles := Iter.toArray(profiles.entries());
+    };
+
+    system func postupgrade() {
+        profiles := Map.fromIter<Principal, Profile>(
+            stableprofiles.vals(),
+            10,
+            Principal.equal,
+            Principal.hash,
+        );
+        stableprofiles := []; 
+    };
 };
