@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { actor, nostric_user} from "../store/auth";
+  import { actor, nostr_service, nostric_user} from "../store/auth";
   import ProfileForm from "./ProfileForm.svelte";
   import type { Profile, Result } from "../../../declarations/backend/backend.did";
   import { alert } from "../store/alert";
   import { navigateTo } from "svelte-router-spa";
   import { ROUTES } from "../router/routes";
+  import { Kind } from "nostr-tools";
 
 
   let loading = false;
@@ -15,6 +16,14 @@
     let response : Result = await actor.updateProfile(profile);
     if ("ok" in response) {
       nostric_user.set_profile(response.ok);
+      // Publish updated profile to the Nostr relay as well
+      let content = JSON.stringify({
+        "username": profile.username,
+        "about": profile.about,
+        "picture": profile.avatar_url
+      });
+      let event = nostr_service.create_event(content, Kind.Metadata);
+      await nostr_service.publish_event(event);
       await navigateTo(ROUTES.POSTS);
       alert.success("Profile successfully updated");
     } else {

@@ -5,6 +5,7 @@ import {
   getEventHash,
   getPublicKey,
   relayInit,
+  Kind,
 } from "nostr-tools";
 import type { Relay, Sub } from "nostr-tools/lib/relay";
 import type { Event } from "nostr-tools/lib/event";
@@ -30,21 +31,22 @@ export class NostrHandler {
     this.relay.on("error", () => {
       alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
     })
-
+    
     await this.relay.connect();
 
     this.sub = this.relay.sub([{
-      kinds: [1],
+      kinds: [Kind.Text],
       authors: [this.public_key]
     }]);
 
+    //this.sub.on("event", event => nostr_events.add(event));
     this.sub.on("event", event => nostr_events.add(event));
 
   }
 
-  public create_event(content : string) {
+  public create_event(content : string, kind : Kind) {
     let event = {
-      kind: 1,
+      kind: kind,
       created_at: Math.floor(Date.now() / 1000),
       tags: [],
       pubkey: this.public_key,
@@ -59,7 +61,7 @@ export class NostrHandler {
     return event;
   }
 
-  public async publish_event(event : Event) {
+  public async publish_event(event: Event) {
     await this.relay.publish(event);
   }
 
