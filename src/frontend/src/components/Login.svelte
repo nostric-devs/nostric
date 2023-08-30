@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AuthStates, login_to_ii, auth_state } from "../store/auth";
   import Alert from "./Alert.svelte";
-  import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
+  import Spinner from "./Spinner.svelte";
   import { nostric_user } from "../store/auth";
 
   let disabled = false;
@@ -32,7 +32,7 @@
       {#if current_state === AuthStates.ANONYMOUS }
         <button class="btn btn-primary" disabled="{ disabled }" on:click={() => login()} >
           {#if disabled}
-            <MegaCoolUltraSpinner/>
+            <Spinner/>
           {/if}
           <span class="text-white">
             { disabled ? "Identifying" : "Log in with Internet Identity" }
@@ -40,7 +40,7 @@
         </button>
       {:else if current_state === AuthStates.IDENTIFIED }
         <button class="btn btn-primary btn-disabled" disabled>
-          <MegaCoolUltraSpinner/>
+          <Spinner/>
           <span class="text-white">Identified, initializing</span>
         </button>
       {:else if current_state === AuthStates.ERROR }

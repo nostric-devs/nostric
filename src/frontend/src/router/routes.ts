@@ -32,7 +32,7 @@ export const routes = [
     }
   },
   {
-    name: "/edit-profile",
+    name: ROUTES.EDIT_PROFILE,
     layout: BasicLayout,
     component: EditProfile,
     onlyIf: {

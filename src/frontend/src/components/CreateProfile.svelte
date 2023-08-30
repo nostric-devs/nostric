@@ -4,7 +4,7 @@
   import type { Profile } from "../../../declarations/backend/backend.did";
   import ProfileForm from "./ProfileForm.svelte";
   import { alert } from "../store/alert";
-  
+
   let private_key = generatePrivateKey();
   let pk = getPublicKey(private_key);
   let loading = false;
@@ -42,7 +42,7 @@
   export let params;
 
 </script>
-<div class="max-w-xl mx-auto mt-8 text-center">
+<div class="max-w-xl mx-auto my-12 text-center">
   <h1 class="text-4xl font-bold mt-12">Create your profile</h1>
-  <ProfileForm   bind:profile={profile} loading={loading} submit_function={create_profile}/>
+  <ProfileForm bind:profile={profile} loading={loading} submit_function={create_profile}/>
 </div>

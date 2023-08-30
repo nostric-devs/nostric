@@ -1,5 +1,5 @@
 <script>
-  import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
+  import Spinner from "./Spinner.svelte";
 
   export let loading;
   export let submit_function;
@@ -31,21 +31,25 @@
       <label class="label">
         <span class="label-text">Public key</span>
       </label>
-      <input type="text" bind:value={profile.pk} placeholder="Public key" class="input input-bordered" disabled />
+      <input type="text" value={profile.pk} placeholder="Public key" class="input input-bordered" disabled />
     </div>
     <div class="form-control">
       <label class="label">
         <span class="label-text">Private key</span>
       </label>
-      <input type="password" bind:value={profile.encrypted_sk} placeholder="Private key" class="input input-bordered" disabled />
+      <input type="password" value={profile.encrypted_sk} placeholder="Private key" class="input input-bordered" disabled />
       <span class="text-left text-sm text-gray-500 mt-4">
         *You can copy your Public key and Private key. It will be encrypted and securely stored on the IC.
       </span>
     </div>
     <div class="form-control mt-6">
-      <button class="btn btn-primary" on:click={async () => await submit_function()} disabled={ !profile.username }>
+      <button
+        class="btn btn-primary"
+        on:click={async () => await submit_function()}
+        disabled={ !profile.username || loading }
+      >
         {#if loading}
-          <MegaCoolUltraSpinner/>
+          <Spinner/>
         {/if}
         <span class="text-white">Save profile</span>
       </button>
