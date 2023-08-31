@@ -2,7 +2,7 @@
   import { Icon } from "svelte-feathers";
   import { alert } from "../store/alert";
 
-  // error in tailwind won't load dynamic alert class, hotfix
+  // Tailwind won't load dynamic alert class, hotfix
   let level_to_icon_map = {
     info: { icon_name: "info", color: "hsl(var(--in))" },
     success: { icon_name: "check-circle", color: "hsl(var(--su))"},

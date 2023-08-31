@@ -31,7 +31,7 @@ export class NostrHandler {
     this.relay.on("error", () => {
       alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
     })
-    
+
     await this.relay.connect();
 
     this.sub = this.relay.sub([{
@@ -39,7 +39,6 @@ export class NostrHandler {
       authors: [this.public_key]
     }]);
 
-    //this.sub.on("event", event => nostr_events.add(event));
     this.sub.on("event", event => nostr_events.add(event));
 
   }

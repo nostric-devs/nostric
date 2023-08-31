@@ -7,7 +7,6 @@
   import { ROUTES } from "../router/routes";
   import { Kind } from "nostr-tools";
 
-
   let loading = false;
   let profile : Profile = JSON.parse(JSON.stringify(nostric_user.get_profile()));
 
@@ -16,7 +15,7 @@
     let response : Result = await actor.updateProfile(profile);
     if ("ok" in response) {
       nostric_user.set_profile(response.ok);
-      // Publish updated profile to the Nostr relay as well
+      // publish updated profile to the Nostr relay as well
       let content = JSON.stringify({
         "username": profile.username,
         "about": profile.about,

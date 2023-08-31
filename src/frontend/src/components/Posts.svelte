@@ -5,15 +5,15 @@
   import { Icon } from 'svelte-feathers';
   import Alert from "./Alert.svelte";
   import { ROUTES } from "../router/routes";
-  import MegaCoolUltraSpinner from "./MegaCoolUltraSpinner.svelte";
+  import Spinner from "./Spinner.svelte";
   import { Kind, nip19 } from "nostr-tools";
 
   let profile = nostric_user.get_profile();
   let private_key = nostric_user.get_private_key();
   let message = null;
   let publishing = false;
-  let npub = nip19.npubEncode(profile.pk) 
-  
+  let npub = nip19.npubEncode(profile.pk)
+
   const create_post = async () => {
     publishing = true;
     let event = nostr_service.create_event(message, Kind.Text);
@@ -59,7 +59,7 @@
         <span class="text-gray-500" title="Your public key.">{npub}</span>
         <p class="text-sm mt-1">{ profile.about }</p>
     </div>
-  </div>  
+  </div>
 </div>
 
 <div class="max-w-xl mx-auto mt-12">
@@ -77,15 +77,15 @@
       on:click={ async () => await create_post() }
     >
       {#if publishing}
-        <MegaCoolUltraSpinner/>
+        <Spinner/>
       {/if}
       <span class="text-white">Create post</span>
     </button>
   </div>
   <div class="divider"></div>
   <div class="mt-12">
-    {#each $nostr_events.reverse() as event}
-      <div class="post mb-4 p-2 rounded">
+    {#each $nostr_events as event}
+      <div class="bg-gray-100 mb-4 p-2 rounded">
         <div class=" flex items-start">
           <!-- Avatar Picture -->
           {#if profile.avatar_url}
@@ -114,7 +114,4 @@
 
 
 <style lang="postcss">
- .post {
-    background-color:rgb(246, 245, 245);
- }
 </style>

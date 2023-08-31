@@ -4,7 +4,7 @@
   import type { Profile } from "../../../declarations/backend/backend.did";
   import ProfileForm from "./ProfileForm.svelte";
   import { alert } from "../store/alert";
-  
+
   let private_key = generatePrivateKey();
   let pk = getPublicKey(private_key);
   let loading = false;
@@ -23,6 +23,7 @@
     profile.encrypted_sk = await crypto_service.encrypt(private_key);
     let response = await actor.addProfile(profile);
     if ("ok" in response) {
+      await init_nostr_structures(response.ok);
       // Publish updated profile to the Nostr relay as well
       let content = JSON.stringify({
         "username": profile.username,
@@ -31,7 +32,6 @@
       });
       let event = nostr_service.create_event(content, Kind.Metadata);
       await nostr_service.publish_event(event);
-      await init_nostr_structures(response.ok);
     } else {
       alert.error(response["UnableToCreate"]);
     }
@@ -42,7 +42,7 @@
   export let params;
 
 </script>
-<div class="max-w-xl mx-auto mt-8 text-center">
+<div class="max-w-xl mx-auto my-12 text-center">
   <h1 class="text-4xl font-bold mt-12">Create your profile</h1>
-  <ProfileForm   bind:profile={profile} loading={loading} submit_function={create_profile}/>
+  <ProfileForm bind:profile={profile} loading={loading} submit_function={create_profile}/>
 </div>

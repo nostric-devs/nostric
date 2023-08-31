@@ -13,6 +13,7 @@ function fetch_nostr_events() {
         ...event,
         created_at_time: new Date(event.created_at * 1000).toLocaleString()
       });
+      events.sort((x, y) => y.created_at - x.created_at);
     }
     return events;
   });
