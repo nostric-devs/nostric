@@ -23,6 +23,7 @@
     profile.encrypted_sk = await crypto_service.encrypt(private_key);
     let response = await actor.addProfile(profile);
     if ("ok" in response) {
+      await init_nostr_structures(response.ok);
       // Publish updated profile to the Nostr relay as well
       let content = JSON.stringify({
         "username": profile.username,
@@ -31,7 +32,6 @@
       });
       let event = nostr_service.create_event(content, Kind.Metadata);
       await nostr_service.publish_event(event);
-      await init_nostr_structures(response.ok);
     } else {
       alert.error(response["UnableToCreate"]);
     }
