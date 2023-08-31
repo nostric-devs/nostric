@@ -16,11 +16,11 @@
     if ("ok" in response) {
       nostric_user.set_profile(response.ok);
       // publish updated profile to the Nostr relay as well
-      let content = {
+      let content = JSON.stringify({
         "username": profile.username,
         "about": profile.about,
         "picture": profile.avatar_url
-      };
+      });
       let event = nostr_service.create_event(content, Kind.Metadata);
       await nostr_service.publish_event(event);
       await navigateTo(ROUTES.POSTS);
