@@ -4,41 +4,39 @@ import {
   getSignature,
   getEventHash,
   getPublicKey,
-  relayInit,
   Kind,
+  SimplePool,
 } from "nostr-tools";
-import type { Relay, Sub } from "nostr-tools/lib/relay";
+import type { Sub } from "nostr-tools/lib/relay";
 import type { Event } from "nostr-tools/lib/event";
 import { nostr_events } from "../store/nostr";
 import { alert } from "../store/alert";
 
 export class NostrHandler {
 
-  relay : Relay | null = null;
-  sub : Sub | null = null;
-  private_key : string;
-  public_key : string;
+  private pool: SimplePool | null = null;
+  private sub : Sub | null = null;
+  private private_key : string;
+  private public_key : string;
 
-  constructor() {
-  }
+  private RELAYS = [
+    "wss://relay.nostr.band",
+    "wss://nostr.girino.org",
+    "wss://nostr-pub.wellorder.net",
+  ]
 
-  public async init(private_key : string) {
+  public async init(private_key : string, following_list : string[] = []) {
     this.private_key = private_key;
     this.public_key = getPublicKey(private_key);
 
-    this.relay = relayInit("wss://relay.nostr.band");
-
-    this.relay.on("error", () => {
-      alert.error(`Unable to connect to Nostr relay ${this.relay.url}`);
-    })
-
-    await this.relay.connect();
-
-    this.sub = this.relay.sub([{
-      kinds: [Kind.Text],
-      authors: [this.public_key]
-    }]);
-
+    this.pool = new SimplePool();
+    this.sub = this.pool.sub(
+      this.RELAYS,
+      [{
+        kinds: [Kind.Text],
+        authors: [this.public_key, ...following_list]
+      }]
+    );
     this.sub.on("event", event => nostr_events.add(event));
 
   }
@@ -61,7 +59,13 @@ export class NostrHandler {
   }
 
   public async publish_event(event: Event) {
-    await this.relay.publish(event);
+    await this.pool.publish(this.RELAYS, event);
+  }
+
+  public close_relay_pool() {
+    if (this.pool !== null) {
+      this.pool.close();
+    }
   }
 
 }
