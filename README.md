@@ -3,6 +3,20 @@
 Nostric is yet a very simple Nostr client running on the Internet Computer Protocol (ICP). We started this project as a submission to the Vetkey challenge bounty released by the DFINITY foundation. The main idea is to store Nostr private keys encrypted in the backend of the application. This makes managing private keys secure and also improves UX as an user does not need to use any Chrome extensions to sign posts.
 
 However, there we see more synergies between Nostr and ICP and it would be great to continue with this project to deliver a fully featured Nostr client and eventually relay server as well.
+### Supported features
+Our client currently suports these features:
+- Generate PK, SK
+- Create a profile
+- Update profile
+- NIP-01 kind:1 Post publish
+- NIP-01 kind:0 User Metadata publish
+
+### Canisters
+Current architecture consists of 4 canisters for local development:
+- frontend canister
+- backend canister
+- vetkd_system_api canister
+- internet identity canister (for local developlment only)
 
 ## Deploy locally
 
@@ -39,6 +53,4 @@ dfx generate
 ```
 npm run dev
 ```
-
-
 
