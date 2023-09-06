@@ -4,7 +4,7 @@ Nostric is yet a very simple Nostr client running on the Internet Computer Proto
 
 However, there we see more synergies between Nostr and ICP and it would be great to continue with this project to deliver a fully featured Nostr client and eventually relay server as well.
 ### Supported features
-Our client currently suports these features:
+Our client currently supports these features:
 - Generate PK, SK
 - Create a profile
 - Update profile
