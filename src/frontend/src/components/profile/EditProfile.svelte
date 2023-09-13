@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { actor, nostr_service, nostric_user} from "../../store/auth";
+  import { actor, nostr_service } from "../store/auth";
   import ProfileForm from "./ProfileForm.svelte";
-  import type { Profile, Result } from "../../../../declarations/backend/backend.did";
-  import { alert } from "../../store/alert";
+  import type { Profile, Result } from "../../../declarations/backend/backend.did";
+  import { alert } from "../store/alert";
   import { navigateTo } from "svelte-router-spa";
-  import { ROUTES } from "../../router/routes";
-  import { Kind } from "nostr-tools";
+  import { ROUTES } from "../router/routes";
+  import { NDKUser } from "@nostr-dev-kit/ndk";
 
   let loading = false;
-  let profile : Profile = JSON.parse(JSON.stringify(nostric_user.get_profile()));
+  let user : NDKUser = nostr_service.get_user();
+
+  let profile : Profile = {
+    username: user.profile.name,
+    about: user.profile.bio,
+    avatar_url: user.profile.image,
+    pk: user.hexpubkey(),
+    encrypted_sk: nostr_service.get_private_key(),
+  }
 
   const update_profile = async () => {
     loading = true;
     let response : Result = await actor.updateProfile(profile);
     if ("ok" in response) {
-      nostric_user.set_profile(response.ok);
-      // publish updated profile to the Nostr relay as well
-      let content = JSON.stringify({
-        "username": profile.username,
-        "about": profile.about,
-        "picture": profile.avatar_url
-      });
-      let event = nostr_service.create_event(content, Kind.Metadata);
-      await nostr_service.publish_event(event);
+      await nostr_service.change_user(profile);
       await navigateTo(ROUTES.POSTS);
       alert.success("Profile successfully updated");
     } else {
@@ -36,7 +36,7 @@
 </script>
 
 <div class="max-w-xl mx-auto mt-8 text-center">
-  <a href="/src/frontend/public" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
+  <a href="/" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
   <h1 class="text-4xl font-bold mt-12">Update your profile</h1>
   <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ update_profile }/>
 </div>

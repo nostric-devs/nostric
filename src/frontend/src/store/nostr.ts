@@ -1,26 +1,24 @@
 import { writable } from "svelte/store";
-import type { Event } from "nostr-tools/lib/event";
+import type { NDKEvent } from "@nostr-dev-kit/ndk";
 
-
-type NostrEvent = Event & { created_at_time: string };
 
 function fetch_nostr_events() {
-  const { subscribe, update } = writable<NostrEvent[]>([]);
+  const { subscribe, update, set } = writable<NDKEvent[]>([]);
 
-  const add = (event: NostrEvent) => update((events: NostrEvent[]) => {
-    if (!events.find((past_event : NostrEvent) => past_event.id === event.id)) {
-      events = events.concat({
-        ...event,
-        created_at_time: new Date(event.created_at * 1000).toLocaleString()
-      });
+  const add = (event: NDKEvent) => update((events: NDKEvent[]) => {
+    if (!events.find((past_event : NDKEvent) => past_event.id === event.id)) {
+      events = events.concat(event);
       events.sort((x, y) => y.created_at - x.created_at);
     }
     return events;
   });
 
+  const clear = () => set([]);
+
   return {
     subscribe,
-    add
+    add,
+    clear,
   };
 }
 
