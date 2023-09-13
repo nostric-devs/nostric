@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AuthStates, login_to_ii, auth_state } from "../store/auth";
-  import Alert from "./Alert.svelte";
-  import Spinner from "./Spinner.svelte";
+  import Alert from "./utils/Alert.svelte";
+  import Spinner from "./utils/Spinner.svelte";
   import { nostric_user } from "../store/auth";
 
   let disabled = false;

@@ -19,9 +19,6 @@ export class NostrHandler {
   private_key : string;
   public_key : string;
 
-  constructor() {
-  }
-
   public async init(private_key : string) {
     this.private_key = private_key;
     this.public_key = getPublicKey(private_key);

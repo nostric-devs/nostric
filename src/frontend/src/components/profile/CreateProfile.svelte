@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Kind, generatePrivateKey, getPublicKey } from "nostr-tools";
-  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../store/auth";
-  import type { Profile } from "../../../declarations/backend/backend.did";
+  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../../store/auth";
+  import type { Profile } from "../../../../declarations/backend/backend.did";
   import ProfileForm from "./ProfileForm.svelte";
-  import { alert } from "../store/alert";
+  import { alert } from "../../store/alert";
 
   let private_key = generatePrivateKey();
   let pk = getPublicKey(private_key);

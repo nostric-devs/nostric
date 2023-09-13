@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { actor, nostr_service, nostric_user} from "../store/auth";
+  import { actor, nostr_service, nostric_user} from "../../store/auth";
   import ProfileForm from "./ProfileForm.svelte";
-  import type { Profile, Result } from "../../../declarations/backend/backend.did";
-  import { alert } from "../store/alert";
+  import type { Profile, Result } from "../../../../declarations/backend/backend.did";
+  import { alert } from "../../store/alert";
   import { navigateTo } from "svelte-router-spa";
-  import { ROUTES } from "../router/routes";
+  import { ROUTES } from "../../router/routes";
   import { Kind } from "nostr-tools";
 
   let loading = false;
@@ -36,7 +36,7 @@
 </script>
 
 <div class="max-w-xl mx-auto mt-8 text-center">
-  <a href="/" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
+  <a href="/src/frontend/public" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
   <h1 class="text-4xl font-bold mt-12">Update your profile</h1>
   <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ update_profile }/>
 </div>

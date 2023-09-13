@@ -1,5 +1,5 @@
 <script>
-  import Spinner from "./Spinner.svelte";
+  import Spinner from "../utils/Spinner.svelte";
 
   export let loading;
   export let submit_function;

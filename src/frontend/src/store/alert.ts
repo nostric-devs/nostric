@@ -15,7 +15,7 @@ export type Alert = {
 
 
 function fetch_alert() {
-  const { subscribe, set } = writable<Alert>({text: "bla", level: Alerts.ERROR, time: null});
+  const { subscribe, set } = writable<Alert>(null);
 
   const create = (text, time=null, level) =>
     set({

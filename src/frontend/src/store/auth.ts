@@ -7,6 +7,7 @@ import { createActor } from "../../../declarations/backend";
 import { navigateTo } from "svelte-router-spa";
 import { alert } from "./alert";
 import { ROUTES } from "../router/routes";
+import { getCookie, setCookie, deleteCookie } from "svelte-cookie";
 
 
 export enum AuthStates {
@@ -64,6 +65,12 @@ export let nostr_service = null;
 export let nostric_user = null;
 
 export async function init() {
+  // let auth_cookie = getCookie("nostrAuth");
+  // if (auth_cookie !== "") {
+  //   auth_client = await AuthClient.create(JSON.parse(auth_cookie.identity));
+  // } else {
+  //   auth_client = await AuthClient.create();
+  // }
   auth_client = await AuthClient.create();
   if (await auth_client.isAuthenticated()) {
     auth_state.set_identified();
@@ -76,7 +83,7 @@ export async function init_nostr_structures(profile) {
   nostric_user.init(profile, private_key);
   await nostr_service.init(private_key);
   auth_state.set_registered();
-  await navigateTo(ROUTES.POSTS);
+  await navigateTo(ROUTES.HOME);
 }
 
 export async function init_structures() {
