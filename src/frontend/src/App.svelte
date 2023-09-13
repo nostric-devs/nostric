@@ -1,14 +1,8 @@
 <script lang="ts">
   import { Router } from "svelte-router-spa";
   import { routes } from "./router/routes";
-  import { onDestroy } from "svelte";
-  import { nostr_service } from "./store/auth";
 
   let options = { gaPageviews: true};
-
-  onDestroy(() => {
-    nostr_service.close_relay_pool();
-  })
 
 </script>
 

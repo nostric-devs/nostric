@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { AuthStates, login_to_ii, auth_state } from "../store/auth";
+  import { AuthStates, login_to_ii, auth_state, nostr_service } from "../store/auth";
   import Alert from "./Alert.svelte";
   import Spinner from "./Spinner.svelte";
-  import { nostric_user } from "../store/auth";
 
   let disabled = false;
   let current_state;
@@ -53,7 +52,7 @@
           </div>
         {/if}
       {:else if current_state === AuthStates.REGISTERED }
-       <span>Welcome, { nostric_user.get_profile().name }</span>
+       <span>Welcome</span>
       {/if}
 
     </div>

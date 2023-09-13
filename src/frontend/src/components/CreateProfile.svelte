@@ -1,37 +1,27 @@
 <script lang="ts">
-  import { Kind, generatePrivateKey, getPublicKey } from "nostr-tools";
-  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../store/auth";
-  import type { Profile } from "../../../declarations/backend/backend.did";
   import ProfileForm from "./ProfileForm.svelte";
+  import { NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+  import { onMount } from "svelte";
+  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../store/auth";
   import { alert } from "../store/alert";
+  import type { Profile } from "../../../declarations/backend/backend.did";
 
-  let private_key = generatePrivateKey();
-  let pk = getPublicKey(private_key);
   let loading = false;
-
   let profile : Profile = {
     username: "",
     about: "",
     avatar_url: "",
-    pk: pk,
-    encrypted_sk: private_key // will be encrypted later
+    pk: "",
+    encrypted_sk: "",
   }
-
 
   const create_profile = async () => {
     loading = true;
-    profile.encrypted_sk = await crypto_service.encrypt(private_key);
+    profile.encrypted_sk = await crypto_service.encrypt(profile.encrypted_sk);
     let response = await actor.addProfile(profile);
     if ("ok" in response) {
       await init_nostr_structures(response.ok);
-      // Publish updated profile to the Nostr relay as well
-      let content = JSON.stringify({
-        "username": profile.username,
-        "about": profile.about,
-        "picture": profile.avatar_url
-      });
-      let event = nostr_service.create_event(content, Kind.Metadata);
-      await nostr_service.publish_event(event);
+      await nostr_service.change_user(profile);
     } else {
       alert.error(response["UnableToCreate"]);
     }
@@ -40,6 +30,13 @@
 
   export let currentRoute;
   export let params;
+
+  onMount(async () => {
+    let signer = NDKPrivateKeySigner.generate();
+    let user = await signer.user();
+    profile.encrypted_sk = signer.privateKey;
+    profile.pk = user.hexpubkey();
+  });
 
 </script>
 <div class="max-w-xl mx-auto my-12 text-center">

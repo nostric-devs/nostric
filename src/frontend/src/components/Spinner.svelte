@@ -6,6 +6,7 @@
   let current_color;
   $: current_color = colors[initial];
 
+  export let width = 2.5;
 
   onMount(() => {
     setInterval(() => {
@@ -16,7 +17,7 @@
 </script>
 
 <span
-  class="loading loading-infinity loading-lg transition-colors ease-in duration-1000"
-  style="color: {current_color};"
+  class="loading loading-infinity transition-colors ease-in duration-1000"
+  style="color: {current_color}; width: {width}rem;"
 ></span>
 
