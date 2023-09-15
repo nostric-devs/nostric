@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { actor, nostr_service } from "../store/auth";
+  import { actor, nostr_service } from "../../store/auth";
   import ProfileForm from "./ProfileForm.svelte";
-  import type { Profile, Result } from "../../../declarations/backend/backend.did";
-  import { alert } from "../store/alert";
+  import type { Profile, Result } from "../../../../declarations/backend/backend.did";
+  import { alert } from "../../store/alert";
   import { navigateTo } from "svelte-router-spa";
-  import { ROUTES } from "../router/routes";
+  import { ROUTES } from "../../router/routes";
   import { NDKUser } from "@nostr-dev-kit/ndk";
 
   let loading = false;
@@ -22,8 +22,8 @@
     loading = true;
     let response : Result = await actor.updateProfile(profile);
     if ("ok" in response) {
-      await nostr_service.change_user(profile);
-      await navigateTo(ROUTES.POSTS);
+      await nostr_service.update_user(profile);
+      await navigateTo(ROUTES.PROFILE);
       alert.success("Profile successfully updated");
     } else {
       alert.error(response["UnableToCreate"]);

@@ -23,9 +23,9 @@
   <div class="text-center">
     <div>
       <h1
-        class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
+        class="mb-5 text-4xl sm:text-5xl font-bold dark:text-white"
       >
-        Nostric
+        Nostr<span class="text-primary">ic</span>
       </h1>
 
       {#if current_state === AuthStates.ANONYMOUS }

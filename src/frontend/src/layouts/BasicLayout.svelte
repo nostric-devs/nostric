@@ -1,6 +1,6 @@
 <script>
   import { logout_from_ii } from "../store/auth";
-  import { Navigate } from "svelte-router-spa";
+  import { Navigate, navigateTo } from "svelte-router-spa";
   import { Route } from "svelte-router-spa";
   import { ROUTES } from "../router/routes";
   import { Icon } from "svelte-feathers";
@@ -11,9 +11,9 @@
 
 </script>
 
-<div class="w-100 flex justify-center">
+<div class="w-full flex justify-center">
   <div
-    class="navbar flex justify-between bg-base-200 md:w-3/4 rounded-lg mx-5 my-12 shadow-none"
+    class="navbar flex justify-between bg-base-200 w-3/4 rounded-lg my-12 shadow-none"
   >
     <div class="navbar-start">
       <div class="btn btn-ghost normal-case text-3xl text-white font-bold">
@@ -30,34 +30,36 @@
   </div>
 </div>
 
-<div class="container mx-auto mb-24">
-  <div class="flex justify-center">
-    <div class="menu menu-horizontal bg-base-200 capitalize rounded-lg">
-      <div
-        class="flex px-4 py-3 mr-2 cursor-pointer hover:bg-neutral rounded"
-        class:bg-neutral={currentRoute.name === ROUTES.HOME}
+<div class="mx-auto mb-24">
+  <div class="flex justify-center mb-24">
+    <div class="join">
+      <button
+        class="btn btn-lg join-item rounded-l"
+        class:btn-active={ currentRoute.name === ROUTES.HOME }
+        on:click={ () => navigateTo(ROUTES.HOME) }
       >
-        <div class="mr-2"><Icon name="home" width="20" height="20"/></div>
-        <Navigate to={ ROUTES.HOME }>feed</Navigate>
-      </div>
-      <div
-        class="flex px-4 py-3 cursor-pointer hover:bg-neutral rounded"
-        class:bg-neutral={currentRoute.name === ROUTES.PROFILE}
+        <Icon name="home" width="20" height="20"/>
+        feed
+      </button>
+      <button
+        class="btn btn-lg join-item"
+        class:btn-active={ currentRoute.name === ROUTES.PROFILE }
+        on:click={ () => navigateTo(ROUTES.PROFILE) }
       >
-        <div class="mr-2"><Icon name="home" width="20" height="20"/></div>
-        <Navigate to={ ROUTES.PROFILE }>profile</Navigate>
-      </div>
-      <div
-        class="flex px-4 py-3 cursor-pointer hover:bg-neutral rounded"
-        class:bg-neutral={currentRoute.name === ROUTES.SETTINGS}
+        <Icon name="user" width="20" height="20"/>
+        profile
+      </button>
+      <button
+        class="btn btn-lg join-item rounded-r"
+        class:btn-active={ currentRoute.name.includes(ROUTES.SETTINGS) }
+        on:click={ () => navigateTo(ROUTES.SETTINGS) }
       >
-        <div class="mr-2"><Icon name="home" width="20" height="20"/></div>
-        <Navigate to={ ROUTES.SETTINGS }>settings</Navigate>
-      </div>
-
+        <Icon name="settings" width="20" height="20"/>
+        settings
+      </button>
     </div>
   </div>
-  <div class="my-6"><Alert /></div>
+  <div class="mb-6"><Alert /></div>
   <Route {currentRoute} {params}/>
 </div>
 

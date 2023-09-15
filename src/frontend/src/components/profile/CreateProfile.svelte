@@ -2,8 +2,9 @@
   import ProfileForm from "./ProfileForm.svelte";
   import { NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
   import { onMount } from "svelte";
-  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../store/auth";
-  import type { Profile } from "../../../declarations/backend/backend.did";
+  import { actor, crypto_service, init_nostr_structures, nostr_service } from "../../store/auth";
+  import { alert } from "../../store/alert";
+  import type { Profile } from "../../../../declarations/backend/backend.did";
 
   let loading = false;
   let profile : Profile = {
@@ -20,7 +21,7 @@
     let response = await actor.addProfile(profile);
     if ("ok" in response) {
       await init_nostr_structures(response.ok);
-      await nostr_service.change_user(profile);
+      await nostr_service.update_user(profile);
     } else {
       alert.error(response["UnableToCreate"]);
     }
@@ -35,6 +36,7 @@
     let user = await signer.user();
     profile.encrypted_sk = signer.privateKey;
     profile.pk = user.hexpubkey();
+    console.log(profile);
   });
 
 </script>

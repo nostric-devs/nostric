@@ -6,7 +6,6 @@ import { createActor } from "../../../declarations/backend";
 import { navigateTo } from "svelte-router-spa";
 import { alert } from "./alert";
 import { ROUTES } from "../router/routes";
-import { getCookie, setCookie, deleteCookie } from "svelte-cookie";
 
 
 export enum AuthStates {
@@ -122,8 +121,9 @@ export async function init_structures() {
       auth_state.set_error();
     }
 
-  } catch {
-    alert.error("Unable to initialize necessary structures");
+  } catch(error) {
+    alert.error("Unable to initialize vetkeys");
+    console.error(error);
     auth_state.set_error();
   }
 
@@ -155,5 +155,6 @@ export async function logout_from_ii() {
   crypto_service.logout();
   auth_client.logout();
   auth_state.set_anonymous();
+  await actor.deleteProfile(); // todo get rid of this in production
   navigateTo(ROUTES.LOGIN);
 }
