@@ -10,7 +10,6 @@
   export let params;
 
 </script>
-
 <div class="w-full flex justify-center">
   <div
     class="navbar flex justify-between bg-base-200 w-3/4 rounded-lg my-12 shadow-none"
@@ -32,32 +31,26 @@
 
 <div class="mx-auto mb-24">
   <div class="flex justify-center mb-24">
-    <div class="join">
-      <button
-        class="btn btn-lg join-item rounded-l"
-        class:btn-active={ currentRoute.name === ROUTES.HOME }
-        on:click={ () => navigateTo(ROUTES.HOME) }
-      >
-        <Icon name="home" width="20" height="20"/>
-        feed
-      </button>
-      <button
-        class="btn btn-lg join-item"
-        class:btn-active={ currentRoute.name === ROUTES.PROFILE }
-        on:click={ () => navigateTo(ROUTES.PROFILE) }
-      >
-        <Icon name="user" width="20" height="20"/>
-        profile
-      </button>
-      <button
-        class="btn btn-lg join-item rounded-r"
-        class:btn-active={ currentRoute.name.includes(ROUTES.SETTINGS) }
-        on:click={ () => navigateTo(ROUTES.SETTINGS) }
-      >
-        <Icon name="settings" width="20" height="20"/>
-        settings
-      </button>
-    </div>
+    <ul class="menu menu-horizontal bg-base-200 rounded-box">
+      <li>
+        <a href="{ROUTES.HOME}" class:active={ currentRoute.name === ROUTES.HOME }>
+          <Icon name="home" width="20" height="20"/>
+          Feed
+        </a>
+      </li>
+      <li>
+        <a href="{ROUTES.PROFILE}" class:active={ currentRoute.name === ROUTES.PROFILE }>
+          <Icon name="user" width="20" height="20"/>
+          Profile
+        </a>
+      </li>
+      <li>
+        <a href={ROUTES.SETTINGS} class:active={ currentRoute.name.includes(ROUTES.SETTINGS) }>
+          <Icon name="settings" width="20" height="20"/>
+          Settings
+        </a>
+      </li>
+    </ul>
   </div>
   <div class="mb-6"><Alert /></div>
   <Route {currentRoute} {params}/>

@@ -135,7 +135,7 @@
           <div class="text-xl font-bold">
             @{ user.profile?.name || user.profile?.displayName  }
           </div>
-          <div class="text-sm break-all">
+          <div class="text-sm max-w-xs break-all">
             <span>{ user.hexpubkey() }</span>
           </div>
         </div>
