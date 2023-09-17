@@ -7,8 +7,8 @@
 </script>
 
 
-<div class="card w-full shadow-2xl bg-base-100 mt-8">
-  <div class="card-body">
+<div class="card w-full shadow-2xl bg-base-100">
+  <div class="card-body p-0">
     <div class="form-control">
       <label class="label">
         <span class="label-text">Username</span>
