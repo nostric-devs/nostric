@@ -23,7 +23,7 @@
     </div>
     <div class="flex-none">
       <button on:click={async () => await logout_from_ii()} class="btn btn-ghost btn-circle">
-        <Icon name="x" class="cursor-pointer hover:scale-110"></Icon>
+        <Icon name="log-out" class="cursor-pointer hover:scale-110"></Icon>
       </button>
     </div>
   </div>

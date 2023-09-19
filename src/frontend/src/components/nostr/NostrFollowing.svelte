@@ -87,7 +87,6 @@
 
 </script>
 
-
 <div class="form-control mb-6">
   <div class="w-full">
     <div class="flex justify-center">

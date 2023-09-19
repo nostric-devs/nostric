@@ -7,10 +7,11 @@ import Option "mo:base/Option";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
+import Account "./utils/Account";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
-shared({ caller = initializer }) actor class() {
+shared({ caller = initializer }) actor class() = this {
 
     type Profile = {
         pk: Text;
@@ -25,6 +26,14 @@ shared({ caller = initializer }) actor class() {
         #ProfileNotFound;
         #UnableToCreate;
     };
+
+    public type AccountType = { owner : Principal; subaccount : ?Blob };
+
+    public type Actor = actor {
+        icrc1_balance_of : (acc : AccountType) -> async Nat;
+    };
+
+    private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
@@ -150,4 +159,51 @@ shared({ caller = initializer }) actor class() {
         );
         stableprofiles := []; 
     };
+
+    public shared (msg) func getDepositAddress() : async Text {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        return Account.toText(acc);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func getSubaccountForCaller() : async Blob {
+        Account.toSubaccount(msg.caller);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func whoAmI() : async Principal {
+        msg.caller;
+    };
+    
+    // Method for local testing purposes
+    public shared (msg) func getSubaccountForPrincipal(principal : Text) : async Blob {
+        let p : Principal = Principal.fromText(principal);
+        Account.toSubaccount(p);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func getBalance() : async Nat {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+        return response;
+    };
+
+    public shared (msg) func verifyPayment() : async Bool {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+        if (response > 10) {
+            return true;
+        } else {
+            return false;
+        };
+    }
 };

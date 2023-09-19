@@ -2,6 +2,7 @@
   import { ROUTES } from "../router/routes";
   import NostrFollowing from "./nostr/NostrFollowing.svelte";
   import EditProfile from "./profile/EditProfile.svelte";
+  import Pro from "./settings/Pro.svelte";
 
   export let currentRoute;
   export let params;
@@ -25,7 +26,7 @@
       {#if currentRoute.name.includes(ROUTES.EDIT_PROFILE)}
         <EditProfile />
       {:else if  currentRoute.name.includes(ROUTES.NOSTRIC_PRO)}
-        <div>pro</div>
+        <Pro />
       {:else if  currentRoute.name.includes(ROUTES.RELAYS)}
         <div>relays</div>
       {:else}
