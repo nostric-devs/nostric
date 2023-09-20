@@ -13,12 +13,17 @@ import Account "./utils/Account";
 // Bind the caller and the initializer
 shared({ caller = initializer }) actor class() = this {
 
+
     type Profile = {
         pk: Text;
         encrypted_sk: Text;
         username: Text;
         about: Text;
         avatar_url: Text;
+    };
+
+    type PrivateProfile = Profile and {
+        is_pro: Bool;
     };
 
     type Error = {
@@ -35,22 +40,23 @@ shared({ caller = initializer }) actor class() = this {
 
     private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
-    private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
+    private var profiles = Map.HashMap<Principal, PrivateProfile>(0, Principal.equal, Principal.hash);
 
-    private stable var stableprofiles : [(Principal, Profile)] = [];
+    private stable var stableprofiles : [(Principal, PrivateProfile)] = [];
 
-    public shared (msg) func addProfile(p: Profile) : async Result.Result<Profile, Error> {
+    public shared (msg) func addProfile(p: Profile) : async Result.Result<PrivateProfile, Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
         };
 
-        let profile : Profile = {
+        let profile : PrivateProfile = {
             pk = p.pk;
             encrypted_sk = p.encrypted_sk;
             username = p.username;
             about = p.about;
-            avatar_url = p.avatar_url
+            avatar_url = p.avatar_url;
+            is_pro = false; // new profile does not have pro features
         };
 
         profiles.put(msg.caller, profile);
@@ -58,12 +64,12 @@ shared({ caller = initializer }) actor class() = this {
         return Result.fromOption(saved_profile, #UnableToCreate);
     };
 
-    public query (msg) func getProfile() : async Result.Result<Profile, Error> {
+    public query (msg) func getProfile() : async Result.Result<PrivateProfile, Error> {
          let profile = profiles.get(msg.caller);
          return Result.fromOption(profile, #ProfileNotFound);
      };
 
-    public shared (msg) func updateProfile(p: Profile) : async Result.Result<(Profile), Error> {
+    public shared (msg) func updateProfile(p: Profile) : async Result.Result<(PrivateProfile), Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
@@ -77,12 +83,13 @@ shared({ caller = initializer }) actor class() = this {
             return #err(#ProfileNotFound);
         };
         case (?v) {
-            let profile : Profile = {
+            let profile : PrivateProfile = {
                 pk = v.pk;
                 encrypted_sk = v.encrypted_sk;
                 username = p.username;
                 about = p.about;
-                avatar_url = p.avatar_url
+                avatar_url = p.avatar_url;
+                is_pro = v.is_pro;
                 };
                 profiles.put(id, profile);
                 return #ok(profile);
@@ -151,7 +158,7 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     system func postupgrade() {
-        profiles := Map.fromIter<Principal, Profile>(
+        profiles := Map.fromIter<Principal, PrivateProfile>(
             stableprofiles.vals(),
             10,
             Principal.equal,
@@ -201,6 +208,25 @@ shared({ caller = initializer }) actor class() = this {
         };
         var response : Nat = await ledgerActor.icrc1_balance_of(acc);
         if (response > 10) {
+            // If the payment is verified set the user's is_pro param
+            let result = profiles.get(msg.caller);
+            switch (result) {
+            case null {
+                //return #err(#ProfileNotFound);
+            };
+            case (?v) {
+                let profile : PrivateProfile = {
+                        pk = v.pk;
+                        encrypted_sk = v.encrypted_sk;
+                        username = v.username;
+                        about = v.about;
+                        avatar_url = v.avatar_url;
+                        is_pro = true;
+                    };
+                    profiles.put(msg.caller, profile);
+
+                };
+            };
             return true;
         } else {
             return false;
