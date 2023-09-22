@@ -12,18 +12,12 @@ export class NostrHandler {
   private signer: NDKPrivateKeySigner | null = null;
   private subscription : NDKSubscription | null = null;
 
-  private RELAYS = [
-    "wss://relay.nostr.band",
-    "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
-  ]
-
-  public async init(private_key : string) {
+  public async init(private_key : string, relays : string[]) {
     // init private key signer based on the existing private key
     this.signer = new NDKPrivateKeySigner(private_key);
     this.nostr_user = await this.signer.user();
     this.nostr_kit = new NDK({
-      explicitRelayUrls: this.RELAYS,
+      explicitRelayUrls: relays,
       signer: this.signer,
     });
     await this.nostr_kit.connect();

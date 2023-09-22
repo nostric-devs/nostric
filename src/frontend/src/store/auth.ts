@@ -60,14 +60,9 @@ export let actor = null;
 export let auth_client = null;
 export let crypto_service = null;
 export let nostr_service = null;
+export let nostric_service = null;
 
 export async function init() {
-  // let auth_cookie = getCookie("nostrAuth");
-  // if (auth_cookie !== "") {
-  //   auth_client = await AuthClient.create(JSON.parse(auth_cookie.identity));
-  // } else {
-  //   auth_client = await AuthClient.create();
-  // }
   auth_client = await AuthClient.create();
   if (await auth_client.isAuthenticated()) {
     auth_state.set_identified();
@@ -75,9 +70,27 @@ export async function init() {
   }
 }
 
-export async function init_nostr_structures(profile) {
+export async function init_nostr_structures(profile, actor) {
   let private_key = await crypto_service.decrypt(profile.encrypted_sk);
-  await nostr_service.init(private_key);
+
+  // todo subs with motoko actor call
+  let nostr_relays = [
+    "wss://relay.nostr.band",
+    "wss://nostr.girino.org",
+    "wss://nostr-pub.wellorder.net",
+  ]
+
+  await nostr_service.init(private_key, nostr_relays);
+
+  // todo get from motoko actor
+  let nostric_relays = [
+    { gateway: "ws://localhost:8000", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai" } // foreign canister id
+  ]
+
+  // todo if pro user, also initialize owned relay, else not;
+  await nostric_service.init_private_relay();
+  await nostric_service.init_pool(nostric_relays);
+
   auth_state.set_registered();
   await navigateTo(ROUTES.HOME);
 }
@@ -107,10 +120,10 @@ export async function init_structures() {
 
     try {
       nostr_service = new NostrHandler();
-
+      nostric_service = new NostrHandler();
       try {
         let response = await actor.getProfile();
-        await init_nostr_structures(response["ok"]);
+        await init_nostr_structures(response["ok"], actor);
       } catch {
         auth_state.set_not_registered();
         await navigateTo(ROUTES.CREATE_PROFILE);

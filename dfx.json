@@ -29,6 +29,16 @@
       "candid": "internet_identity.did",
       "type": "custom",
       "wasm": "internet_identity.wasm"
+    },
+    "relay": {
+      "candid": "src/relay/relay.did",
+      "type": "rust",
+      "package": "relay"
+    },
+    "foreign_relay": {
+      "candid": "src/relay/relay.did",
+      "type": "rust",
+      "package": "foreign_relay"
     }
   },
   "dfx": "0.14.2",

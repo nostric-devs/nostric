@@ -5,6 +5,7 @@ import CreateProfile from "../components/profile/CreateProfile.svelte";
 import Settings from "../components/Settings.svelte";
 import BasicLayout from "../layouts/BasicLayout.svelte";
 import { is_registered, is_not_registered } from "../store/auth";
+import Ws from "../Ws.svelte";
 
 export const ROUTES = {
   HOME: "/",
@@ -91,4 +92,9 @@ export const routes = [
       redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
     }
   },
+  // {
+  //   name: "ws",
+  //   layout: BasicLayout,
+  //   component: Settings,
+  // },
 ]

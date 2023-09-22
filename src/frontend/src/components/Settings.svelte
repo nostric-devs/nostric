@@ -2,6 +2,7 @@
   import { ROUTES } from "../router/routes";
   import { navigateTo } from "svelte-router-spa";
   import NostrFollowing from "./nostr/NostrFollowing.svelte";
+  import NostrRelays from "./nostr/NostrRelays.svelte";
 
   export let currentRoute;
   export let params;
@@ -46,7 +47,7 @@
     {:else if  currentRoute.name.includes(ROUTES.NOSTRIC_PRO)}
       <div>pro</div>
     {:else if  currentRoute.name.includes(ROUTES.RELAYS)}
-      <div>relays</div>
+      <NostrRelays />
     {:else}
       <NostrFollowing />
     {/if}
