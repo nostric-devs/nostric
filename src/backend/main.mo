@@ -14,7 +14,7 @@ import Account "./utils/Account";
 shared({ caller = initializer }) actor class() = this {
 
 
-    type Profile = {
+    type UserProfile = {
         pk: Text;
         encrypted_sk: Text;
         username: Text;
@@ -22,8 +22,8 @@ shared({ caller = initializer }) actor class() = this {
         avatar_url: Text;
     };
 
-    type PrivateProfile = Profile and {
-        is_pro: Bool;
+    type Profile = UserProfile and {
+        is_pro: Bool; // this property is going be changed only through backend
     };
 
     type Error = {
@@ -40,17 +40,17 @@ shared({ caller = initializer }) actor class() = this {
 
     private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
-    private var profiles = Map.HashMap<Principal, PrivateProfile>(0, Principal.equal, Principal.hash);
+    private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
-    private stable var stableprofiles : [(Principal, PrivateProfile)] = [];
+    private stable var stableprofiles : [(Principal, Profile)] = [];
 
-    public shared (msg) func addProfile(p: Profile) : async Result.Result<PrivateProfile, Error> {
+    public shared (msg) func addProfile(p: UserProfile) : async Result.Result<Profile, Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
         };
 
-        let profile : PrivateProfile = {
+        let profile : Profile = {
             pk = p.pk;
             encrypted_sk = p.encrypted_sk;
             username = p.username;
@@ -64,12 +64,12 @@ shared({ caller = initializer }) actor class() = this {
         return Result.fromOption(saved_profile, #UnableToCreate);
     };
 
-    public query (msg) func getProfile() : async Result.Result<PrivateProfile, Error> {
+    public query (msg) func getProfile() : async Result.Result<Profile, Error> {
          let profile = profiles.get(msg.caller);
          return Result.fromOption(profile, #ProfileNotFound);
      };
 
-    public shared (msg) func updateProfile(p: Profile) : async Result.Result<(PrivateProfile), Error> {
+    public shared (msg) func updateProfile(p: UserProfile) : async Result.Result<(Profile), Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
@@ -83,7 +83,7 @@ shared({ caller = initializer }) actor class() = this {
             return #err(#ProfileNotFound);
         };
         case (?v) {
-            let profile : PrivateProfile = {
+            let profile : Profile = {
                 pk = v.pk;
                 encrypted_sk = v.encrypted_sk;
                 username = p.username;
@@ -158,7 +158,7 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     system func postupgrade() {
-        profiles := Map.fromIter<Principal, PrivateProfile>(
+        profiles := Map.fromIter<Principal, Profile>(
             stableprofiles.vals(),
             10,
             Principal.equal,
@@ -215,7 +215,7 @@ shared({ caller = initializer }) actor class() = this {
                 //return #err(#ProfileNotFound);
             };
             case (?v) {
-                let profile : PrivateProfile = {
+                let profile : Profile = {
                         pk = v.pk;
                         encrypted_sk = v.encrypted_sk;
                         username = v.username;
