@@ -1,0 +1,13 @@
+type EffectiveIndex = record {
+  tags : vec text;
+  bucket_max_entries : nat64;
+  current_entries : nat64;
+};
+service : {
+  add_bucket_index : (EffectiveIndex) -> (bool);
+  get_all_indexes : () -> (vec principal) query;
+  get_global_index : () -> (vec vec text) query;
+  get_index_by_tag : (text) -> (vec principal) query;
+  get_metrics : () -> (text) query;
+  spawn_bucket : () -> ();
+}

@@ -22,6 +22,10 @@ dfx canister create foreign_relay --specified-id b77ix-eeaaa-aaaaa-qaada-cai
 dfx deploy foreign_relay
 
 
-
+#uncomment this if foreign_relay.wasm is missing
+#cargo build --target wasm32-unknown-unknown --release --package foreign_relay
+wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
+dfx canister create dynamic_relays --specified-id avqkn-guaaa-aaaaa-qaaea-cai
+dfx deploy dynamic_relays
 
 
