@@ -1,6 +1,6 @@
 <script>
   import { Icon } from "svelte-feathers";
-  import { alert } from "../store/alert";
+  import { alert } from "../../store/alert";
 
   // Tailwind won't load dynamic alert class, hotfix
   let level_to_icon_map = {
@@ -20,14 +20,14 @@
 
 </script>
 {#if active_alert !== null}
-<div class="alert w-5/6 mx-auto rounded-3xl" style="background-color: {alert_class};">
+<div class="alert w-5/6 mx-auto rounded-lg" style="background-color: {alert_class};">
   <div class="flex content-center">
     <Icon name={ alert_icon } class="mr-6"/>
     <span>{ active_alert.text }</span>
   </div>
   <div class="ml-auto">
     <Icon
-      name="x-circle"
+      name="x"
       class="cursor-pointer hover:scale-110"
       on:click={ () => alert.clear() }
     />

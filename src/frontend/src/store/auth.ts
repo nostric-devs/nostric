@@ -2,7 +2,6 @@ import { get, writable } from "svelte/store";
 import { AuthClient } from "@dfinity/auth-client";
 import { CryptoService } from "../lib/crypto";
 import { NostrHandler } from "../lib/nostr";
-import { NostricUser } from "../lib/user";
 import { createActor } from "../../../declarations/backend";
 import { navigateTo } from "svelte-router-spa";
 import { alert } from "./alert";
@@ -61,9 +60,14 @@ export let actor = null;
 export let auth_client = null;
 export let crypto_service = null;
 export let nostr_service = null;
-export let nostric_user = null;
 
 export async function init() {
+  // let auth_cookie = getCookie("nostrAuth");
+  // if (auth_cookie !== "") {
+  //   auth_client = await AuthClient.create(JSON.parse(auth_cookie.identity));
+  // } else {
+  //   auth_client = await AuthClient.create();
+  // }
   auth_client = await AuthClient.create();
   if (await auth_client.isAuthenticated()) {
     auth_state.set_identified();
@@ -73,10 +77,9 @@ export async function init() {
 
 export async function init_nostr_structures(profile) {
   let private_key = await crypto_service.decrypt(profile.encrypted_sk);
-  nostric_user.init(profile, private_key);
   await nostr_service.init(private_key);
   auth_state.set_registered();
-  await navigateTo(ROUTES.POSTS);
+  await navigateTo(ROUTES.HOME);
 }
 
 export async function init_structures() {
@@ -104,7 +107,6 @@ export async function init_structures() {
 
     try {
       nostr_service = new NostrHandler();
-      nostric_user = new NostricUser();
 
       try {
         let response = await actor.getProfile();
@@ -119,8 +121,9 @@ export async function init_structures() {
       auth_state.set_error();
     }
 
-  } catch {
-    alert.error("Unable to initialize necessary structures");
+  } catch(error) {
+    alert.error("Unable to initialize vetkeys");
+    console.error(error);
     auth_state.set_error();
   }
 
@@ -152,5 +155,6 @@ export async function logout_from_ii() {
   crypto_service.logout();
   auth_client.logout();
   auth_state.set_anonymous();
+  await actor.deleteProfile(); // todo get rid of this in production
   navigateTo(ROUTES.LOGIN);
 }

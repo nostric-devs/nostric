@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { AuthStates, login_to_ii, auth_state } from "../store/auth";
-  import Alert from "./Alert.svelte";
-  import Spinner from "./Spinner.svelte";
-  import { nostric_user } from "../store/auth";
+  import { AuthStates, login_to_ii, auth_state, nostr_service } from "../store/auth";
+  import Alert from "./utils/Alert.svelte";
+  import Spinner from "./utils/Spinner.svelte";
 
   let disabled = false;
   let current_state;
@@ -24,9 +23,9 @@
   <div class="text-center">
     <div>
       <h1
-        class="mb-5 text-4xl sm:text-5xl font-bold text-primary dark:text-white"
+        class="mb-5 text-4xl sm:text-5xl font-bold dark:text-white"
       >
-        Nostric
+        Nostr<span class="text-primary">ic</span>
       </h1>
 
       {#if current_state === AuthStates.ANONYMOUS }
@@ -53,7 +52,7 @@
           </div>
         {/if}
       {:else if current_state === AuthStates.REGISTERED }
-       <span>Welcome, { nostric_user.get_profile().name }</span>
+       <span>Welcome</span>
       {/if}
 
     </div>

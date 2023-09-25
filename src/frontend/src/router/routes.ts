@@ -1,21 +1,27 @@
-import Posts from "../components/Posts.svelte";
 import Login from "../components/Login.svelte";
-import CreateProfile from "../components/CreateProfile.svelte";
-import EditProfile from "../components/EditProfile.svelte";
+import Feed from "../components/Feed.svelte";
+import Profile from "../components/profile/Profile.svelte";
+import CreateProfile from "../components/profile/CreateProfile.svelte";
+import Settings from "../components/Settings.svelte";
 import BasicLayout from "../layouts/BasicLayout.svelte";
 import { is_registered, is_not_registered } from "../store/auth";
 
 export const ROUTES = {
-  POSTS: "/",
+  HOME: "/",
   LOGIN: "/login",
   CREATE_PROFILE: "/create-profile",
+  SETTINGS: "/settings",
+  PROFILE: "/profile",
   EDIT_PROFILE: "/edit-profile",
+  RELAYS: "/relays",
+  NOSTRIC_PRO: "/pro",
+  FOLLOWING: "/following",
 }
 
 export const routes = [
   {
-    name: ROUTES.POSTS,
-    component: Posts,
+    name: ROUTES.HOME,
+    component: Feed,
     layout: BasicLayout,
     onlyIf: {
       guard: () => is_registered(),
@@ -28,13 +34,58 @@ export const routes = [
     component: CreateProfile,
     onlyIf: {
       guard: () => is_not_registered(),
-      redirect: is_registered() ? ROUTES.POSTS : ROUTES.LOGIN,
+      redirect: is_registered() ? ROUTES.HOME : ROUTES.LOGIN,
     }
   },
   {
-    name: ROUTES.EDIT_PROFILE,
+    name: ROUTES.SETTINGS,
     layout: BasicLayout,
-    component: EditProfile,
+    component: Settings,
+    onlyIf: {
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
+  },
+  {
+    name: ROUTES.PROFILE,
+    layout: BasicLayout,
+    component: Profile,
+    onlyIf: {
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
+  },
+  {
+    name: ROUTES.SETTINGS + ROUTES.EDIT_PROFILE,
+    layout: BasicLayout,
+    component: Settings,
+    onlyIf: {
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
+  },
+  {
+    name: ROUTES.SETTINGS + ROUTES.RELAYS,
+    layout: BasicLayout,
+    component: Settings,
+    onlyIf: {
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
+  },
+  {
+    name: ROUTES.SETTINGS + ROUTES.FOLLOWING,
+    layout: BasicLayout,
+    component: Settings,
+    onlyIf: {
+      guard: () => is_registered(),
+      redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
+    }
+  },
+  {
+    name: ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO,
+    layout: BasicLayout,
+    component: Settings,
     onlyIf: {
       guard: () => is_registered(),
       redirect: is_not_registered() ? ROUTES.CREATE_PROFILE : ROUTES.LOGIN,
