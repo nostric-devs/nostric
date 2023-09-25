@@ -43,6 +43,7 @@ fn post_upgrade() {
 // method called by the client SDK when instantiating a new IcWebSocket
 #[update]
 fn ws_register(args: CanisterWsRegisterArguments) -> CanisterWsRegisterResult {
+    ic_cdk::print("REGISTER WAS CALLED");
     ic_websocket_cdk::ws_register(args)
 }
 

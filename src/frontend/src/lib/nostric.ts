@@ -3,8 +3,12 @@ import type { ActorSubclass } from "@dfinity/agent";
 import type { _SERVICE } from "../../../relay/relay.did";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { createActor, idlFactory } from "../../../declarations/relay/index.js";
-import { nostric_events } from "../store/nostric";
+import { createActor, idlFactory } from "../../../declarations/relay";
+import {
+  nostric_events,
+  nostric_relays_count,
+  nostric_relays_eose_count
+} from "../store/nostric";
 import { nostric_service } from "../store/auth";
 
 export class NostricHandler {
@@ -13,8 +17,9 @@ export class NostricHandler {
   private ic_url : string;
   private private_relay_canister_id : string = process.env.RELAY_CANISTER_ID || "";
   private local : boolean;
-  private persist_keys : boolean;
+  private persist_key : boolean;
   private private_relay_canister_actor : ActorSubclass<_SERVICE> | null = null;
+  private private_relay_set : boolean = false;
 
   private relay_pool : SimplePool | null = null;
   private active_subs : Sub | null = null;
@@ -22,29 +27,25 @@ export class NostricHandler {
   private private_key : string;
   private public_key : string;
 
+  public eose_number = 0;
+  public expected_eose_number = 0;
 
-  constructor(
+  public init(
     private_key : string,
     public_key : string,
-    gateway_url : string,
     ic_url : string,
     local : boolean,
-    persist_keys : boolean
+    persist_key : boolean
   ) {
     this.private_key = private_key;
     this.public_key = public_key;
-    this.gateway_url = gateway_url;
     this.ic_url = ic_url;
     this.local = local;
-    this.persist_keys = persist_keys;
+    this.persist_key = persist_key;
   }
 
   public get_private_key() {
     return this.private_key;
-  }
-
-  public get_public_key() {
-    return this.public_key;
   }
 
   public get_gateway_url() {
@@ -55,25 +56,29 @@ export class NostricHandler {
     return this.private_relay_canister_id;
   }
 
-  public async init_private_relay() {
+  public async init_private_relay(
+    gateway_url : string,
+  ) {
+
+    this.gateway_url = gateway_url;
+
     let options = {
       agentOptions: {host: this.ic_url}
     }
     this.private_relay_canister_actor = await createActor(
       this.private_relay_canister_id, options
     );
+    this.private_relay_set = true;
   }
 
   public async init_foreign_relay(gateway_url : string, canister_id : string) {
     // init the agent for the foreign relay using the universal candid of relays
     // the private relay does not have to be activated
-    const agent = new HttpAgent();
+    const agent = new HttpAgent({ host: this.ic_url});
     if (process.env.DFX_NETWORK !== "ic") {
-      agent.fetchRootKey().catch(err => {
-        console.warn("Unable to fetch root key. Check to ensure that your local replica is running");
-        console.error(err);
-      });
+      await agent.fetchRootKey();
     }
+
     const actor = await Actor.createActor(idlFactory, {
       agent,
       canisterId: canister_id,
@@ -85,7 +90,7 @@ export class NostricHandler {
       canister_id,
       canister_actor: actor,
       local: this.local,
-      persist_keys: this.persist_keys
+      persist_key: this.persist_key
     }
   }
 
@@ -97,33 +102,44 @@ export class NostricHandler {
         canister_id: this.private_relay_canister_id,
         canister_actor: this.private_relay_canister_actor,
         local: this.local,
-        persist_keys: this.persist_keys
+        persist_key: this.persist_key
       }
     else {
       return null;
     }
   }
 
-  public async init_pool(relays, authors) {
+  public async init_pool(relays) {
     // init foreign relays if any
     let initialized_relays = [];
     if (relays.length > 0) {
-      let initialized_relays = [];
-      for (let nostric_relay in relays) {
-        initialized_relays.push(nostric_service.init_foreign_relay(
-          nostric_relay.gateway_url, nostric_relay.canister_id
-        ));
+      for (let nostric_relay of relays) {
+        if (
+          nostric_relay.gateway_url !== this.gateway_url ||
+          nostric_relay.canister_id !== this.private_relay_canister_id
+        ) {
+          let foreign_relay = await nostric_service.init_foreign_relay(
+            nostric_relay.gateway_url, nostric_relay.canister_id
+          );
+          initialized_relays.push(foreign_relay);
+        }
       }
     }
-    // todo do we wanna subscribe to ourselves?
-    if (this.private_relay_canister_actor) {
+    if (this.private_relay_set) {
       initialized_relays.push(this.get_private_relay_params());
     }
     if (initialized_relays.length > 0) {
+      nostric_relays_count.set(initialized_relays.length);
       this.relay_pool = new SimplePool();
-      this.active_subs = this.relay_pool.sub(relays, [{ authors }]);
+      this.active_subs = this.relay_pool.sub(
+        initialized_relays,
+        []
+      );
       this.active_subs.on("event", (event: any) => {
         nostric_events.add(event);
+      });
+      this.active_subs.on("eose", () => {
+        nostric_relays_eose_count.update((previous) => previous + 1);
       });
     }
   }
@@ -139,6 +155,7 @@ export class NostricHandler {
       };
       const signed_event = finishEvent(event, this.private_key);
       await this.private_relay_canister_actor.add_new_event(signed_event);
+      return signed_event;
     }
   }
 

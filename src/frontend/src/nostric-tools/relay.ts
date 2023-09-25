@@ -110,154 +110,142 @@ export function relayInit(
   } = {}
 
   var connectionPromise: Promise<void> | undefined
-  function connectICRelay(): Promise<void> {
+  async function connect() {
 
-    if (connectionPromise) {
-      return connectionPromise
+    try {
+      ws = new IcWebSocket(gateway_url, undefined, {
+        canisterActor: canister_actor,
+        canisterId: canister_id,
+        networkUrl: ic_url,
+        localTest: true,
+        persistKey: false,
+      });
+    } catch (err) {
+      console.error(err);
     }
 
-    connectionPromise = new Promise((resolve, reject) => {
-      try {
-        ws = new IcWebSocket(gateway_url, undefined, {
-          canisterActor: canister_actor,
-          canisterId: canister_id,
-          networkUrl: ic_url,
-          localTest: local,
-          persistKey: persist_key,
-        });
-      } catch (err) {
-        reject(err)
+    ws.onopen = (event) => {
+      console.log("v onopen", event);
+      listeners.connect.forEach(cb => cb());
+    }
+    ws.onerror = (error) => {
+      console.log("v onerror", error);
+      connectionPromise = undefined
+      listeners.error.forEach(cb => cb())
+    }
+    ws.onclose = async () => {
+      console.log("v onclose");
+      connectionPromise = undefined
+      listeners.disconnect.forEach(cb => cb())
+    }
+
+    let incomingMessageQueue: MessageQueue = new MessageQueue()
+    let handleNextInterval: any
+
+    ws.onmessage = async (event)  => {
+      incomingMessageQueue.enqueue(event.data)
+      if (!handleNextInterval) {
+        handleNextInterval = setInterval(handleNext, 0)
+      }
+    }
+
+    function handleNext() {
+
+      if (incomingMessageQueue.size === 0) {
+        clearInterval(handleNextInterval)
+        handleNextInterval = null
+        return
       }
 
-      ws.onopen = () => {
-        console.log("v onopen");
-        listeners.connect.forEach(cb => cb());
-        resolve()
-      }
-      ws.onerror = (error) => {
-        console.log("v onerror", error);
-        connectionPromise = undefined
-        listeners.error.forEach(cb => cb())
-        reject()
-      }
-      ws.onclose = async () => {
-        console.log("v onclose");
-        connectionPromise = undefined
-        listeners.disconnect.forEach(cb => cb())
+      let data = incomingMessageQueue.dequeue()
+      if (data === null) {
+        return;
       }
 
-      let incomingMessageQueue: MessageQueue = new MessageQueue()
-      let handleNextInterval: any
+      const decoded : AppMessage = deserializeAppMessage(data);
 
-      ws.onmessage = async (event)  => {
-        console.log("v on message");
-        incomingMessageQueue.enqueue(event.data)
-        if (!handleNextInterval) {
-          handleNextInterval = setInterval(handleNext, 0)
-        }
-      }
+      // get the message to be in the expected format for this crazy (unnecessary?) thing below
+      const fake_json = decoded.text
+        .replace(/"action":|"subscription_id":|"event":|"message:"/g, "")
+        .replace(/^{/, "[")
+        .replace(/}$/, "]");
 
-      function handleNext() {
+      let subid = getSubscriptionId(fake_json);
 
-        if (incomingMessageQueue.size === 0) {
-          clearInterval(handleNextInterval)
-          handleNextInterval = null
+      if (subid) {
+        let so = openSubs[subid];
+        if (so && so.alreadyHaveEvent && so.alreadyHaveEvent(getHex64(fake_json, 'id'), canister_id)) {
           return
         }
+      }
 
-        let data = incomingMessageQueue.dequeue()
-        if (data === null) {
-          return;
-        }
+      try {
+        let data = JSON.parse(fake_json);
 
-        const decoded : AppMessage = deserializeAppMessage(data);
+        // we won't do any checks against the data since all failures (i.e. invalid messages from relays)
+        // will naturally be caught by the encompassing try..catch block
 
-        // get the message to be in the expected format for this crazy (unnecessary?) thing below
-        const fake_json = decoded.text
-            .replace(/"action":|"subscription_id":|"event":/g, "")
-            .replace(/^{/, "[")
-            .replace(/}$/, "]");
+        switch (data[0]) {
+          case 'EVENT': {
+            let id = data[1];
+            let event = data[2];
 
-        let subid = getSubscriptionId(fake_json);
-
-        if (subid) {
-          let so = openSubs[subid];
-          if (so && so.alreadyHaveEvent && so.alreadyHaveEvent(getHex64(fake_json, 'id'), canister_id)) {
+            if (
+              validateEvent(event) &&
+              openSubs[id] &&
+              (openSubs[id].skipVerification || verifySignature(event)) &&
+              matchFilters(openSubs[id].filters, event)
+            ) {
+              openSubs[id]
+              ;(subListeners[id]?.event || []).forEach(cb => cb(event))
+            }
+            return
+          }
+          case 'COUNT':
+            let id = data[1]
+            let payload = data[2]
+            if (openSubs[id]) {
+              ;(subListeners[id]?.count || []).forEach(cb => cb(payload))
+            }
+            return
+          case 'EOSE': {
+            let id = data[1]
+            if (id in subListeners) {
+              subListeners[id].eose.forEach(cb => cb())
+              subListeners[id].eose = [] // 'eose' only happens once per sub, so stop listeners here
+            }
+            return
+          }
+          case 'OK': {
+            let id: string = data[1]
+            let ok: boolean = data[2]
+            let reason: string = data[3] || ''
+            if (id in pubListeners) {
+              let { resolve, reject } = pubListeners[id]
+              if (ok) resolve(null)
+              else reject(new Error(reason))
+            }
+            return
+          }
+          case 'NOTICE':
+            let notice = data[1]
+            listeners.notice.forEach(cb => cb(notice))
+            return
+          case 'AUTH': {
+            let challenge = data[1]
+            listeners.auth?.forEach(cb => cb(challenge))
             return
           }
         }
-
-        try {
-          let data = JSON.parse(fake_json);
-
-
-          // we won't do any checks against the data since all failures (i.e. invalid messages from relays)
-          // will naturally be caught by the encompassing try..catch block
-
-          switch (data[0]) {
-            case 'EVENT': {
-              let id = data[1];
-              let event = data[2];
-
-              if (
-                validateEvent(event) &&
-                openSubs[id] &&
-                (openSubs[id].skipVerification || verifySignature(event)) &&
-                matchFilters(openSubs[id].filters, event)
-              ) {
-                openSubs[id]
-                ;(subListeners[id]?.event || []).forEach(cb => cb(event))
-              }
-              return
-            }
-            case 'COUNT':
-              let id = data[1]
-              let payload = data[2]
-              if (openSubs[id]) {
-                ;(subListeners[id]?.count || []).forEach(cb => cb(payload))
-              }
-              return
-            case 'EOSE': {
-              let id = data[1]
-              if (id in subListeners) {
-                subListeners[id].eose.forEach(cb => cb())
-                subListeners[id].eose = [] // 'eose' only happens once per sub, so stop listeners here
-              }
-              return
-            }
-            case 'OK': {
-              let id: string = data[1]
-              let ok: boolean = data[2]
-              let reason: string = data[3] || ''
-              if (id in pubListeners) {
-                let { resolve, reject } = pubListeners[id]
-                if (ok) resolve(null)
-                else reject(new Error(reason))
-              }
-              return
-            }
-            case 'NOTICE':
-              let notice = data[1]
-              listeners.notice.forEach(cb => cb(notice))
-              return
-            case 'AUTH': {
-              let challenge = data[1]
-              listeners.auth?.forEach(cb => cb(challenge))
-              return
-            }
-          }
-        } catch (err) {
-          return
-        }
+      } catch (err) {
+        return
       }
-    });
-
-    return connectionPromise
+    }
   }
 
-  async function connect(): Promise<void> {
-    return connectICRelay();
-  }
+  // async function connect(): any {
+  //   return await connectICRelay();
+  // }
 
   async function trySend(params: [string, ...any]) {
     let message : AppMessage = {
@@ -267,7 +255,7 @@ export function relayInit(
     try {
       await ws.send(serializeAppMessage(message));
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 

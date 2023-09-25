@@ -37,6 +37,13 @@ export class NostrHandler {
     return this.signer.privateKey;
   }
 
+  public async fetch_foreign_user_profile(hexpub : string) {
+    let user = new NDKUser({hexpubkey: hexpub});
+    user.ndk = this.nostr_kit;
+    await user.fetchProfile();
+    return user;
+  }
+
   public async search_match(query : string) {
     let events = await this.nostr_kit.fetchEvents({
       search: query,
@@ -83,10 +90,16 @@ export class NostrHandler {
     });
   }
 
-  public async publish_event(content : string, kind : NDKKind = NDKKind.Text) {
+  public async create_and_publish(content : string, kind : NDKKind = NDKKind.Text) {
     const nostr_event = new NDKEvent(this.nostr_kit);
     nostr_event.kind = kind;
     nostr_event.content = content;
+    nostr_event.tags = [];
+    await nostr_event.publish();
+  }
+
+  public async publish(event) {
+    const nostr_event = new NDKEvent(this.nostr_kit, event);
     await nostr_event.publish();
   }
 

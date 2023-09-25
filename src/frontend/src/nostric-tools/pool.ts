@@ -43,7 +43,7 @@ export class SimplePool {
     })
   }
 
-  async ensureRelay(
+  ensureRelay(
       gateway_url: string,
       canister_actor: any,
       canister_id: string,
@@ -62,12 +62,7 @@ export class SimplePool {
           gateway_url, canister_actor, canister_id, ic_url, local, persist_key, options
       );
     }
-
-    const relay = this._conn[nm];
-
-    await relay.connect();
-
-    return relay;
+    return this._conn[nm];
   }
 
   sub<K extends number = number>(relays: any[], filters: Filter<K>[], opts?: SubscriptionOptions): Sub<K> {
@@ -98,29 +93,37 @@ export class SimplePool {
           for (let cb of eoseListeners.values()) cb()
         },
         opts?.eoseSubTimeout || this.eoseSubTimeout,
-    )
+    );
 
     relays
         .filter((r, i, a) => a.indexOf(r) === i)
         .forEach(async ({gateway_url, canister_actor, canister_id, ic_url, local, persist_key}) => {
-          let r
+          let r;
           try {
-            r = await this.ensureRelay(gateway_url, canister_actor, canister_id, ic_url, local, persist_key);
+
+            r = this.ensureRelay(gateway_url, canister_actor, canister_id, ic_url, local, persist_key);
+            let s;
+
+            r.on("connect", () => {
+              s = r.sub(filters, modifiedOpts);
+              s.on('event', event => {
+                _knownIds.add(event.id as string)
+                for (let cb of eventListeners.values()) cb({event, gateway_url, canister_id})
+              })
+              s.on('eose', (event) => {
+                if (eoseSent) return
+                handleEose()
+              })
+              subs.push(s)
+            });
+
+            await r.connect();
+
           } catch (err) {
             handleEose()
             return
           }
           if (!r) return
-          let s = r.sub(filters, modifiedOpts)
-          s.on('event', event => {
-            _knownIds.add(event.id as string)
-            for (let cb of eventListeners.values()) cb(event)
-          })
-          s.on('eose', () => {
-            if (eoseSent) return
-            handleEose()
-          })
-          subs.push(s)
 
           function handleEose() {
             eosesMissing--
@@ -252,6 +255,7 @@ export class SimplePool {
   publish(relays: any[], event: Event<number>): Promise<void>[] {
     return relays.map(async ({gateway_url, canister_actor, canister_id, ic_url, local, persist_key}) => {
       let r = await this.ensureRelay(gateway_url, canister_actor, canister_id, ic_url, local, persist_key);
+      await r.connect();
       return r.publish(event)
     })
   }
