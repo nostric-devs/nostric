@@ -4,7 +4,7 @@
   import { NDKUser } from "@nostr-dev-kit/ndk";
   import { Icon } from "svelte-feathers";
   import Spinner from "../utils/Spinner.svelte";
-  import NostrAvatar from "./NostrAvatar.svelte";
+  import NostrAvatar from "../nostr/NostrAvatar.svelte";
   import { alert } from "../../store/alert";
   import { onMount } from "svelte";
   import { nostr_followees } from "../../store/nostr";
@@ -87,6 +87,12 @@
 
 </script>
 
+<div class="mb-6">
+  <h3 class="uppercase text-xl font-bold">
+    Following list
+  </h3>
+</div>
+
 <div class="form-control mb-6">
   <div class="w-full">
     <div class="flex justify-center">
@@ -94,6 +100,7 @@
         class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
         placeholder="search for a user name or public key"
         bind:value={ query_value }
+        disabled={ searching || loading }
       />
       <button
         disabled={ searching || !query_value || loading }
@@ -112,13 +119,13 @@
       <div class="mr-3">
         <label class="label cursor-pointer">
           <input type="checkbox" bind:checked={ search_followed } class="checkbox mr-2"/>
-          <span class="label-text">My followed users</span>
+          <span class="label-text">Search my followed users</span>
         </label>
       </div>
       <div>
         <label class="label cursor-pointer">
           <input type="checkbox" bind:checked={ search_nostr } class="checkbox mr-2"/>
-          <span class="label-text">All Nostr Users</span>
+          <span class="label-text">Search all Nostr users</span>
         </label>
       </div>
     </div>
@@ -170,11 +177,11 @@
       </div>
     {/each}
     {:else if search_followed}
-      <div class="text-center">
+      <div class="text-left">
         No users found in your following list. Try searching through Nostr and follow them.
       </div>
     {:else}
-      <div class="text-center">
+      <div class="text-left">
         No users matching the query were found in Nostr.
       </div>
     {/if}

@@ -9,22 +9,13 @@
   let initializing : boolean = true;
   let address;
   let principal;
-  let isPro = false;
-
-  const init = async () => {
-    initializing = true;
-    address = await actor.getDepositAddress();
-    principal = await actor.whoAmI();
-    isPro = await actor.verifyPayment(); // TODO get this from the user's profile instead
-    console.log(isPro);
-    initializing = false;
-  }
+  let is_pro = false;
 
   const verify = async () => {
     initializing = true;
-    let res = await actor.verifyPayment();
-    if (res){
-      isPro = true;
+    let response = await actor.verifyPayment();
+    if (response["ok"]){
+      is_pro = true;
       alert.success("We have successfully verified the payment!");
     } else {
       alert.error("Couldn't verify the payment, try again!");
@@ -32,9 +23,14 @@
     initializing = false;
   };
 
+  onMount(async () => {
+    initializing = true;
+    address = await actor.getDepositAddress();
+    principal = await actor.whoAmI();
+    is_pro = await actor.verifyPayment(); // TODO get this from the user's profile instead
+    initializing = false;
+  });
 
-
-  onMount(init);
 </script>
 
 
@@ -45,10 +41,10 @@
     </div>
   </div>
 {:else}
-<div class="max-w-2xl mx-auto text-center">
-  <div class="card w-full shadow-2xl bg-base-100">
-    <div class="card-body p-0">
-      {#if !isPro }
+<div class="text-center">
+  <div class="w-full shadow-2xl bg-base-100">
+    <div>
+      {#if !is_pro }
       <h1 class="text-2xl text-white font-bold">
         Get Nostric Pro features
       </h1>
@@ -60,13 +56,13 @@
         <QRCodeImage
         text={address}
         displayStyle="border-style: dotted;"
-        width="300"
-        displayWidth="300"
+        width="200"
+        displayWidth="200"
         displayClass="mt-8 mx-auto text-center"
         />
       </div>
       <!-- Get the principal to generate subaAccount blob and make a payment locally via shell command -->
-      
+
       <!-- <div>Is pro? {isPro}</div> -->
       <button class="btn btn-primary my-8 mx-16" on:click={verify}>Verify payment</button>
       {:else}

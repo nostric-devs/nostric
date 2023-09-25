@@ -44,9 +44,7 @@
         }
       }
     }
-
     feed_events = Object.values(events);
-    console.log(feed_events);
   }
 
 

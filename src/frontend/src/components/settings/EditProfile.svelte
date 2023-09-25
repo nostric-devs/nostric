@@ -1,6 +1,6 @@
 <script lang="ts">
   import { actor, nostr_service } from "../../store/auth";
-  import ProfileForm from "./ProfileForm.svelte";
+  import ProfileForm from "../profile/ProfileForm.svelte";
   import type { Profile, Result } from "../../../../declarations/backend/backend.did";
   import { alert } from "../../store/alert";
   import { navigateTo } from "svelte-router-spa";
@@ -46,6 +46,15 @@
   onMount(get_profile);
 </script>
 
-<div class="max-w-xl mx-auto text-center">
-  <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ update_profile }/>
+<div class="mb-6">
+  <h3 class="uppercase text-xl font-bold">
+    Edit profile
+  </h3>
+</div>
+<div class="mx-auto text-center">
+  <ProfileForm
+    bind:profile={ profile }
+    loading={ loading }
+    submit_function={ update_profile }
+  />
 </div>

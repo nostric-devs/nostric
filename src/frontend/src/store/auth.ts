@@ -130,22 +130,19 @@ export async function init_structures() {
     nostr_service = new NostrHandler();
     nostric_service = new NostricHandler();
 
-    let response;
-    try {
-      response = await actor.getProfile();
-    } catch {
+    let response = await actor.getProfile();
+    if (response["err"]) {
       auth_state.set_not_registered();
       await navigateTo(ROUTES.CREATE_PROFILE);
+    } else {
+      try {
+        await init_nostr_structures(response["ok"]);
+      } catch(error) {
+        alert.error("Unable to initiate Nostr functionality");
+        console.error(error)
+        auth_state.set_error();
+      }
     }
-
-    try {
-      await init_nostr_structures(response["ok"]);
-    } catch(error) {
-      alert.error("Unable to initiate Nostr functionality");
-      console.error(error)
-      auth_state.set_error();
-    }
-
 
   } catch(error) {
     alert.error("Unable to initialize vetkeys");
@@ -180,7 +177,7 @@ export async function login_to_ii() {
 export async function logout_from_ii() {
   crypto_service.logout();
   auth_client.logout();
+  nostric_service.close_pool();
   auth_state.set_anonymous();
-  await actor.deleteProfile(); // todo get rid of this in production
   navigateTo(ROUTES.LOGIN);
 }

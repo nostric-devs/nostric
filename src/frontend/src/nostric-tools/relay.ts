@@ -125,16 +125,13 @@ export function relayInit(
     }
 
     ws.onopen = (event) => {
-      console.log("v onopen", event);
       listeners.connect.forEach(cb => cb());
     }
     ws.onerror = (error) => {
-      console.log("v onerror", error);
       connectionPromise = undefined
       listeners.error.forEach(cb => cb())
     }
     ws.onclose = async () => {
-      console.log("v onclose");
       connectionPromise = undefined
       listeners.disconnect.forEach(cb => cb())
     }

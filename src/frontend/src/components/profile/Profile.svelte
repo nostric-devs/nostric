@@ -6,7 +6,11 @@
   import NostrAvatar from "../nostr/NostrAvatar.svelte";
   import { nostr_service, nostric_service } from "../../store/auth";
   import { nostr_events, nostr_followees } from "../../store/nostr";
-  import { nostric_events, NostricEvent } from "../../store/nostric";
+  import {
+    nostric_events,
+    nostric_relays_count,
+    nostric_relays_eose_count
+  } from "../../store/nostric";
   import { Icon } from "svelte-feathers";
 
   let user : NDKUser = null;
@@ -139,18 +143,25 @@
           </div>
         </div>
         <div class="divider"></div>
-
         <div class="mt-12">
-          {#each feed_events as event}
-            <div class="mb-6">
-              <NostrPost
-                event={ event.event }
-                gateway_url={ event.gateway_url }
-                canister_id={ event.canister_id }
-                {user}
-              />
+          {#if !initialized || $nostric_relays_count > $nostric_relays_eose_count }
+            <div class="d-flex justify-center content-center">
+              <div class="text-center opacity-70">
+                <Spinner width="10"/>
+              </div>
             </div>
-          {/each}
+          {:else}
+            {#each feed_events as event}
+              <div class="mb-6">
+                <NostrPost
+                  event={ event.event }
+                  gateway_url={ event.gateway_url }
+                  canister_id={ event.canister_id }
+                  {user}
+                />
+              </div>
+            {/each}
+          {/if}
         </div>
       </div>
 
@@ -158,7 +169,9 @@
     <div class="drawer-side">
       <label for="add-followees-drawer"  class="drawer-overlay"></label>
       <div id="drawer-bottom-add" class="fixed bottom-0 h-2/3 left-0 right-0 z-40 bg-base-100 mx-10 rounded-2xl p-10 overflow-y-auto transition-transform transform-none" tabindex="-1" aria-labelledby="drawer-bottom-label">
-        add images here todo
+        <div class="grid grid-cols-6">
+          add images here todo
+        </div>
       </div>
     </div>
   </div>

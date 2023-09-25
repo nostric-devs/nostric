@@ -109,6 +109,10 @@ export class NostricHandler {
     }
   }
 
+  public close_pool() {
+    this.active_subs.unsub();
+  }
+
   public async init_pool(relays) {
     // init foreign relays if any
     let initialized_relays = [];

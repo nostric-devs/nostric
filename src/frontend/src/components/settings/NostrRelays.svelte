@@ -141,7 +141,7 @@
   <div>
     {#each nostr_relays as nostr_relay, index}
       <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
-        <div class="flex items-center font-sans">
+        <div class="flex items-center font-sans text-sm">
           <span class="text-primary font-bold mr-2">Gateway</span>
           { nostr_relay }
         </div>
@@ -176,11 +176,13 @@
           class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl mr-4"
           placeholder="type nostric gateway url"
           bind:value={ new_nostric_gateway_url_value }
+          disabled={ adding || deleting || adding_nostric }
         />
         <input
           class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
           placeholder="type canister ID"
           bind:value={ new_nostric_canister_id }
+          disabled={ adding || deleting || adding_nostric }
         />
         <button
           disabled={ !new_nostric_gateway_url_value || !new_nostric_canister_id || adding || deleting || adding_nostric }
@@ -201,11 +203,11 @@
     {#each nostric_relays as nostric_relay, index}
       <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
         <div class="grid grid-cols-2 w-full mr-6">
-          <div class="flex items-center font-sans">
+          <div class="flex items-center font-sans text-sm">
             <span class="text-primary font-bold mr-2">Gateway</span>
             { nostric_relay.gateway_url }
           </div>
-          <div class="flex items-center font-sans ml-4">
+          <div class="flex items-center font-sans ml-4 text-sm">
             <span class="text-primary font-bold mr-2">Canister ID</span>
             { nostric_relay.canister_id }
           </div>
