@@ -17,4 +17,8 @@
     scroll-behavior: smooth;
   }
 
+  * {
+   color: white;
+  }
+
 </style>

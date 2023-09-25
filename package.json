@@ -68,6 +68,7 @@
     "sirv-cli": "^1.0.0",
     "svelte-cookie": "^1.0.1",
     "svelte-feathers": "^0.7.5",
+    "svelte-qrcode-image": "^1.0.0-rc.2",
     "svelte-router-spa": "^6.0.3",
     "typewriter-editor": "^0.6.45"
   },

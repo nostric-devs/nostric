@@ -7,17 +7,23 @@ import Option "mo:base/Option";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
+import Account "./utils/Account";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
-shared({ caller = initializer }) actor class() {
+shared({ caller = initializer }) actor class() = this {
 
-    type Profile = {
+
+    type UserProfile = {
         pk: Text;
         encrypted_sk: Text;
         username: Text;
         about: Text;
         avatar_url: Text;
+    };
+
+    type Profile = UserProfile and {
+        is_pro: Bool; // this property is going be changed only through backend
     };
 
     type Error = {
@@ -26,11 +32,19 @@ shared({ caller = initializer }) actor class() {
         #UnableToCreate;
     };
 
+    public type AccountType = { owner : Principal; subaccount : ?Blob };
+
+    public type Actor = actor {
+        icrc1_balance_of : (acc : AccountType) -> async Nat;
+    };
+
+    private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
+
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
     private stable var stableprofiles : [(Principal, Profile)] = [];
 
-    public shared (msg) func addProfile(p: Profile) : async Result.Result<Profile, Error> {
+    public shared (msg) func addProfile(p: UserProfile) : async Result.Result<Profile, Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
@@ -41,7 +55,8 @@ shared({ caller = initializer }) actor class() {
             encrypted_sk = p.encrypted_sk;
             username = p.username;
             about = p.about;
-            avatar_url = p.avatar_url
+            avatar_url = p.avatar_url;
+            is_pro = false; // new profile does not have pro features
         };
 
         profiles.put(msg.caller, profile);
@@ -54,7 +69,7 @@ shared({ caller = initializer }) actor class() {
          return Result.fromOption(profile, #ProfileNotFound);
      };
 
-    public shared (msg) func updateProfile(p: Profile) : async Result.Result<(Profile), Error> {
+    public shared (msg) func updateProfile(p: UserProfile) : async Result.Result<(Profile), Error> {
 
         if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
             return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
@@ -73,7 +88,8 @@ shared({ caller = initializer }) actor class() {
                 encrypted_sk = v.encrypted_sk;
                 username = p.username;
                 about = p.about;
-                avatar_url = p.avatar_url
+                avatar_url = p.avatar_url;
+                is_pro = v.is_pro;
                 };
                 profiles.put(id, profile);
                 return #ok(profile);
@@ -150,4 +166,70 @@ shared({ caller = initializer }) actor class() {
         );
         stableprofiles := []; 
     };
+
+    public shared (msg) func getDepositAddress() : async Text {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        return Account.toText(acc);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func getSubaccountForCaller() : async Blob {
+        Account.toSubaccount(msg.caller);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func whoAmI() : async Principal {
+        msg.caller;
+    };
+    
+    // Method for local testing purposes
+    public shared (msg) func getSubaccountForPrincipal(principal : Text) : async Blob {
+        let p : Principal = Principal.fromText(principal);
+        Account.toSubaccount(p);
+    };
+
+    // Method for local testing purposes
+    public shared (msg) func getBalance() : async Nat {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+        return response;
+    };
+
+    public shared (msg) func verifyPayment() : async Bool {
+        let acc : AccountType = {
+        owner = Principal.fromActor(this);
+        subaccount = ?Account.toSubaccount(msg.caller);
+        };
+        var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+        if (response > 10) {
+            // If the payment is verified set the user's is_pro param
+            let result = profiles.get(msg.caller);
+            switch (result) {
+            case null {
+                //return #err(#ProfileNotFound);
+            };
+            case (?v) {
+                let profile : Profile = {
+                        pk = v.pk;
+                        encrypted_sk = v.encrypted_sk;
+                        username = v.username;
+                        about = v.about;
+                        avatar_url = v.avatar_url;
+                        is_pro = true;
+                    };
+                    profiles.put(msg.caller, profile);
+
+                };
+            };
+            return true;
+        } else {
+            return false;
+        };
+    }
 };

@@ -6,17 +6,29 @@
   import { navigateTo } from "svelte-router-spa";
   import { ROUTES } from "../../router/routes";
   import { NDKUser } from "@nostr-dev-kit/ndk";
+  import { onMount } from "svelte";
 
   let loading = false;
-  let user : NDKUser = nostr_service.get_user();
-
+  let user : NDKUser;
   let profile : Profile = {
-    username: user.profile.name,
-    about: user.profile.bio,
-    avatar_url: user.profile.image,
-    pk: user.hexpubkey(),
-    encrypted_sk: nostr_service.get_private_key(),
+    username: "",
+    about: "",
+    avatar_url: "",
+    pk: "",
+    encrypted_sk: ""
+  };
+
+  const get_profile = async () => {
+    user = await nostr_service.get_user();
+    profile = {
+      username: user.profile.name,
+      about: user.profile.bio || "",
+      avatar_url: user.profile.image || "",
+      pk: user.hexpubkey(),
+      encrypted_sk: await nostr_service.get_private_key(),
+    }
   }
+
 
   const update_profile = async () => {
     loading = true;
@@ -31,12 +43,9 @@
     loading = false;
   }
 
-  export let currentRoute;
-  export let params;
+  onMount(get_profile);
 </script>
 
-<div class="max-w-xl mx-auto mt-8 text-center">
-  <a href="/" class="link link-primary btn btn-ghost normal-case mt-8">Back</a>
-  <h1 class="text-4xl font-bold mt-12">Update your profile</h1>
+<div class="max-w-xl mx-auto text-center">
   <ProfileForm bind:profile={ profile } loading={ loading } submit_function={ update_profile }/>
 </div>

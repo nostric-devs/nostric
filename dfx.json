@@ -12,6 +12,11 @@
       "main": "src/backend/main.mo",
       "type": "motoko"
     },
+    "ckbtc_ledger" : {
+      "type" : "custom",
+      "candid" : "ledger.did",
+      "wasm" : "ledger_canister.wasm"
+    },
     "frontend": {
       "dependencies": [
         "backend",

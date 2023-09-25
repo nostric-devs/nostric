@@ -80,8 +80,7 @@
     <input id="add-followees-drawer" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content">
 
-      <div class="max-w-3xl mx-auto">
-
+      <div class="max-w-2xl mx-auto">
         <div class="flex items-center">
           <div><NostrAvatar profile={ user.profile } size="170"/></div>
           <div class="ml-4 break-all">
