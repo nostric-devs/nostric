@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import NDKUserProfile, { NDKUser } from "@nostr-dev-kit/ndk";
+  import NDKUserProfile, { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
   import Spinner from "../utils/Spinner.svelte";
   import NostrPost from "../nostr/NostrPost.svelte";
   import NostrAvatar from "../nostr/NostrAvatar.svelte";
-  import { nostr_service } from "../../store/auth";
+  import { nostr_service, nostric_service } from "../../store/auth";
   import { nostr_events, nostr_followees } from "../../store/nostr";
+  import { nostric_events, NostricEvent } from "../../store/nostric";
   import { Icon } from "svelte-feathers";
 
   let user : NDKUser = null;
@@ -15,18 +16,43 @@
   let hexpubkey : string = "";
   let publishing : boolean = false;
   let message : string | null = null;
+  let initialized : boolean = false;
+
+  let feed_events = {};
 
   export let currentRoute;
   export let params;
 
-  $: $nostr_events, publishing = false;
-
   const create_post = async () => {
     publishing = true;
-    let event = nostr_service.publish_event(message);
-    await nostr_service.publish_event(event);
+    // todo if private relay else create_and_publish(message)
+    let finished_event = await nostric_service.publish_to_private_relay(message);
+    await nostr_service.publish(finished_event);
+  }
+
+  const parse_events = () => {
+    let events = {};
+    for (let nostric_event of $nostric_events) {
+      if (nostric_event.event.pubkey === hexpubkey) {
+        events[nostric_event.event.id] = nostric_event
+      }
+    }
+    for (let event of $nostr_events) {
+      if (event.pubkey === hexpubkey) {
+        if (!event.id in events) {
+          events[event.id] = {
+            event, gateway_url: null, canister_id: null
+          }
+        }
+      }
+    }
+    feed_events = Object.values(events);
+    publishing = false;
     message = null;
   }
+
+  $: initialized && $nostr_events, parse_events();
+  $: initialized && $nostric_events, parse_events();
 
   // TODO what is such profile does not exist in nostr, but exists in our canister?
   onMount(async () => {
@@ -35,10 +61,12 @@
     profile = user.profile;
     private_key = nostr_service.get_private_key();
     initializing = false;
-    console.log(user);
+    parse_events();
+    initialized = true;
   });
 
 </script>
+
 
 {#if initializing}
   <div class="d-flex justify-center content-center">
@@ -84,6 +112,7 @@
         <div class="form-control">
           <textarea
             bind:value={message}
+            disabled={ publishing }
             class="textarea textarea-lg border-primary rounded-3xl border-2"
             maxlength="200"
             placeholder="Write something..."></textarea>
@@ -113,8 +142,15 @@
         <div class="divider"></div>
 
         <div class="mt-12">
-          {#each $nostr_events.filter((event) => event.pubkey === hexpubkey) as event}
-            <NostrPost {event} {user}/>
+          {#each feed_events as event}
+            <div class="mb-6">
+              <NostrPost
+                event={ event.event }
+                gateway_url={ event.gateway_url }
+                canister_id={ event.canister_id }
+                {user}
+              />
+            </div>
           {/each}
         </div>
       </div>

@@ -4,7 +4,6 @@ export const utf8Decoder = new TextDecoder('utf-8')
 export const utf8Encoder = new TextEncoder()
 
 export function normalizeURL(url: string, canister_id: string): string {
-  console.log("normalizeURL ", url);
   let p = new URL(url)
   p.pathname = p.pathname.replace(/\/+/g, '/')
   if (p.pathname.endsWith('/')) p.pathname = p.pathname.slice(0, -1)

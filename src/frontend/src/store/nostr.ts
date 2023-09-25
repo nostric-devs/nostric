@@ -32,8 +32,8 @@ function fetch_nostr_followees() {
 
   const init = (followees: NDKUser[]) => set(followees);
 
-  const find_user = (npub: string) => {
-    return get(followees).find((followee : NDKUser) => followee.hexpubkey() === npub);
+  const find_user = (hexpub: string) => {
+    return get(followees).find((followee : NDKUser) => followee.hexpubkey() === hexpub);
   }
 
   const search_match = (query : string) => {

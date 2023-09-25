@@ -112,14 +112,17 @@ pub fn on_message(args: OnMessageCallbackArgs) {
             match deserialized.action {
                 ReceiveActionType::REQ => {
 
-                    // private key e349f55622c9682ec8bdc05d66cc1600a23099796cb02c95946621f4c2402046
-//                     let user_input = UserEventInput {
-//                       pubkey: String::from("7c3a7e0bce2f99be4d3c7ca146097c0c5344b691e859d33f60a7e4386f488bc4"),
-//                       created_at: time() as u64,
-//                       kind: 1_u64,
-//                       content: String::from("hello world"),
-//                       tags: Vec::new(),
-//                     };
+                    RECEIVED_EVENTS.lock().unwrap().push(EventData {
+                      id: String::from("193e7016c3a3935cb6a4ba768fc77e1a80621f1984a3d1a023092e566d860a5c"),
+                      pubkey: String::from("82be339c4981fb067289c3458278f477ba1d92a2d586303087a32887a067ab62"),
+                      created_at: 1695540134,
+                      kind: 1,
+                      tags: Vec::new(),
+                      content: String::from("hello world from foreign relay"),
+                      sig: String::from("7ab80c4edc5164c44cc65c8ae8ea95b51d4c8d86a8fdffc0d19d04e333766f68ba3a38082eb636428bd92f9fffe598870b1e1ee2d16c03ca309b2d6a64a7c657")
+                    });
+
+
                     let events = RECEIVED_EVENTS.lock().unwrap();
 
                     let response = SendMessageType {

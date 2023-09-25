@@ -21,17 +21,12 @@
   let adding = false; // flag for adding new relay
   let deleting = false; // flag for deleting existing relay
   let selected_index = null;
-
-  const restart_nostr_service = async (nostr_relays) => {
-    let private_key = nostr_service.get_private_key();
-    nostr_service = new NostrHandler();
-    await nostr_service.init(private_key, nostr_relays);
-  }
+  let private_key = nostr_service.get_private_key();
 
   const add_nostr_relay = async () => {
     adding = true;
     try {
-      await restart_nostr_service(nostr_relays.concat(new_nostr_gateway_url_value));
+      await nostr_service.init(private_key, nostr_relays.concat(new_nostr_gateway_url_value));
       // todo subs with motoko actor call to save relay on backend
       nostr_relays.push(new_nostr_gateway_url_value);
     } catch(err) {
@@ -49,7 +44,7 @@
     selected_index = index;
     try {
       let filtered_relays = nostr_relays.filter((item) => item !== relay);
-      await restart_nostr_service(filtered_relays);
+      await nostr_service.init(private_key, filtered_relays);
       // todo subs with motoko actor call to save relay on backend
       nostr_relays = filtered_relays;
     } catch(err) {
@@ -70,6 +65,7 @@
   let owner_canister_id : string = nostric_service.get_private_relay_canister_id();
   let owner_gateway_url : string = nostric_service.get_gateway_url()
 
+  // todo get current users pro relay if any
   let nostric_relays = [
     { gateway_url: "ws://localhost:8000", canister_id: process.env.RELAY_CANISTER_ID }
   ]
@@ -99,6 +95,7 @@
     deleting = true;
     selected_index_nostric = index;
     try {
+      // todo call motoko actor
       let filtered_relays = nostric_relays.filter((item) => item.gateway_url !== relay.gateway_url);
       await nostric_service.init_pool(filtered_relays);
       nostric_relays = filtered_relays;

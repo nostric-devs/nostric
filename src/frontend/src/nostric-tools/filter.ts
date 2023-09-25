@@ -39,6 +39,9 @@ export function matchFilter(filter: Filter<number>, event: Event<number>): boole
 }
 
 export function matchFilters(filters: Filter<number>[], event: Event<number>): boolean {
+  if (filters.length === 0) {
+    return true;
+  }
   for (let i = 0; i < filters.length; i++) {
     if (matchFilter(filters[i], event)) return true
   }

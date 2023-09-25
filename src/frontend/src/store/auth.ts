@@ -6,6 +6,7 @@ import { createActor } from "../../../declarations/backend";
 import { navigateTo } from "svelte-router-spa";
 import { alert } from "./alert";
 import { ROUTES } from "../router/routes";
+import { NostricHandler } from "../lib/nostric";
 
 
 export enum AuthStates {
@@ -70,7 +71,7 @@ export async function init() {
   }
 }
 
-export async function init_nostr_structures(profile, actor) {
+export async function init_nostr_structures(profile) {
   let private_key = await crypto_service.decrypt(profile.encrypted_sk);
 
   // todo subs with motoko actor call
@@ -84,11 +85,19 @@ export async function init_nostr_structures(profile, actor) {
 
   // todo get from motoko actor
   let nostric_relays = [
-    { gateway: "ws://localhost:8000", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai" } // foreign canister id
+    // { gateway_url: "ws://localhost:8089", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai" } // foreign canister id
   ]
 
+  await nostric_service.init(private_key, profile.pk, "http://localhost:8000", true, false);
+
   // todo if pro user, also initialize owned relay, else not;
-  await nostric_service.init_private_relay();
+  // todo fetch from motoko actor private relay details
+  await nostric_service.init_private_relay(
+    "ws://localhost:8089",
+    process.env.RELAY_CANISTER_ID,
+  );
+
+  // todo if any relays, subcribe to nostric
   await nostric_service.init_pool(nostric_relays);
 
   auth_state.set_registered();
@@ -118,21 +127,25 @@ export async function init_structures() {
 
     auth_state.set_authenticated();
 
-    try {
-      nostr_service = new NostrHandler();
-      nostric_service = new NostrHandler();
-      try {
-        let response = await actor.getProfile();
-        await init_nostr_structures(response["ok"], actor);
-      } catch {
-        auth_state.set_not_registered();
-        await navigateTo(ROUTES.CREATE_PROFILE);
-      }
+    nostr_service = new NostrHandler();
+    nostric_service = new NostricHandler();
 
-    } catch (error) {
+    let response;
+    try {
+      response = await actor.getProfile();
+    } catch {
+      auth_state.set_not_registered();
+      await navigateTo(ROUTES.CREATE_PROFILE);
+    }
+
+    try {
+      await init_nostr_structures(response["ok"]);
+    } catch(error) {
       alert.error("Unable to initiate Nostr functionality");
+      console.error(error)
       auth_state.set_error();
     }
+
 
   } catch(error) {
     alert.error("Unable to initialize vetkeys");
