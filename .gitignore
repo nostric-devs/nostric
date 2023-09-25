@@ -12,3 +12,4 @@ src/frontend/public/build/*
 **/build
 
 src/declarations
+/Cargo.lock
