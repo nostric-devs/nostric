@@ -57,11 +57,11 @@ shared({ caller = initializer }) actor class() = this {
     private stable var stableprofiles : [(Principal, Profile)] = [];
 
     public shared (msg) func addProfile(p: NostrProfile) : async Result.Result<Profile, Error> {
-        // Only allows signed users to register profile
+        /*if// Only allows signed users to register profile
         if (Principal.isAnonymous(msg.caller)) {
             // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };
+        };*/
 
         let nostr_profile : NostrProfile = {
             pk = p.pk;
@@ -100,11 +100,11 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func updateProfile(p: NostrProfile) : async Result.Result<(Profile), Error> {
-        // Only allows signed users to register profile
+        /*// Only allows signed users to register profile
         if (Principal.isAnonymous(msg.caller)) {
             // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };
+        };*/
 
         let id = msg.caller;
         let result = profiles.get(id);
@@ -129,17 +129,17 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
-        if (Principal.isAnonymous(msg.caller)){
+        /*if (Principal.isAnonymous(msg.caller)){
             return #err(#NotAuthenticated);
-        };
+        };*/
         profiles.delete(msg.caller);
         return #ok(());
     };
 
     public shared (msg) func addNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-      if(Principal.isAnonymous(msg.caller)){
-          return #err(#NotAuthenticated);
-      };
+      /*if(Principal.isAnonymous(msg.caller)){
+                  return #err(#NotAuthenticated);
+      };*/
 
       let id = msg.caller;
       let result = profiles.get(id);
@@ -151,7 +151,7 @@ shared({ caller = initializer }) actor class() = this {
         };
         case (?profile) {
           // Check if the relay already exists
-          label l for (i in Iter.range(0, profile.followed_relays.nostric.size())) {
+          label l for (i in Iter.range(0, profile.followed_relays.nostric.size() - 1)) {
             let relay = profile.followed_relays.nostric[i];
             if (relay.gateway_url == gateway_url and relay.canister_id == canister_id) {
                 relayExists := true;
@@ -181,9 +181,9 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func removeNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-        if(Principal.isAnonymous(msg.caller)){
+        /*if(Principal.isAnonymous(msg.caller)){
             return #err(#NotAuthenticated);
-        };
+        };*/
 
         let id = msg.caller;
         let result = profiles.get(id);
@@ -217,9 +217,9 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func addNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
-      if(Principal.isAnonymous(msg.caller)){
-          return #err(#NotAuthenticated);
-      };
+      /*if(Principal.isAnonymous(msg.caller)){
+                  return #err(#NotAuthenticated);
+      };*/
 
       let id = msg.caller;
       let result = profiles.get(id);
@@ -231,7 +231,7 @@ shared({ caller = initializer }) actor class() = this {
         };
         case (?profile) {
           // Check if the relay already exists
-          label l for (i in Iter.range(0, profile.followed_relays.nostr.size())) {
+          label l for (i in Iter.range(0, profile.followed_relays.nostr.size() - 1)) {
               let relay = profile.followed_relays.nostr[i];
               if (relay == gateway_url) {
                   relayExists := true;
@@ -257,9 +257,9 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func removeNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
-        if(Principal.isAnonymous(msg.caller)){
-            return #err(#NotAuthenticated);
-        };
+        /*if(Principal.isAnonymous(msg.caller)){
+                    return #err(#NotAuthenticated);
+        };*/
 
         let id = msg.caller;
         let result = profiles.get(id);
