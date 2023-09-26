@@ -16,7 +16,7 @@
     adding = true;
     try {
       let new_relays = [...auth_user.followed_relays.nostr, nostr_gateway_url_value];
-      let result = actor.addNostrRelay(nostr_gateway_url_value);
+      let result = await actor.addNostrRelay(nostr_gateway_url_value);
       if (result["ok"]) {
         await nostr_service.init(
           private_key,
@@ -45,7 +45,7 @@
 
     try {
       let filtered_relays = auth_user.followed_relays.nostr.filter((item) => item !== relay);
-      let result = actor.removeNostrRelay(relay);
+      let result = await actor.removeNostrRelay(relay);
       if (result["ok"]) {
         await nostr_service.init(private_key, filtered_relays);
         alert.success(`Successfully removed relay ${relay}. Wait a while for the changes to take place.`);
@@ -82,7 +82,7 @@
       }
       let new_relays = [...auth_user.followed_relays.nostric, new_relay]
 
-      let result = actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
+      let result = await actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
 
       if (result["ok"]) {
         // clear events, close pool and re-init with new changes
@@ -118,7 +118,7 @@
       let filtered_relays = auth_user.followed_relays.nostric
         .filter((item) => item.gateway_url !== relay.gateway_url && item.canister_id !== relay.canister_id);
 
-      let result = actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
+      let result = await actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
 
       if (result["ok"]) {
         // no need to clear events, the old ones can stay and new ones will be loaded
