@@ -104,7 +104,7 @@ shared({ caller = initializer }) actor class() = this {
         if (Principal.isAnonymous(msg.caller)) {
             // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        }
+        };
 
         let id = msg.caller;
         let result = profiles.get(id);
