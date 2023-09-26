@@ -57,11 +57,11 @@ shared({ caller = initializer }) actor class() = this {
     private stable var stableprofiles : [(Principal, Profile)] = [];
 
     public shared (msg) func addProfile(p: NostrProfile) : async Result.Result<Profile, Error> {
-        /*if// Only allows signed users to register profile
+        // Only allows signed users to register profile
         if (Principal.isAnonymous(msg.caller)) {
             // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };*/
+        };
 
         let nostr_profile : NostrProfile = {
             pk = p.pk;
@@ -100,11 +100,11 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func updateProfile(p: NostrProfile) : async Result.Result<(Profile), Error> {
-        /*// Only allows signed users to register profile
+        // Only allows signed users to register profile
         if (Principal.isAnonymous(msg.caller)) {
             // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };*/
+        }
 
         let id = msg.caller;
         let result = profiles.get(id);
@@ -129,17 +129,21 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
-        /*if (Principal.isAnonymous(msg.caller)){
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };*/
+        };
         profiles.delete(msg.caller);
         return #ok(());
     };
 
     public shared (msg) func addNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-      /*if(Principal.isAnonymous(msg.caller)){
-                  return #err(#NotAuthenticated);
-      };*/
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
+          return #err(#NotAuthenticated);
+      };
 
       let id = msg.caller;
       let result = profiles.get(id);
@@ -181,9 +185,11 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func removeNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-        /*if(Principal.isAnonymous(msg.caller)){
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
-        };*/
+        };
 
         let id = msg.caller;
         let result = profiles.get(id);
@@ -217,9 +223,11 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func addNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
-      /*if(Principal.isAnonymous(msg.caller)){
-                  return #err(#NotAuthenticated);
-      };*/
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
+          return #err(#NotAuthenticated);
+      };
 
       let id = msg.caller;
       let result = profiles.get(id);
@@ -257,9 +265,11 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func removeNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
-        /*if(Principal.isAnonymous(msg.caller)){
-                    return #err(#NotAuthenticated);
-        };*/
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
+        };
 
         let id = msg.caller;
         let result = profiles.get(id);
