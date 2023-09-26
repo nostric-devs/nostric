@@ -3,21 +3,10 @@
   import Spinner from "../utils/Spinner.svelte";
   import { Icon } from "svelte-feathers";
   import { alert } from "../../store/alert";
-  import { nostr_service, nostric_service } from "../../store/auth";
-  import { NostrHandler } from "../../lib/nostr";
+  import { nostr_service, nostric_service, auth_user, actor } from "../../store/auth";
+  import { nostric_events, nostric_relays_eose_count, nostric_relays_count } from "../../store/nostric";
 
-  // for both normal and nostric relays:
-  // todo fetch relays from backend on startup
-  // todo add relay to backend
-  // todo remove relay from backend
-
-  let nostr_relays = [
-    "wss://relay.nostr.band",
-    "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
-  ];
-
-  let new_nostr_gateway_url_value : string = null;
+  let nostr_gateway_url_value : string = null;
   let adding = false; // flag for adding new relay
   let deleting = false; // flag for deleting existing relay
   let selected_index = null;
@@ -26,87 +15,134 @@
   const add_nostr_relay = async () => {
     adding = true;
     try {
-      await nostr_service.init(private_key, nostr_relays.concat(new_nostr_gateway_url_value));
-      // todo subs with motoko actor call to save relay on backend
-      nostr_relays.push(new_nostr_gateway_url_value);
+      let new_relays = [...auth_user.followed_relays.nostr, nostr_gateway_url_value];
+      //let result = actor.addNostrRelay(nostr_gateway_url_value);
+      let result = {"ok": "ok"};
+      if (result["ok"]) {
+        await nostr_service.init(
+          private_key,
+          auth_user.followed_relays.nostr.concat(nostr_gateway_url_value)
+        );
+        alert.success(`Successfully added new relay ${nostr_gateway_url_value}`);
+        auth_user.followed_relays.nostr = new_relays;
+      } else {
+        alert.error(`Unable to add new relay ${nostr_gateway_url_value}`);
+        console.error(result["err"]);
+      }
+
     } catch(err) {
-      alert.error(`Unable to add new relay ${new_nostr_gateway_url_value}`);
+      alert.error(`Unable to add new relay ${nostr_gateway_url_value}`);
       console.error(err);
     }
-    setTimeout(() => {
-      new_nostr_gateway_url_value = "";
-      adding = false;
-    }, 1000);
+
+    nostr_gateway_url_value = null;
+    adding = false;
+
   }
 
   const remove_nostr_relay = async (relay, index) => {
     deleting = true;
     selected_index = index;
+
     try {
-      let filtered_relays = nostr_relays.filter((item) => item !== relay);
-      await nostr_service.init(private_key, filtered_relays);
-      // todo subs with motoko actor call to save relay on backend
-      nostr_relays = filtered_relays;
+      let filtered_relays = auth_user.followed_relays.nostr.filter((item) => item !== relay);
+      //let result = actor.removeNostrRelay(relay);
+      let result = {"ok": "ok"};
+      if (result["ok"]) {
+        await nostr_service.init(private_key, filtered_relays);
+        alert.success(`Successfully removed relay ${relay}. Wait a while for the changes to take place.`);
+        auth_user.followed_relays.nostr = filtered_relays;
+      } else {
+        alert.error(`Unable remove relay ${relay}`);
+        console.error(result["err"]);
+      }
+
     } catch(err) {
       alert.error(`Unable remove relay ${relay}`);
       console.error(err);
     }
-    setTimeout(() => {
-      selected_index = null;
-      deleting = false;
-    }, 1000);
+
+    selected_index = null;
+    deleting = false;
+
   }
 
   let selected_index_nostric = null;
-  let new_nostric_gateway_url_value : string = "";
-  let new_nostric_canister_id : string = "";
+  let nostric_gateway_url_value : string = "ws://localhost:8089";
+  let nostric_canister_id : string = "b77ix-eeaaa-aaaaa-qaada-cai";
   let adding_nostric : boolean = false;
 
-  let owner_canister_id : string = nostric_service.get_private_relay_canister_id();
-  let owner_gateway_url : string = nostric_service.get_gateway_url()
-
-  // todo get current users pro relay if any
-  let nostric_relays = [
-    { gateway_url: "ws://localhost:8000", canister_id: process.env.RELAY_CANISTER_ID }
-  ]
+  let owner_canister_id : string = auth_user.private_relay.canister_id;
+  let owner_gateway_url : string = auth_user.private_relay.gateway_url;
 
   const add_nostric_relay = async () => {
     adding_nostric = true;
     try {
-      // todo call motoko actor
       let new_relay = {
-        gateway_url: new_nostric_gateway_url_value,
-        canister_id: new_nostric_canister_id,
+        gateway_url: nostric_gateway_url_value,
+        canister_id: nostric_canister_id,
       }
-      await nostric_service.init_pool([...nostric_relays, new_relay]);
-      nostric_relays = [...nostric_relays, new_relay];
+      let new_relays = [...auth_user.followed_relays.nostric, new_relay]
+
+      //let result = actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
+      let result = {"ok": "ok"};
+
+      if (result["ok"]) {
+        // clear events, close pool and re-init with new changes
+        nostric_events.clear();
+        await nostric_service.close_pool();
+        await nostric_service.init_pool(new_relays);
+
+        alert.success(`Successfully added new relay ${new_relay.gateway_url} with ID ${new_relay.canister_id}. Wait a while for it to initialize.`);
+
+        // local state update
+        auth_user.followed_relays.nostric = new_relays;
+
+      } else {
+        alert.error(`Unable to add new relay ${nostric_gateway_url_value}`);
+        console.error(result["err"]);
+      }
     } catch(err) {
-      alert.error(`Unable to add new relay ${new_nostr_gateway_url_value}`);
+      alert.error(`Unable to add new relay ${nostric_gateway_url_value}`);
       console.error(err);
     }
-    setTimeout(() => {
-      new_nostric_gateway_url_value = null;
-      new_nostric_canister_id = null;
-      adding_nostric = false;
-    }, 1000);
+
+    nostric_gateway_url_value = "ws://localhost:8089";
+    nostric_canister_id = "b77ix-eeaaa-aaaaa-qaada-cai";
+    adding_nostric = false;
+
   }
 
   const remove_nostric_relay = async (relay, index) => {
     deleting = true;
     selected_index_nostric = index;
+
     try {
-      // todo call motoko actor
-      let filtered_relays = nostric_relays.filter((item) => item.gateway_url !== relay.gateway_url);
-      await nostric_service.init_pool(filtered_relays);
-      nostric_relays = filtered_relays;
+      let filtered_relays = auth_user.followed_relays.nostric
+        .filter((item) => item.gateway_url !== relay.gateway_url && item.canister_id !== relay.canister_id);
+
+      //let result = actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
+      let result = {"ok": "ok"};
+
+      if (result["ok"]) {
+        // no need to clear events, the old ones can stay and new ones will be loaded
+        await nostric_service.close_pool();
+        await nostric_service.init_pool(filtered_relays);
+        alert.success(`Successfully removed relay ${relay.gateway_url} with ID ${relay.canister_id}`);
+        // update local state
+        auth_user.followed_relays.nostric = filtered_relays;
+      } else {
+        alert.error(`Unable to add new relay ${relay}`);
+        console.error(result["err"]);
+      }
     } catch(err) {
       alert.error(`Unable remove relay ${relay}`);
       console.error(err);
     }
-    setTimeout(() => {
-      selected_index_nostric = null;
-      deleting = false;
-    }, 1000);
+
+    selected_index_nostric = null;
+    deleting = false;
+
   }
 
 
@@ -121,17 +157,17 @@
         <input
           class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl mr-4"
           placeholder="type nostr gateway url"
-          bind:value={ new_nostr_gateway_url_value }
+          bind:value={ nostr_gateway_url_value }
         />
         <button
-          disabled={ !new_nostr_gateway_url_value || adding || deleting || adding_nostric }
+          disabled={ !nostr_gateway_url_value || adding || deleting || adding_nostric }
           class="btn btn-primary rounded-2xl ml-3"
           on:click={ async () => await add_nostr_relay() }
         >
           {#if !adding}
             <Icon name="plus" />
           {:else}
-            <Spinner />
+            <Spinner width="2"/>
           {/if}
           Add relay
         </button>
@@ -139,7 +175,7 @@
     </div>
   </div>
   <div>
-    {#each nostr_relays as nostr_relay, index}
+    {#each auth_user.followed_relays.nostr as nostr_relay, index}
       <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
         <div class="flex items-center font-sans text-sm">
           <span class="text-primary font-bold mr-2">Gateway</span>
@@ -151,7 +187,7 @@
           disabled={ adding || deleting || adding_nostric }
         >
           {#if deleting && selected_index === index}
-            <Spinner />
+            <Spinner width="2"/>
           {:else}
             <Icon name="minus" size="12"/>
           {/if}
@@ -175,24 +211,24 @@
         <input
           class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl mr-4"
           placeholder="type nostric gateway url"
-          bind:value={ new_nostric_gateway_url_value }
+          bind:value={ nostric_gateway_url_value }
           disabled={ adding || deleting || adding_nostric }
         />
         <input
           class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
           placeholder="type canister ID"
-          bind:value={ new_nostric_canister_id }
+          bind:value={ nostric_canister_id }
           disabled={ adding || deleting || adding_nostric }
         />
         <button
-          disabled={ !new_nostric_gateway_url_value || !new_nostric_canister_id || adding || deleting || adding_nostric }
+          disabled={ !nostric_gateway_url_value || !nostric_canister_id || adding || deleting || adding_nostric }
           class="btn btn-primary rounded-2xl ml-3"
           on:click={ async () => await add_nostric_relay() }
         >
           {#if !adding_nostric}
             <Icon name="plus" />
           {:else}
-            <Spinner />
+            <Spinner width="2"/>
           {/if}
           Add relay
         </button>
@@ -200,7 +236,7 @@
     </div>
   </div>
   <div>
-    {#each nostric_relays as nostric_relay, index}
+    {#each auth_user.followed_relays.nostric as nostric_relay, index}
       <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
         <div class="grid grid-cols-2 w-full mr-6">
           <div class="flex items-center font-sans text-sm">
@@ -221,7 +257,7 @@
           }
         >
           {#if deleting && selected_index_nostric === index}
-            <Spinner />
+            <Spinner width="2"/>
           {:else}
             <Icon name="minus" />
           {/if}

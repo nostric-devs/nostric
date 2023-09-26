@@ -36,6 +36,7 @@ export type CountPayload = {
 }
 export type SubEvent<K extends number> = {
   event: (event: Event<K>) => void | Promise<void>
+  error: (error: any) => void | Promise<void>
   count: (payload: CountPayload) => void | Promise<void>
   eose: () => void | Promise<void>
 }
@@ -120,18 +121,22 @@ export function relayInit(
         localTest: true,
         persistKey: false,
       });
+      console.log("Created Websocket ", ws);
     } catch (err) {
       console.error(err);
     }
 
     ws.onopen = (event) => {
+      console.log("Opened websocket connection ", ws);
       listeners.connect.forEach(cb => cb());
     }
     ws.onerror = (error) => {
+      console.error("Websocket ERROR ", error, ws);
       connectionPromise = undefined
       listeners.error.forEach(cb => cb())
     }
     ws.onclose = async () => {
+      console.log("Websocket CLOSE");
       connectionPromise = undefined
       listeners.disconnect.forEach(cb => cb())
     }
@@ -186,7 +191,6 @@ export function relayInit(
           case 'EVENT': {
             let id = data[1];
             let event = data[2];
-
             if (
               validateEvent(event) &&
               openSubs[id] &&
@@ -240,20 +244,12 @@ export function relayInit(
     }
   }
 
-  // async function connect(): any {
-  //   return await connectICRelay();
-  // }
-
   async function trySend(params: [string, ...any]) {
     let message : AppMessage = {
       text: JSON.stringify(params),
       timestamp: BigInt(Date.now())
     };
-    try {
-      await ws.send(serializeAppMessage(message));
-    } catch (err) {
-      console.log(err);
-    }
+    await ws.send(serializeAppMessage(message));
   }
 
   const sub = <K extends number = number>(
@@ -273,7 +269,7 @@ export function relayInit(
       skipVerification,
       alreadyHaveEvent,
     }
-    trySend([verb, subid])
+    trySend([verb, subid]);
 
     let subscription: Sub<K> = {
       sub: (newFilters, newOpts = {}) =>
@@ -292,6 +288,7 @@ export function relayInit(
           event: [],
           count: [],
           eose: [],
+          error: [],
         }
         subListeners[subid][type].push(cb)
       },

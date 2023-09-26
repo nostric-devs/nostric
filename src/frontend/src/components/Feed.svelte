@@ -24,8 +24,8 @@
           events[event_id].canister_id = nostric_event.canister_id;
         } else {
           let nostric_user = nostric_users.find_user(pubkey);
-          if (!nostric_user) {
-            let nostric_user = await nostr_service.fetch_foreign_user_profile(pubkey);
+          if (nostric_user === undefined) {
+            nostric_user = await nostr_service.fetch_foreign_user_profile(pubkey);
             nostric_users.add_user(nostric_user);
           }
           events[event_id] = {...nostric_event, author: nostric_user};
@@ -55,6 +55,7 @@
   export let params;
 
   onMount(async () => {
+    feed_events = [];
     active_user = await nostr_service.get_user();
     active_hexpubkey = active_user.hexpubkey();
     await parse_events();
@@ -65,25 +66,25 @@
 
 <div class="max-w-2xl mx-auto">
 
-  {#if !initialized || $nostric_relays_count > $nostric_relays_eose_count }
+  {#if !initialized || (feed_events.length === 0 && $nostric_relays_count !== $nostric_relays_eose_count) }
     <div class="d-flex justify-center content-center">
-      <div class="text-center opacity-70">
-        <Spinner width="10"/>
+      <div class="justify-center opacity-70 flex items-center">
+        <Spinner width="3"/>
+        <span class="ml-2">Live loading messages</span>
       </div>
     </div>
-  {:else}
-    {#if feed_events.length > 0 }
-      {#each feed_events as event}
-        <div class="my-6">
-          <NostrPost
-            event={ event.event }
-            user={ event.author }
-            gateway_url={ event.gateway_url }
-            canister_id={ event.canister_id }
-          />
-        </div>
-      {/each}
-    {/if}
+  {/if}
+  {#if feed_events.length > 0 && initialized }
+    {#each feed_events as event}
+      <div class="my-6">
+        <NostrPost
+          event={ event.event }
+          user={ event.author }
+          gateway_url={ event.gateway_url }
+          canister_id={ event.canister_id }
+        />
+      </div>
+    {/each}
   {/if}
 </div>
 

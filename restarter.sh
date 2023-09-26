@@ -6,7 +6,7 @@ dfx canister create vetkd_system_api --specified-id br5f7-7uaaa-aaaaa-qaaca-cai
 dfx deploy vetkd_system_api
 
 
-dfx canister create backend --specified-id bkyz2-fmaaa-aaaaa-qaaaq-cai
+dfx canister create backend --specified-id asrmz-lmaaa-aaaaa-qaaeq-cai
 dfx deploy backend
 
 
@@ -31,8 +31,8 @@ dfx deploy backend
 
 #uncomment this if foreign_relay.wasm is missing
 #cargo build --target wasm32-unknown-unknown --release --package foreign_relay
-wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
-dfx canister create dynamic_relays --specified-id avqkn-guaaa-aaaaa-qaaea-cai
-dfx deploy dynamic_relays
+#wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
+#dfx canister create dynamic_relays --specified-id avqkn-guaaa-aaaaa-qaaea-cai
+#dfx deploy dynamic_relays
 
 

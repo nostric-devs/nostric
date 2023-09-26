@@ -1,8 +1,8 @@
-import { relayInit, eventsGenerator, type Relay, type Sub, type SubscriptionOptions } from './relay.ts'
-import { normalizeURL } from './utils.ts'
+import { relayInit, eventsGenerator, type Relay, type Sub, type SubscriptionOptions } from './relay'
+import { normalizeURL } from './utils'
 
-import type { Event } from './event.ts'
-import { matchFilters, type Filter } from './filter.ts'
+import type { Event } from './event'
+import { matchFilters, type Filter } from './filter'
 
 type BatchedRequest = {
   filters: Filter<any>[]
@@ -37,8 +37,8 @@ export class SimplePool {
   }
 
   close(relays: any[]): void {
-    relays.forEach(({url, canister_id}) => {
-      let relay = this._conn[normalizeURL(url, canister_id)]
+    relays.forEach(({gateway_url, canister_id}) => {
+      let relay = this._conn[normalizeURL(gateway_url, canister_id)]
       if (relay) relay.close()
     })
   }
@@ -83,6 +83,7 @@ export class SimplePool {
 
     let subs: Sub[] = []
     let eventListeners: Set<any> = new Set()
+    let errorListeners: Set<any> = new Set()
     let eoseListeners: Set<() => void> = new Set()
     let eosesMissing = relays.length
 
@@ -100,7 +101,7 @@ export class SimplePool {
         .forEach(async ({gateway_url, canister_actor, canister_id, ic_url, local, persist_key}) => {
           let r;
           try {
-
+            console.log("going to ensure relay ", canister_id)
             r = this.ensureRelay(gateway_url, canister_actor, canister_id, ic_url, local, persist_key);
             let s;
 
@@ -117,9 +118,14 @@ export class SimplePool {
               subs.push(s)
             });
 
+            r.on("error", (error) => {
+              for (let cb of errorListeners.values()) cb({error, gateway_url, canister_id});
+            });
+
             await r.connect();
 
           } catch (err) {
+            console.error(err);
             handleEose()
             return
           }
@@ -147,6 +153,8 @@ export class SimplePool {
           eventListeners.add(cb)
         } else if (type === 'eose') {
           eoseListeners.add(cb as () => void | Promise<void>)
+        } else if (type === "error") {
+          errorListeners.add(cb);
         }
       },
       off(type, cb) {

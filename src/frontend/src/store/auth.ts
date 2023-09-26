@@ -62,6 +62,7 @@ export let auth_client = null;
 export let crypto_service = null;
 export let nostr_service = null;
 export let nostric_service = null;
+export let auth_user = null;
 
 export async function init() {
   auth_client = await AuthClient.create();
@@ -71,34 +72,35 @@ export async function init() {
   }
 }
 
-export async function init_nostr_structures(profile) {
-  let private_key = await crypto_service.decrypt(profile.encrypted_sk);
+export async function init_nostr_structures(auth_user) {
 
-  // todo subs with motoko actor call
-  let nostr_relays = [
-    "wss://relay.nostr.band",
-    "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
-  ]
+  let private_key = await crypto_service.decrypt(auth_user.nostr_profile.encrypted_sk);
 
-  await nostr_service.init(private_key, nostr_relays);
+  await nostr_service.init(private_key, auth_user.followed_relays.nostr);
 
-  // todo get from motoko actor
-  let nostric_relays = [
-    // { gateway_url: "ws://localhost:8089", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai" } // foreign canister id
-  ]
+  let ic_network = "http://localhost:8000";
+  let local = true;
+  let persist_keys = true;
 
-  await nostric_service.init(private_key, profile.pk, "http://localhost:8000", true, false);
+  if (process.env.DFX_NETWORK === "ic") {
+    ic_network = "https://icp0.io";
+    local = false;
+  }
 
-  // todo if pro user, also initialize owned relay, else not;
-  // todo fetch from motoko actor private relay details
-  await nostric_service.init_private_relay(
-    "ws://localhost:8089",
-    process.env.RELAY_CANISTER_ID,
-  );
+  await nostric_service.init(private_key, auth_user.nostr_profile.pk, ic_network, local, persist_keys);
 
-  // todo if any relays, subcribe to nostric
-  await nostric_service.init_pool(nostric_relays);
+  if (auth_user.is_pro) {
+    await nostric_service.init_private_relay(
+      auth_user.private_relay.gateway_url,
+      auth_user.private_relay.canister_id,
+    );
+  }
+
+  // auth_user.followed_relays.nostric = [
+  //   {gateway_url: "ws://localhost:8089", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai"}
+  // ]
+
+  await nostric_service.init_pool(auth_user.followed_relays.nostric);
 
   auth_state.set_registered();
   await navigateTo(ROUTES.HOME);
@@ -136,7 +138,8 @@ export async function init_structures() {
       await navigateTo(ROUTES.CREATE_PROFILE);
     } else {
       try {
-        await init_nostr_structures(response["ok"]);
+        auth_user = response["ok"];
+        await init_nostr_structures(auth_user);
       } catch(error) {
         alert.error("Unable to initiate Nostr functionality");
         console.error(error)
@@ -179,5 +182,6 @@ export async function logout_from_ii() {
   auth_client.logout();
   nostric_service.close_pool();
   auth_state.set_anonymous();
+  await actor.deleteProfile();
   navigateTo(ROUTES.LOGIN);
 }

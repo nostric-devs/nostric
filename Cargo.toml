@@ -2,6 +2,6 @@
 members = [
     "src/relay",
     "src/foreign_relay",
-    "src/dynamic_relays"
+#     "src/dynamic_relays"
 ]
 resolver = "2"

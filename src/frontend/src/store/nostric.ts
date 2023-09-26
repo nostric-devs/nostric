@@ -77,3 +77,55 @@ function fetch_nostric_user_encounters() {
 
 export const nostric_users = fetch_nostric_user_encounters();
 
+export enum STATUS {
+  OPEN,
+  CLOSED,
+  ERROR
+}
+
+function fetch_nostric_relay_statuses() {
+
+  const relays = writable([]);
+  const { subscribe, update, set } = relays;
+
+  const find = (relays : any[], gateway_url: string, canister_id : string) =>
+    relays.findIndex((relay) => relay.gateway_url === gateway_url && relay.canister_id === canister_id);
+
+  const get_status = (gateway_url: string, canister_id : string) => {
+    let all_relays = get(relays);
+    let index = find(all_relays, gateway_url, canister_id);
+    return all_relays[index];
+  }
+
+  const set_status = (gateway_url: string, canister_id : string, status : STATUS) =>
+    update((relays) => {
+      let index = find(relays, gateway_url, canister_id);
+      if (index !== -1) {
+        relays[index].status = status;
+        return relays;
+      } else {
+        return [...relays, {gateway_url, canister_id, status}];
+      }
+    }
+  );
+
+  const remove_relay = (gateway_url: string, canister_id : string) => update(
+    (relays) =>
+      relays.filter((relay) => relay.gateway_url !== gateway_url && relay.canister_id !== canister_id)
+  );
+
+  const clear = () => set([]);
+
+  return {
+    subscribe,
+    get_status,
+    set_status,
+    remove_relay,
+    clear,
+  };
+}
+
+export const relay_statuses = fetch_nostric_relay_statuses();
+
+
+

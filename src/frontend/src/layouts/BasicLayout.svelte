@@ -39,7 +39,7 @@
         {#if !logging_out}
           <Icon name="log-out" class="cursor-pointer hover:scale-110"></Icon>
         {:else}
-          <Spinner size="4"/>
+          <Spinner width="4"/>
         {/if}
       </button>
     </div>

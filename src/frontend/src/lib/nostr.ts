@@ -13,8 +13,10 @@ export class NostrHandler {
   private subscription : NDKSubscription | null = null;
 
   public async init(private_key : string, relays : string[]) {
-    // init private key signer based on the existing private key
-    this.signer = new NDKPrivateKeySigner(private_key);
+    if (this.signer === null) {
+      // init private key signer based on the existing private key
+      this.signer = new NDKPrivateKeySigner(private_key);
+    }
     this.nostr_user = await this.signer.user();
     this.nostr_kit = new NDK({
       explicitRelayUrls: relays,
@@ -80,7 +82,7 @@ export class NostrHandler {
     let filters = {
       kinds: [NDKKind.Text],
       authors: [this.nostr_user.hexpubkey(), ...following_list],
-      limit: 10, // TODO get rid of this
+      limit: 15, // TODO get rid of this
     };
     let options = { closeOnEose: false };
     this.subscription = this.nostr_kit.subscribe(filters, options);

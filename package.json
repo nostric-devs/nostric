@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs",
-    "dev": "rollup -c --bundleConfigAsCjs -w",
+    "dev": "LOG_LEVEL=debug rollup -c --bundleConfigAsCjs -w",
     "dev-docker": "rollup -c -w --configExpose",
     "start": "sirv src/frontend/public --no-clear -s --port 3000",
     "start-expose": "sirv src/frontend/public --no-clear -s --host 0.0.0.0 --port 3000",
@@ -70,7 +70,8 @@
     "svelte-feathers": "^0.7.5",
     "svelte-qrcode-image": "^1.0.0-rc.2",
     "svelte-router-spa": "^6.0.3",
-    "typewriter-editor": "^0.6.45"
+    "typewriter-editor": "^0.6.45",
+    "loglevel": "^1.8.1"
   },
   "jest": {
     "transform": {

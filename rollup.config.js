@@ -82,10 +82,11 @@ export default (config) => {
       sourcemap: true,
       name: 'app',
       format: 'iife',
-      
+
       file: 'src/frontend/public/build/main.js',
       inlineDynamicImports: true,
     },
+    external: ['loglevel'],
     plugins: [
       svelte({
         preprocess: sveltePreprocess({

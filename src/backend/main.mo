@@ -57,9 +57,10 @@ shared({ caller = initializer }) actor class() = this {
     private stable var stableprofiles : [(Principal, Profile)] = [];
 
     public shared (msg) func addProfile(p: NostrProfile) : async Result.Result<Profile, Error> {
-
-        if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
-            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
         let nostr_profile : NostrProfile = {
@@ -72,9 +73,20 @@ shared({ caller = initializer }) actor class() = this {
 
         let profile : Profile = {
           nostr_profile = nostr_profile;
-          is_pro = false;
-          private_relay: [];
-          followed_relays: [];
+          // todo false and private_relay null in production
+          is_pro = true;
+          private_relay = {
+            gateway_url = "ws://localhost:8089";
+            canister_id = "bd3sg-teaaa-aaaaa-qaaba-cai";
+          };
+          followed_relays = {
+            nostr = [
+              "wss://relay.nostr.band",
+              "wss://nostr.girino.org",
+              "wss://nostr-pub.wellorder.net"
+            ];
+            nostric = [];
+          };
         };
 
         profiles.put(msg.caller, profile);
@@ -85,12 +97,13 @@ shared({ caller = initializer }) actor class() = this {
     public query (msg) func getProfile() : async Result.Result<Profile, Error> {
          let profile = profiles.get(msg.caller);
          return Result.fromOption(profile, #ProfileNotFound);
-     };
+    };
 
     public shared (msg) func updateProfile(p: NostrProfile) : async Result.Result<(Profile), Error> {
-
-        if (Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
-            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
         let id = msg.caller;
@@ -100,27 +113,25 @@ shared({ caller = initializer }) actor class() = this {
           case null {
               return #err(#ProfileNotFound);
           };
-          case (?v) {
-              let profile : Profile = {
-                  pk = v.pk;
-                  encrypted_sk = v.encrypted_sk;
+          case (?profile) {
+              let nostr_profile : NostrProfile = {
+                  pk = profile.nostr_profile.pk;
+                  encrypted_sk = profile.nostr_profile.encrypted_sk;
                   username = p.username;
                   about = p.about;
                   avatar_url = p.avatar_url;
               };
-              result.nostr_profile = profile;
-              profiles.put(id, result);
+              let updated_profile = { profile with nostr_profile = nostr_profile };
+              profiles.put(id, updated_profile);
               return #ok(profile);
            };
         };
     };
 
     public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
-
-        if(Principal.isAnonymous(msg.caller)){
+        if (Principal.isAnonymous(msg.caller)){
             return #err(#NotAuthenticated);
         };
-
         profiles.delete(msg.caller);
         return #ok(());
     };
@@ -333,21 +344,12 @@ shared({ caller = initializer }) actor class() = this {
             // If the payment is verified set the user's is_pro param
             let result = profiles.get(msg.caller);
             switch (result) {
-            case null {
-                //return #err(#ProfileNotFound);
-            };
-            case (?v) {
-                let profile : Profile = {
-                        pk = v.pk;
-                        encrypted_sk = v.encrypted_sk;
-                        username = v.username;
-                        about = v.about;
-                        avatar_url = v.avatar_url;
-                        is_pro = true;
-                    };
-                    profiles.put(msg.caller, profile);
-
-                };
+              case null {
+              };
+              case (?profile) {
+                  let updated_profile = { profile with is_pro = true };
+                  profiles.put(msg.caller, updated_profile);
+              };
             };
             return true;
         } else {

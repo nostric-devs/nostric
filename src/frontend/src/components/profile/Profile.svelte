@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import NDKUserProfile, { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
+  import NDKUserProfile, { NDKUser } from "@nostr-dev-kit/ndk";
   import Spinner from "../utils/Spinner.svelte";
   import NostrPost from "../nostr/NostrPost.svelte";
   import NostrAvatar from "../nostr/NostrAvatar.svelte";
-  import { nostr_service, nostric_service } from "../../store/auth";
+  import { nostr_service, nostric_service, auth_user } from "../../store/auth";
   import { nostr_events, nostr_followees } from "../../store/nostr";
   import {
     nostric_events,
@@ -29,9 +29,12 @@
 
   const create_post = async () => {
     publishing = true;
-    // todo if private relay else create_and_publish(message)
-    let finished_event = await nostric_service.publish_to_private_relay(message);
-    await nostr_service.publish(finished_event);
+    if (auth_user.is_pro) {
+      let finished_event = await nostric_service.publish_to_private_relay(message);
+      await nostr_service.publish(finished_event);
+    } else {
+      await nostr_service.create_and_publish(message);
+    }
   }
 
   const parse_events = () => {
@@ -144,20 +147,22 @@
         </div>
         <div class="divider"></div>
         <div class="mt-12">
-          {#if !initialized || $nostric_relays_count > $nostric_relays_eose_count }
-            <div class="d-flex justify-center content-center">
-              <div class="text-center opacity-70">
-                <Spinner width="10"/>
+          {#if !initialized || (feed_events.length === 0 && $nostric_relays_count !== $nostric_relays_eose_count) }
+            <div class="d-flex justify-center content-center mb-4">
+              <div class="justify-center opacity-70 flex items-center">
+                <Spinner width="3"/>
+                <span class="ml-2">Live loading messages</span>
               </div>
             </div>
-          {:else}
+          {/if}
+          {#if feed_events.length > 0 && initialized }
             {#each feed_events as event}
               <div class="mb-6">
                 <NostrPost
                   event={ event.event }
                   gateway_url={ event.gateway_url }
                   canister_id={ event.canister_id }
-                  {user}
+                  { user }
                 />
               </div>
             {/each}

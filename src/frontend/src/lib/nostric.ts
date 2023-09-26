@@ -1,15 +1,18 @@
-import { SimplePool, Sub, finishEvent } from "../nostric-tools";
+import { finishEvent, SimplePool, Sub } from "../nostric-tools";
 import type { ActorSubclass } from "@dfinity/agent";
+import { Actor, HttpAgent } from "@dfinity/agent";
 import type { _SERVICE } from "../../../relay/relay.did";
 import { NDKKind } from "@nostr-dev-kit/ndk";
-import { Actor, HttpAgent } from "@dfinity/agent";
 import { createActor, idlFactory } from "../../../declarations/relay";
 import {
   nostric_events,
   nostric_relays_count,
-  nostric_relays_eose_count
+  nostric_relays_eose_count,
+  relay_statuses,
+  STATUS
 } from "../store/nostric";
 import { nostric_service } from "../store/auth";
+import { alert } from "../store/alert";
 
 export class NostricHandler {
 
@@ -23,6 +26,7 @@ export class NostricHandler {
 
   private relay_pool : SimplePool | null = null;
   private active_subs : Sub | null = null;
+  private active_relays = [];
 
   private private_key : string;
   private public_key : string;
@@ -110,12 +114,16 @@ export class NostricHandler {
   }
 
   public close_pool() {
-    this.active_subs.unsub();
+    if (this.active_subs !== null) {
+      this.active_subs.unsub();
+    }
+    if (this.relay_pool !== null) {
+      this.relay_pool.close(this.active_relays);
+    }
   }
 
   public async init_pool(relays) {
     // init foreign relays if any
-    let initialized_relays = [];
     if (relays.length > 0) {
       for (let nostric_relay of relays) {
         if (
@@ -125,25 +133,32 @@ export class NostricHandler {
           let foreign_relay = await nostric_service.init_foreign_relay(
             nostric_relay.gateway_url, nostric_relay.canister_id
           );
-          initialized_relays.push(foreign_relay);
+          this.active_relays.push(foreign_relay);
         }
       }
     }
     if (this.private_relay_set) {
-      initialized_relays.push(this.get_private_relay_params());
+      this.active_relays.push(this.get_private_relay_params());
     }
-    if (initialized_relays.length > 0) {
-      nostric_relays_count.set(initialized_relays.length);
+    if (this.active_relays.length > 0) {
+      nostric_relays_count.set(this.active_relays.length);
       this.relay_pool = new SimplePool();
       this.active_subs = this.relay_pool.sub(
-        initialized_relays,
+        this.active_relays,
         []
       );
       this.active_subs.on("event", (event: any) => {
+        console.log("Received EVENT ", event);
         nostric_events.add(event);
       });
       this.active_subs.on("eose", () => {
         nostric_relays_eose_count.update((previous) => previous + 1);
+        console.log("Received EOSE");
+      });
+      this.active_subs.on("error", (error) => {
+        relay_statuses.set_status(error.gateway_url, error.canister_id, STATUS.ERROR);
+        alert.error(`There was an error in connection to gateway ${error.gateway_url} with ID ${error.canister_id}. Refresh the app.`)
+        console.log("Received ERROR");
       });
     }
   }

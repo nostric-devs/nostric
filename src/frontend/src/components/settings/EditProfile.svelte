@@ -1,7 +1,7 @@
 <script lang="ts">
   import { actor, nostr_service } from "../../store/auth";
   import ProfileForm from "../profile/ProfileForm.svelte";
-  import type { Profile, Result } from "../../../../declarations/backend/backend.did";
+  import type { NostrProfile, Result } from "../../../../declarations/backend/backend.did";
   import { alert } from "../../store/alert";
   import { navigateTo } from "svelte-router-spa";
   import { ROUTES } from "../../router/routes";
@@ -10,7 +10,7 @@
 
   let loading = false;
   let user : NDKUser;
-  let profile : Profile = {
+  let profile : NostrProfile = {
     username: "",
     about: "",
     avatar_url: "",
