@@ -114,6 +114,7 @@ export class NostricHandler {
   }
 
   public close_pool() {
+    nostric_events.clear();
     if (this.active_subs !== null) {
       this.active_subs.unsub();
     }
