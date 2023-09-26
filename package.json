@@ -63,6 +63,7 @@
     "@dfinity/principal": "^0.15.1",
     "@nostr-dev-kit/ndk": "^0.8.23",
     "ic-websocket-js": "github:omnia-network/ic-websocket-sdk-js#41e37667c36d26a535d4247e37711f4bad2184a8",
+    "loglevel": "^1.8.1",
     "nostr-tools": "^1.14.0",
     "prettier": "^3.0.2",
     "sirv-cli": "^1.0.0",
@@ -70,8 +71,7 @@
     "svelte-feathers": "^0.7.5",
     "svelte-qrcode-image": "^1.0.0-rc.2",
     "svelte-router-spa": "^6.0.3",
-    "typewriter-editor": "^0.6.45",
-    "loglevel": "^1.8.1"
+    "typewriter-editor": "^0.6.45"
   },
   "jest": {
     "transform": {

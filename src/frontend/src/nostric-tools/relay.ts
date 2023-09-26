@@ -121,22 +121,18 @@ export function relayInit(
         localTest: true,
         persistKey: false,
       });
-      console.log("Created Websocket ", ws);
     } catch (err) {
       console.error(err);
     }
 
     ws.onopen = (event) => {
-      console.log("Opened websocket connection ", ws);
       listeners.connect.forEach(cb => cb());
     }
     ws.onerror = (error) => {
-      console.error("Websocket ERROR ", error, ws);
       connectionPromise = undefined
       listeners.error.forEach(cb => cb())
     }
     ws.onclose = async () => {
-      console.log("Websocket CLOSE");
       connectionPromise = undefined
       listeners.disconnect.forEach(cb => cb())
     }

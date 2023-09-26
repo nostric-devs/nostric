@@ -86,7 +86,6 @@ export default (config) => {
       file: 'src/frontend/public/build/main.js',
       inlineDynamicImports: true,
     },
-    external: ['loglevel'],
     plugins: [
       svelte({
         preprocess: sveltePreprocess({
@@ -131,6 +130,7 @@ export default (config) => {
       }),
       injectProcessEnv({
         DFX_NETWORK: network,
+        LOG_LEVEL: "debug",
         NODE_ENV: production ? 'production' : 'development',
         ...Object.assign(
           {},

@@ -101,7 +101,6 @@ export class SimplePool {
         .forEach(async ({gateway_url, canister_actor, canister_id, ic_url, local, persist_key}) => {
           let r;
           try {
-            console.log("going to ensure relay ", canister_id)
             r = this.ensureRelay(gateway_url, canister_actor, canister_id, ic_url, local, persist_key);
             let s;
 
