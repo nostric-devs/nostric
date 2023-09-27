@@ -4,7 +4,7 @@
   import { Icon } from "svelte-feathers";
   import { alert } from "../../store/alert";
   import { nostr_service, nostric_service, auth_user, actor } from "../../store/auth";
-  import { nostric_events, nostric_relays_eose_count, nostric_relays_count } from "../../store/nostric";
+  import { nostric_events } from "../../store/nostric";
 
   let nostr_gateway_url_value : string = null;
   let adding = false; // flag for adding new relay
@@ -16,9 +16,8 @@
     adding = true;
     try {
       let new_relays = [...auth_user.followed_relays.nostr, nostr_gateway_url_value];
-      //let result = actor.addNostrRelay(nostr_gateway_url_value);
-      let result = {"ok": "ok"};
-      if (result["ok"]) {
+      let result = await actor.addNostrRelay(nostr_gateway_url_value);
+      if ("ok" in result) {
         await nostr_service.init(
           private_key,
           auth_user.followed_relays.nostr.concat(nostr_gateway_url_value)
@@ -46,9 +45,8 @@
 
     try {
       let filtered_relays = auth_user.followed_relays.nostr.filter((item) => item !== relay);
-      //let result = actor.removeNostrRelay(relay);
-      let result = {"ok": "ok"};
-      if (result["ok"]) {
+      let result = await actor.removeNostrRelay(relay);
+      if ("ok" in result) {
         await nostr_service.init(private_key, filtered_relays);
         alert.success(`Successfully removed relay ${relay}. Wait a while for the changes to take place.`);
         auth_user.followed_relays.nostr = filtered_relays;
@@ -84,10 +82,8 @@
       }
       let new_relays = [...auth_user.followed_relays.nostric, new_relay]
 
-      //let result = actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
-      let result = {"ok": "ok"};
-
-      if (result["ok"]) {
+      let result = await actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
+      if ("ok" in result) {
         // clear events, close pool and re-init with new changes
         nostric_events.clear();
         await nostric_service.close_pool();
@@ -121,13 +117,14 @@
       let filtered_relays = auth_user.followed_relays.nostric
         .filter((item) => item.gateway_url !== relay.gateway_url && item.canister_id !== relay.canister_id);
 
-      //let result = actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
-      let result = {"ok": "ok"};
+      let result = await actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
 
-      if (result["ok"]) {
+      if ("ok" in result) {
         // no need to clear events, the old ones can stay and new ones will be loaded
         await nostric_service.close_pool();
-        await nostric_service.init_pool(filtered_relays);
+        if (filtered_relays.length > 0) {
+          await nostric_service.init_pool(filtered_relays);
+        }
         alert.success(`Successfully removed relay ${relay.gateway_url} with ID ${relay.canister_id}`);
         // update local state
         auth_user.followed_relays.nostric = filtered_relays;

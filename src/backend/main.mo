@@ -129,63 +129,24 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
-        if (Principal.isAnonymous(msg.caller)){
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
         };
         profiles.delete(msg.caller);
         return #ok(());
     };
-/*
+
     public shared (msg) func addNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-      if(Principal.isAnonymous(msg.caller)){
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
           return #err(#NotAuthenticated);
       };
 
-      //let profile = profiles.get(msg.caller);
-      // Check if the relay already exists
-      var relayExists = false;
-      label l for (relay in profile.followed_relays.nostric) {
-          if (relay.gateway_url == gateway_url and relay.canister_id == canister_id) {
-              relayExists := true;
-              break l;
-          }
-      };
-
-      // If the relay doesn't exist, add it
-      if (relayExists == false) {
-          let newRelay: NostricRelay = {gateway_url = gateway_url; canister_id = canister_id};
-          //profile.followed_relays.nostric := profile.followed_relays.nostric.add(newRelay);
-      };
-
-      //profiles.put(msg.caller, profile);
-      return #ok(());
-    };
-
-    public shared (msg) func removeNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
-        if(Principal.isAnonymous(msg.caller)){
-            return #err(#NotAuthenticated);
-        };
-
-        let profile = profiles.get(msg.caller);
-
-        // Filter the relays that don't match the provided relay
-        profile.followed_relays.nostric := Array.filter(
-            func (relay: NostricRelay) : Bool {
-                return relay.gateway_url != gateway_url or relay.canister_id != canister_id;
-            },
-            profile.followed_relays.nostric
-        );
-
-        profiles.put(msg.caller, profile);
-        return #ok(());
-    };
-
-    public shared (msg) func addRelay(relay_url: Text) : async Result.Result<(()), Error> {
-      if(Principal.isAnonymous(msg.caller)){
-          return #err(#NotAuthenticated);
-      };
-
-      let result = profiles.get(msg.caller);
+      let id = msg.caller;
+      let result = profiles.get(id);
       var relayExists = false;
 
       switch (result) {
@@ -193,53 +154,154 @@ shared({ caller = initializer }) actor class() = this {
             return #err(#ProfileNotFound);
         };
         case (?profile) {
-          /*label l for (relay in profile.followed_relays.nostr) {
-              if (relay == relay_url) {
-                  relayExists := true;
-                  break l;
-              }
-          };*/
-        }
+          // Check if the relay already exists
+          label l for (i in Iter.range(0, profile.followed_relays.nostric.size() - 1)) {
+            let relay = profile.followed_relays.nostric[i];
+            if (relay.gateway_url == gateway_url and relay.canister_id == canister_id) {
+                relayExists := true;
+                break l;
+            };
+          };
+          // If the relay doesn't exist, add it
+          if (relayExists == false) {
+            let nostricRelay: NostricRelay = {
+              gateway_url = gateway_url;
+              canister_id = canister_id;
+            };
+            let updatedProfile: Profile = {
+               nostr_profile = profile.nostr_profile;
+               is_pro = profile.is_pro;
+               private_relay = profile.private_relay;
+               followed_relays = {
+                   nostr = profile.followed_relays.nostr;
+                   nostric = Array.append<NostricRelay>(profile.followed_relays.nostric, [nostricRelay]);
+               }
+            };
+            profiles.put(msg.caller, updatedProfile);
+          };
+        };
       };
-
-      // If the relay doesn't exist, add it
-      if (relayExists == false) {
-          profile.followed_relays.nostr.add(relay_url);
-      };
-
-      profiles.put(msg.caller, profile);
       return #ok(());
     };
 
-    public shared (msg) func removeNostrRelay(relay_url: Text) : async Result.Result<(()), Error> {
-        if(Principal.isAnonymous(msg.caller)){
+    public shared (msg) func removeNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
             return #err(#NotAuthenticated);
         };
-        let result = profiles.get(msg.caller);
 
+        let id = msg.caller;
+        let result = profiles.get(id);
+        var relayExists = false;
 
         switch (result) {
           case null {
-            return #err(#ProfileNotFound);
+              return #err(#ProfileNotFound);
           };
-          case (?v) {
-            profiles.put(msg.caller, profile);
-          }
+          case (?profile) {
+             // Filter the relays that don't match the provided relay
+             let filteredRelays = Array.filter(
+                 profile.followed_relays.nostric,
+                 func (relay: NostricRelay) : Bool {
+                     return relay.gateway_url != gateway_url or relay.canister_id != canister_id;
+                 }
+             );
+             let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = profile.followed_relays.nostr;
+                     nostric = filteredRelays
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+             return #ok(());
+          };
+        };
+    };
+
+    public shared (msg) func addNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
+          return #err(#NotAuthenticated);
+      };
+
+      let id = msg.caller;
+      let result = profiles.get(id);
+      var relayExists = false;
+
+      switch (result) {
+        case null {
+            return #err(#ProfileNotFound);
+        };
+        case (?profile) {
+          // Check if the relay already exists
+          label l for (i in Iter.range(0, profile.followed_relays.nostr.size() - 1)) {
+              let relay = profile.followed_relays.nostr[i];
+              if (relay == gateway_url) {
+                  relayExists := true;
+                  break l;
+              };
+          };
+          // If the relay doesn't exist, add it
+          if (relayExists == false) {
+              let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = Array.append<Text>(profile.followed_relays.nostr, [gateway_url]);
+                     nostric = profile.followed_relays.nostric;
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+          };
+          return #ok(());
+        };
+      };
+    };
+
+    public shared (msg) func removeNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
-        // Filter out the provided gateway_url from the nostr array
-        /*
-        profile.followed_relays.nostr := Array.filter(
-            func (url: Text) : Bool {
-                return url != relay_url;
-            },
-            profile.followed_relays.nostr
-        );
-        */
+        let id = msg.caller;
+        let result = profiles.get(id);
+        var relayExists = false;
 
-        return #ok(());
+        switch (result) {
+          case null {
+              return #err(#ProfileNotFound);
+          };
+          case (?profile) {
+             // Filter the relays that don't match the provided relay
+             let filteredRelays = Array.filter(
+                 profile.followed_relays.nostr,
+                 func (relay: Text) : Bool {
+                     return relay != gateway_url;
+                 }
+             );
+             let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = filteredRelays;
+                     nostric = profile.followed_relays.nostric;
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+             return #ok(());
+          };
+      };
     };
-*/
+
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
         vetkd_public_key : ({
