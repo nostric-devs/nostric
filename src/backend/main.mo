@@ -75,11 +75,10 @@ shared({ caller = initializer }) actor class() = this {
 
         let profile : Profile = {
           nostr_profile = nostr_profile;
-          // todo false and private_relay null in production
-          is_pro = true;
+          is_pro = false;
           private_relay = {
-            gateway_url = "ws://localhost:8089";
-            canister_id = "bd3sg-teaaa-aaaaa-qaaba-cai";
+            gateway_url = "";
+            canister_id = "";
           };
           followed_relays = {
             nostr = [
