@@ -10,13 +10,13 @@ use ic_websocket_cdk::{
 
 mod canister;
 
-/// This is the principal of the WS Gateway deployed on wss://icws.io
+#[cfg(feature = "dev")]
 pub const GATEWAY_PRINCIPAL: &str =
     "3bccy-ycuov-uxdme-kw35s-nrwvs-53cgd-wd4hy-valqf-koy7r-3xdt2-eqe";
 
-/// The principal of the WS Gateway deployed locally
-// pub const GATEWAY_PRINCIPAL: &str =
-//     "sqdfl-mr4km-2hfjy-gajqo-xqvh7-hf4mf-nra4i-3it6l-neaw4-soolw-tae";
+#[cfg(not(feature = "dev"))]
+pub const GATEWAY_PRINCIPAL: &str =
+    "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
 
 #[init]
 fn init() {

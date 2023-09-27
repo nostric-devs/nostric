@@ -33,6 +33,7 @@ shared({ caller = initializer }) actor class() = this {
         #NotAuthenticated;
         #ProfileNotFound;
         #UnableToCreate;
+        #UnableToCreateRelay;
     };
 
     public type AccountType = { owner : Principal; subaccount : ?Blob };
@@ -303,6 +304,41 @@ shared({ caller = initializer }) actor class() = this {
       };
     };
 
+    public shared (msg) func addPrivateNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
+          // Only allows signed users to register profile
+          if (Principal.isAnonymous(msg.caller)) {
+              // If the caller is anonymous Principal "2vxsx-fae" then return an error
+              return #err(#NotAuthenticated);
+          };
+
+          let id = msg.caller;
+          let result = profiles.get(id);
+          var relayExists = false;
+
+          switch (result) {
+            case null {
+                return #err(#ProfileNotFound);
+            };
+            case (?profile) {
+              // If the relay doesn't exist, add it
+              if (relayExists == false) {
+                let privateNostricRelay: NostricRelay = {
+                  gateway_url = gateway_url;
+                  canister_id = canister_id;
+                };
+                let updatedProfile: Profile = {
+                   nostr_profile = profile.nostr_profile;
+                   is_pro = true;
+                   private_relay = privateNostricRelay;
+                   followed_relays = profile.followed_relays;
+                };
+                profiles.put(msg.caller, updatedProfile);
+              };
+            };
+          };
+          return #ok(());
+        };
+
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
         vetkd_public_key : ({
@@ -422,5 +458,28 @@ shared({ caller = initializer }) actor class() = this {
 
     public shared (msg) func spawnBucket() : async Text {
       return await DynamicRelays.spawn_bucket();
+    };
+
+    public shared (msg) func handleTransaction(is_dev : Bool) : async Result.Result<NostricRelay, Error> {
+      if (await verifyPayment()) {
+        let canister_id = await spawnBucket();
+        var gateway_url = "wss://gateway.icws.io";
+        if (is_dev) {
+          gateway_url := "ws://localhost:8089";
+        };
+        switch (await addPrivateNostricRelay(gateway_url, canister_id)) {
+          case (#ok(_)) {
+            let privateNostricRelay: NostricRelay = {
+                              gateway_url = gateway_url;
+                              canister_id = canister_id;
+            };
+            return #ok(privateNostricRelay);
+          };
+          case (#err(_)) {
+              return #err(#UnableToCreateRelay);
+          };
+        };
+      };
+      return #err(#UnableToCreateRelay);
     };
 };

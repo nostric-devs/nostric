@@ -50,7 +50,10 @@
     "dynamic_relays": {
       "candid": "src/dynamic_relays/dynamic_relays.did",
       "type": "rust",
-      "package": "dynamic_relays"
+      "package": "dynamic_relays",
+      "dependencies": [
+        "relay"
+      ]
     }
   },
   "dfx": "0.14.2",

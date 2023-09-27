@@ -1,3 +1,7 @@
+cargo build --target wasm32-unknown-unknown --release --package relay
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
+
+
 dfx canister create internet_identity --specified-id be2us-64aaa-aaaaa-qaabq-cai
 dfx deploy internet_identity --argument '(null)'
 
@@ -28,8 +32,5 @@ PRINCIPAL=$(dfx identity get-principal)
 dfx deploy ckbtc_ledger --argument "(variant {Init = record {minting_account = record { owner = principal \"$PRINCIPAL\" };transfer_fee = 0;token_symbol = \"ckBTC\";token_name = \"Token ckBTC\";metadata = vec {};initial_balances = vec {};archive_options = record {num_blocks_to_archive = 10_000;trigger_threshold = 20_000;cycles_for_archive_creation = opt 4_000_000_000_000;controller_id = principal \"$PRINCIPAL\";};}})"
 dfx deploy backend
 
-
-cargo build --target wasm32-unknown-unknown --release --package relay
-wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 dfx canister create dynamic_relays --specified-id avqkn-guaaa-aaaaa-qaaea-cai
 dfx deploy dynamic_relays
