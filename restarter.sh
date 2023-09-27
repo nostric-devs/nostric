@@ -29,9 +29,7 @@ dfx deploy ckbtc_ledger --argument "(variant {Init = record {minting_account = r
 dfx deploy backend
 
 
-cargo build --target wasm32-unknown-unknown --release --package foreign_relay
-wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
+cargo build --target wasm32-unknown-unknown --release --package relay
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 dfx canister create dynamic_relays --specified-id avqkn-guaaa-aaaaa-qaaea-cai
 dfx deploy dynamic_relays
-
-

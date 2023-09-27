@@ -32,7 +32,7 @@ pub struct EffectiveIndex {
 // bytes after the installation, in a config update call. This would create a smaller
 // Index binary but it would require a two step process in installing the canister.
 const BUCKET_WASM: &[u8] = std::include_bytes!(
-    "../../../target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm"
+    "../../../target/wasm32-unknown-unknown/release/relay-opt.wasm"
 );
 
 // This is the section that implements all our business logic, on top

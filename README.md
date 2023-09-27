@@ -55,9 +55,9 @@ npm run dev
 ```
 
 Troubleshooting:
-- If you have missing `dynamic-relays-opt.wasm` file, run:
+- If you have missing `relay-opt.wasm` file, run:
 ```
-wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 ```
 - If you want to regenerate dynamic-relays.did file then run:
 ```
