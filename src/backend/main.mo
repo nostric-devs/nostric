@@ -8,6 +8,7 @@ import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
 import Account "./utils/Account";
+import DynamicRelays "canister:dynamic_relays";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
@@ -417,5 +418,9 @@ shared({ caller = initializer }) actor class() = this {
         } else {
             return false;
         };
-    }
+    };
+
+    public shared (msg) func spawnBucket() : async Text {
+      return await DynamicRelays.spawn_bucket();
+    };
 };

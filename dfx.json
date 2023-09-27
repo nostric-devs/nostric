@@ -7,7 +7,8 @@
     },
     "backend": {
       "dependencies": [
-        "vetkd_system_api"
+        "vetkd_system_api",
+        "dynamic_relays"
       ],
       "main": "src/backend/main.mo",
       "type": "motoko"
