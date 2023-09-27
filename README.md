@@ -59,6 +59,12 @@ Troubleshooting:
 ```
 wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 ```
+- If you don't have `wasm-opt` installed, run:
+
+```
+brew install binaryen
+```
+
 - If you want to regenerate dynamic-relays.did file then run:
 ```
 cargo test
