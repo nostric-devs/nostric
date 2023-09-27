@@ -94,9 +94,6 @@ impl BusinessState {
 }
 
 // New bucket spawning, Inter canister communication and other canister 2 canister
-// functionality. Most of this is used in heartbeat()
-// This should probably be moved to a dedicated data structure & an impl block
-// Might need to move some things like canister settings from "global" data
 
 pub async fn spawn_bucket() {
 

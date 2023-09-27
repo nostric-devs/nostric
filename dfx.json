@@ -45,6 +45,11 @@
       "candid": "src/relay/relay.did",
       "type": "rust",
       "package": "foreign_relay"
+    },
+    "dynamic_relays": {
+      "candid": "src/dynamic_relays/dynamic_relays.did",
+      "type": "rust",
+      "package": "dynamic_relays"
     }
   },
   "dfx": "0.14.2",
