@@ -80,8 +80,8 @@ fn add_bucket_index_impl(
 
 #[candid_method]
 #[update(name = "spawn_bucket")]
-async fn spawn_bucket() {
-    businesslogic::spawn_bucket().await;
+async fn spawn_bucket() -> String {
+    businesslogic::spawn_bucket().await
 }
 
 // Client facing calls are camelCase

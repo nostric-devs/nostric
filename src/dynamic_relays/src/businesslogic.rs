@@ -1,10 +1,10 @@
-use crate::businesslogic;
+
 use crate::{Principal, RuntimeState, TimestampMillis, RUNTIME_STATE};
 use candid::{CandidType, Encode, Nat};
 use ic_cdk::print;
 use serde::{Deserialize, Serialize};
-use std::cell::{Ref, RefMut};
-use std::cmp::Reverse;
+use std::cell::{RefMut};
+
 use std::collections::HashMap;
 
 //Business State
@@ -95,7 +95,7 @@ impl BusinessState {
 
 // New bucket spawning, Inter canister communication and other canister 2 canister
 
-pub async fn spawn_bucket() {
+pub async fn spawn_bucket() -> String {
 
     // prep canister create
     let canister_create_args =
@@ -121,8 +121,9 @@ pub async fn spawn_bucket() {
         // call canister install
         let result: bool = call_canister_install(&canister_id, canister_install_args).await;
         print(format!("Cannister install: {}", result));
-
+        return canister_id.to_text();
     }
+    String::new()
 }
 
 

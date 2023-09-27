@@ -9,5 +9,5 @@ service : {
   get_global_index : () -> (vec vec text) query;
   get_index_by_tag : (text) -> (vec principal) query;
   get_metrics : () -> (text) query;
-  spawn_bucket : () -> ();
+  spawn_bucket : () -> (text);
 }
