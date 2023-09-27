@@ -20,11 +20,11 @@
 >
   <div
     on:click={() => copyToClipBoard()}
-    class="border border-gray-700 rounded-3xl text-xs sm:text-md font-mono px-5 py-2 mx-10 my-8 cursor-pointer flex items-center"
+    class="border border-gray-700 rounded-3xl text-xs sm:text-md px-5 py-2 my-2 font-mono cursor-pointer flex items-center justify-between"
   >
     <span class="mr-2">{copyValue}</span>
     <slot />
-    <Icon name="copy" class="cursor-pointer hover:scale-110"></Icon>
+    <Icon name="copy" class="cursor-pointer hover:scale-105"></Icon>
   </div>
 </div>
 

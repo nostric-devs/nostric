@@ -13,8 +13,7 @@ import Account "./utils/Account";
 // Bind the caller and the initializer
 shared({ caller = initializer }) actor class() = this {
 
-
-    type UserProfile = {
+    type NostrProfile = {
         pk: Text;
         encrypted_sk: Text;
         username: Text;
@@ -22,8 +21,11 @@ shared({ caller = initializer }) actor class() = this {
         avatar_url: Text;
     };
 
-    type Profile = UserProfile and {
-        is_pro: Bool; // this property is going be changed only through backend
+    type Profile = {
+        nostr_profile: NostrProfile;
+        is_pro: Bool;
+        private_relay: NostricRelay;
+        followed_relays: FollowedRelays;
     };
 
     type Error = {
@@ -40,23 +42,50 @@ shared({ caller = initializer }) actor class() = this {
 
     private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
+    type NostricRelay = {
+        gateway_url: Text;
+        canister_id: Text;
+     };
+
+     type FollowedRelays = {
+        nostr: [Text];
+        nostric: [NostricRelay];
+     };
+
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
     private stable var stableprofiles : [(Principal, Profile)] = [];
 
-    public shared (msg) func addProfile(p: UserProfile) : async Result.Result<Profile, Error> {
-
-        if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
-            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+    public shared (msg) func addProfile(p: NostrProfile) : async Result.Result<Profile, Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
-        let profile : Profile = {
+        let nostr_profile : NostrProfile = {
             pk = p.pk;
             encrypted_sk = p.encrypted_sk;
             username = p.username;
             about = p.about;
-            avatar_url = p.avatar_url;
-            is_pro = false; // new profile does not have pro features
+            avatar_url = p.avatar_url
+        };
+
+        let profile : Profile = {
+          nostr_profile = nostr_profile;
+          is_pro = false;
+          private_relay = {
+            gateway_url = "";
+            canister_id = "";
+          };
+          followed_relays = {
+            nostr = [
+              "wss://relay.nostr.band",
+              "wss://nostr.girino.org",
+              "wss://nostr-pub.wellorder.net"
+            ];
+            nostric = [];
+          };
         };
 
         profiles.put(msg.caller, profile);
@@ -67,45 +96,210 @@ shared({ caller = initializer }) actor class() = this {
     public query (msg) func getProfile() : async Result.Result<Profile, Error> {
          let profile = profiles.get(msg.caller);
          return Result.fromOption(profile, #ProfileNotFound);
-     };
+    };
 
-    public shared (msg) func updateProfile(p: UserProfile) : async Result.Result<(Profile), Error> {
-
-        if(Principal.isAnonymous(msg.caller)){ // Only allows signed users to register profile
-            return #err(#NotAuthenticated); // If the caller is anonymous Principal "2vxsx-fae" then return an error
+    public shared (msg) func updateProfile(p: NostrProfile) : async Result.Result<(Profile), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
         let id = msg.caller;
         let result = profiles.get(id);
 
         switch (result) {
+          case null {
+              return #err(#ProfileNotFound);
+          };
+          case (?profile) {
+              let nostr_profile : NostrProfile = {
+                  pk = profile.nostr_profile.pk;
+                  encrypted_sk = profile.nostr_profile.encrypted_sk;
+                  username = p.username;
+                  about = p.about;
+                  avatar_url = p.avatar_url;
+              };
+              let updated_profile = { profile with nostr_profile = nostr_profile };
+              profiles.put(id, updated_profile);
+              return #ok(profile);
+           };
+        };
+    };
+
+    public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
+        };
+        profiles.delete(msg.caller);
+        return #ok(());
+    };
+
+    public shared (msg) func addNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
+          return #err(#NotAuthenticated);
+      };
+
+      let id = msg.caller;
+      let result = profiles.get(id);
+      var relayExists = false;
+
+      switch (result) {
         case null {
             return #err(#ProfileNotFound);
         };
-        case (?v) {
-            let profile : Profile = {
-                pk = v.pk;
-                encrypted_sk = v.encrypted_sk;
-                username = p.username;
-                about = p.about;
-                avatar_url = p.avatar_url;
-                is_pro = v.is_pro;
-                };
-                profiles.put(id, profile);
-                return #ok(profile);
+        case (?profile) {
+          // Check if the relay already exists
+          label l for (i in Iter.range(0, profile.followed_relays.nostric.size() - 1)) {
+            let relay = profile.followed_relays.nostric[i];
+            if (relay.gateway_url == gateway_url and relay.canister_id == canister_id) {
+                relayExists := true;
+                break l;
             };
+          };
+          // If the relay doesn't exist, add it
+          if (relayExists == false) {
+            let nostricRelay: NostricRelay = {
+              gateway_url = gateway_url;
+              canister_id = canister_id;
+            };
+            let updatedProfile: Profile = {
+               nostr_profile = profile.nostr_profile;
+               is_pro = profile.is_pro;
+               private_relay = profile.private_relay;
+               followed_relays = {
+                   nostr = profile.followed_relays.nostr;
+                   nostric = Array.append<NostricRelay>(profile.followed_relays.nostric, [nostricRelay]);
+               }
+            };
+            profiles.put(msg.caller, updatedProfile);
+          };
         };
-    };  
+      };
+      return #ok(());
+    };
 
-    public shared (msg) func deleteProfile() : async Result.Result<(()), Error> {
-
-        if(Principal.isAnonymous(msg.caller)){ 
-            return #err(#NotAuthenticated); 
+    public shared (msg) func removeNostricRelay(gateway_url: Text, canister_id: Text) : async Result.Result<(()), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
         };
 
-        profiles.delete(msg.caller);
-        return #ok(());
-    };      
+        let id = msg.caller;
+        let result = profiles.get(id);
+        var relayExists = false;
+
+        switch (result) {
+          case null {
+              return #err(#ProfileNotFound);
+          };
+          case (?profile) {
+             // Filter the relays that don't match the provided relay
+             let filteredRelays = Array.filter(
+                 profile.followed_relays.nostric,
+                 func (relay: NostricRelay) : Bool {
+                     return relay.gateway_url != gateway_url or relay.canister_id != canister_id;
+                 }
+             );
+             let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = profile.followed_relays.nostr;
+                     nostric = filteredRelays
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+             return #ok(());
+          };
+        };
+    };
+
+    public shared (msg) func addNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
+      // Only allows signed users to register profile
+      if (Principal.isAnonymous(msg.caller)) {
+          // If the caller is anonymous Principal "2vxsx-fae" then return an error
+          return #err(#NotAuthenticated);
+      };
+
+      let id = msg.caller;
+      let result = profiles.get(id);
+      var relayExists = false;
+
+      switch (result) {
+        case null {
+            return #err(#ProfileNotFound);
+        };
+        case (?profile) {
+          // Check if the relay already exists
+          label l for (i in Iter.range(0, profile.followed_relays.nostr.size() - 1)) {
+              let relay = profile.followed_relays.nostr[i];
+              if (relay == gateway_url) {
+                  relayExists := true;
+                  break l;
+              };
+          };
+          // If the relay doesn't exist, add it
+          if (relayExists == false) {
+              let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = Array.append<Text>(profile.followed_relays.nostr, [gateway_url]);
+                     nostric = profile.followed_relays.nostric;
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+          };
+          return #ok(());
+        };
+      };
+    };
+
+    public shared (msg) func removeNostrRelay(gateway_url: Text) : async Result.Result<(()), Error> {
+        // Only allows signed users to register profile
+        if (Principal.isAnonymous(msg.caller)) {
+            // If the caller is anonymous Principal "2vxsx-fae" then return an error
+            return #err(#NotAuthenticated);
+        };
+
+        let id = msg.caller;
+        let result = profiles.get(id);
+        var relayExists = false;
+
+        switch (result) {
+          case null {
+              return #err(#ProfileNotFound);
+          };
+          case (?profile) {
+             // Filter the relays that don't match the provided relay
+             let filteredRelays = Array.filter(
+                 profile.followed_relays.nostr,
+                 func (relay: Text) : Bool {
+                     return relay != gateway_url;
+                 }
+             );
+             let updatedProfile: Profile = {
+                 nostr_profile = profile.nostr_profile;
+                 is_pro = profile.is_pro;
+                 private_relay = profile.private_relay;
+                 followed_relays = {
+                     nostr = filteredRelays;
+                     nostric = profile.followed_relays.nostric;
+                 }
+             };
+             profiles.put(msg.caller, updatedProfile);
+             return #ok(());
+          };
+      };
+    };
 
     // Only the ecdsa methods in the IC management canister is required here.
     type VETKD_SYSTEM_API = actor {
@@ -164,7 +358,7 @@ shared({ caller = initializer }) actor class() = this {
             Principal.equal,
             Principal.hash,
         );
-        stableprofiles := []; 
+        stableprofiles := [];
     };
 
     public shared (msg) func getDepositAddress() : async Text {
@@ -184,7 +378,7 @@ shared({ caller = initializer }) actor class() = this {
     public shared (msg) func whoAmI() : async Principal {
         msg.caller;
     };
-    
+
     // Method for local testing purposes
     public shared (msg) func getSubaccountForPrincipal(principal : Text) : async Blob {
         let p : Principal = Principal.fromText(principal);
@@ -211,21 +405,12 @@ shared({ caller = initializer }) actor class() = this {
             // If the payment is verified set the user's is_pro param
             let result = profiles.get(msg.caller);
             switch (result) {
-            case null {
-                //return #err(#ProfileNotFound);
-            };
-            case (?v) {
-                let profile : Profile = {
-                        pk = v.pk;
-                        encrypted_sk = v.encrypted_sk;
-                        username = v.username;
-                        about = v.about;
-                        avatar_url = v.avatar_url;
-                        is_pro = true;
-                    };
-                    profiles.put(msg.caller, profile);
-
-                };
+              case null {
+              };
+              case (?profile) {
+                  let updated_profile = { profile with is_pro = true };
+                  profiles.put(msg.caller, updated_profile);
+              };
             };
             return true;
         } else {

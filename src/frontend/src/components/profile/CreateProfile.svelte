@@ -36,7 +36,6 @@
     let user = await signer.user();
     profile.encrypted_sk = signer.privateKey;
     profile.pk = user.hexpubkey();
-    console.log(profile);
   });
 
 </script>

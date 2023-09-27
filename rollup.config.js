@@ -82,7 +82,7 @@ export default (config) => {
       sourcemap: true,
       name: 'app',
       format: 'iife',
-      
+
       file: 'src/frontend/public/build/main.js',
       inlineDynamicImports: true,
     },
@@ -130,6 +130,7 @@ export default (config) => {
       }),
       injectProcessEnv({
         DFX_NETWORK: network,
+        LOG_LEVEL: "debug",
         NODE_ENV: production ? 'production' : 'development',
         ...Object.assign(
           {},

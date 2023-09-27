@@ -20,7 +20,7 @@
 
 </script>
 {#if active_alert !== null}
-<div class="alert w-5/6 mx-auto rounded-lg" style="background-color: {alert_class};">
+<div class="alert w-3/4 mx-auto rounded-lg" style="background-color: {alert_class};">
   <div class="flex content-center">
     <Icon name={ alert_icon } class="mr-6"/>
     <span>{ active_alert.text }</span>

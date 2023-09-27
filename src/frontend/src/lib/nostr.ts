@@ -12,18 +12,14 @@ export class NostrHandler {
   private signer: NDKPrivateKeySigner | null = null;
   private subscription : NDKSubscription | null = null;
 
-  private RELAYS = [
-    "wss://relay.nostr.band",
-    "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
-  ]
-
-  public async init(private_key : string) {
-    // init private key signer based on the existing private key
-    this.signer = new NDKPrivateKeySigner(private_key);
+  public async init(private_key : string, relays : string[]) {
+    if (this.signer === null) {
+      // init private key signer based on the existing private key
+      this.signer = new NDKPrivateKeySigner(private_key);
+    }
     this.nostr_user = await this.signer.user();
     this.nostr_kit = new NDK({
-      explicitRelayUrls: this.RELAYS,
+      explicitRelayUrls: relays,
       signer: this.signer,
     });
     await this.nostr_kit.connect();
@@ -41,6 +37,13 @@ export class NostrHandler {
 
   public async get_private_key() {
     return this.signer.privateKey;
+  }
+
+  public async fetch_foreign_user_profile(hexpub : string) {
+    let user = new NDKUser({hexpubkey: hexpub});
+    user.ndk = this.nostr_kit;
+    await user.fetchProfile();
+    return user;
   }
 
   public async search_match(query : string) {
@@ -79,7 +82,7 @@ export class NostrHandler {
     let filters = {
       kinds: [NDKKind.Text],
       authors: [this.nostr_user.hexpubkey(), ...following_list],
-      limit: 10, // TODO get rid of this
+      limit: 15, // TODO get rid of this
     };
     let options = { closeOnEose: false };
     this.subscription = this.nostr_kit.subscribe(filters, options);
@@ -89,10 +92,16 @@ export class NostrHandler {
     });
   }
 
-  public async publish_event(content : string, kind : NDKKind = NDKKind.Text) {
+  public async create_and_publish(content : string, kind : NDKKind = NDKKind.Text) {
     const nostr_event = new NDKEvent(this.nostr_kit);
     nostr_event.kind = kind;
     nostr_event.content = content;
+    nostr_event.tags = [];
+    await nostr_event.publish();
+  }
+
+  public async publish(event) {
+    const nostr_event = new NDKEvent(this.nostr_kit, event);
     await nostr_event.publish();
   }
 
