@@ -439,16 +439,6 @@ shared({ caller = initializer }) actor class() = this {
         };
         var response : Nat = await ledgerActor.icrc1_balance_of(acc);
         if (response > 10) {
-            // If the payment is verified set the user's is_pro param
-            let result = profiles.get(msg.caller);
-            switch (result) {
-              case null {
-              };
-              case (?profile) {
-                  let updated_profile = { profile with is_pro = true };
-                  profiles.put(msg.caller, updated_profile);
-              };
-            };
             return true;
         } else {
             return false;
