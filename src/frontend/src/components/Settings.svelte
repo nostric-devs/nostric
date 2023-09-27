@@ -4,6 +4,7 @@
   import NostrRelays from "./settings/NostrRelays.svelte";
   import EditProfile from "./settings/EditProfile.svelte";
   import Pro from "./settings/Pro.svelte";
+  import { Icon } from "svelte-feathers";
 
   export let currentRoute;
   export let params;
@@ -41,7 +42,10 @@
           class:btn-active={ currentRoute.name.includes(ROUTES.NOSTRIC_PRO) }
           href="{ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
         >
-          Nostric Pro
+          <div class="flex items-center">
+            Nostric <span class="text-warning mx-1">PRO</span>
+            <Icon name="star" width="15" height="15" color="#F7DC6F"></Icon>
+          </div>
         </a>
       </li>
     </ul>

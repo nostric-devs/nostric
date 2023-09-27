@@ -18,7 +18,7 @@ export class NostricHandler {
 
   private gateway_url : string;
   private ic_url : string;
-  private private_relay_canister_id : string = process.env.RELAY_CANISTER_ID || "";
+  private private_relay_canister_id : string;
   private local : boolean;
   private persist_key : boolean;
   private private_relay_canister_actor : ActorSubclass<_SERVICE> | null = null;
@@ -62,9 +62,11 @@ export class NostricHandler {
 
   public async init_private_relay(
     gateway_url : string,
+    private_relay_canister_id : string
   ) {
 
     this.gateway_url = gateway_url;
+    this.private_relay_canister_id = private_relay_canister_id;
 
     let options = {
       agentOptions: {host: this.ic_url}
