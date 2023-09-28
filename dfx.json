@@ -32,9 +32,15 @@
       "type": "assets"
     },
     "internet_identity": {
-      "candid": "internet_identity.did",
       "type": "custom",
-      "wasm": "internet_identity.wasm"
+      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2023-02-12_2/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2023-02-12_2/internet_identity_dev.wasm",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
     },
     "dynamic_relays": {
       "candid": "src/dynamic_relays/dynamic_relays.did",

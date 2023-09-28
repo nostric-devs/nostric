@@ -11,13 +11,13 @@ use ic_websocket_cdk::{
 
 mod canister;
 
-#[cfg(feature = "dev")]
+// #[cfg(feature = "dev")]
 pub const GATEWAY_PRINCIPAL: &str =
     "3bccy-ycuov-uxdme-kw35s-nrwvs-53cgd-wd4hy-valqf-koy7r-3xdt2-eqe";
 
-#[cfg(not(feature = "dev"))]
-pub const GATEWAY_PRINCIPAL: &str =
-    "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
+// #[cfg(not(feature = "dev"))]
+// pub const GATEWAY_PRINCIPAL: &str =
+//     "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
 
 #[init]
 fn init() {

@@ -4,7 +4,6 @@
   import NostrRelays from "./settings/NostrRelays.svelte";
   import EditProfile from "./settings/EditProfile.svelte";
   import Pro from "./settings/Pro.svelte";
-  import { Icon } from "svelte-feathers";
 
   export let currentRoute;
   export let params;
@@ -15,7 +14,7 @@
     <ul class="menu bg-base-200 rounded-box h-min w-56">
       <li class="mb-2">
         <a
-          class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name===ROUTES.SETTINGS }
+          class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name === ROUTES.SETTINGS }
           href="{ROUTES.SETTINGS + ROUTES.FOLLOWING}"
         >
           Following
@@ -32,7 +31,7 @@
       <li class="mb-2">
         <a
           class:btn-active={ currentRoute.name.includes(ROUTES.RELAYS) }
-          href="{ROUTES.SETTINGS + ROUTES.RELAYS}"
+          href="{ ROUTES.SETTINGS + ROUTES.RELAYS}"
         >
           Relays
         </a>
@@ -40,12 +39,9 @@
       <li>
         <a
           class:btn-active={ currentRoute.name.includes(ROUTES.NOSTRIC_PRO) }
-          href="{ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
+          href="{ ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
         >
-          <div class="flex items-center">
-            Nostric <span class="text-warning mx-1">PRO</span>
-            <Icon name="star" width="15" height="15" color="#F7DC6F"></Icon>
-          </div>
+          Nostric pro
         </a>
       </li>
     </ul>
