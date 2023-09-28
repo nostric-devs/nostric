@@ -72,8 +72,8 @@ export async function init() {
   }
 }
 
-export async function init_nostr_structures(auth_user) {
-
+export async function init_nostr_structures(data) {
+  auth_user = data;
   let private_key = await crypto_service.decrypt(auth_user.nostr_profile.encrypted_sk);
 
   await nostr_service.init(private_key, auth_user.followed_relays.nostr);
@@ -95,10 +95,6 @@ export async function init_nostr_structures(auth_user) {
       auth_user.private_relay.canister_id,
     );
   }
-
-  // auth_user.followed_relays.nostric = [
-  //   {gateway_url: "ws://localhost:8089", canister_id: "b77ix-eeaaa-aaaaa-qaada-cai"}
-  // ]
 
   await nostric_service.init_pool(auth_user.followed_relays.nostric);
 
@@ -133,13 +129,12 @@ export async function init_structures() {
     nostric_service = new NostricHandler();
 
     let response = await actor.getProfile();
-    if (response["err"]) {
+    if ("err" in response) {
       auth_state.set_not_registered();
       await navigateTo(ROUTES.CREATE_PROFILE);
     } else {
       try {
-        auth_user = response["ok"];
-        await init_nostr_structures(auth_user);
+        await init_nostr_structures(response.ok);
       } catch(error) {
         alert.error("Unable to initiate Nostr functionality");
         console.error(error)
