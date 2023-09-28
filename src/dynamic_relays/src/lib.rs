@@ -9,6 +9,7 @@ use ic_cdk_macros::*;
 use serde::Deserialize;
 
 use std::cell::{Ref, RefCell, RefMut};
+use ic_cdk::api;
 
 #[derive(Debug)]
 pub struct Error {
@@ -81,7 +82,18 @@ fn add_bucket_index_impl(
 #[candid_method]
 #[update(name = "spawn_bucket")]
 async fn spawn_bucket() -> String {
-    businesslogic::spawn_bucket().await
+    let canister_id = businesslogic::spawn_bucket().await;
+    /*if canister_id != "" {
+        let candid = canister_id.clone();
+        businesslogic::set_creator(candid).await;
+    }*/
+    return canister_id;
+}
+
+#[candid_method]
+#[update(name = "get_canister_id")]
+async fn get_canister_id() -> Principal {
+    api::id()
 }
 
 // Client facing calls are camelCase

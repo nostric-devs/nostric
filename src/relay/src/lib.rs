@@ -1,3 +1,4 @@
+use candid::{candid_method, export_service, Principal};
 use ic_cdk_macros::*;
 
 use canister::{on_close, on_message, on_open};
@@ -48,25 +49,56 @@ fn ws_register(args: CanisterWsRegisterArguments) -> CanisterWsRegisterResult {
 }
 
 // method called by the WS Gateway after receiving FirstMessage from the client
+#[candid_method]
 #[update]
 fn ws_open(args: CanisterWsOpenArguments) -> CanisterWsOpenResult {
     ic_websocket_cdk::ws_open(args)
 }
 
 // method called by the Ws Gateway when closing the IcWebSocket connection
+#[candid_method]
 #[update]
 fn ws_close(args: CanisterWsCloseArguments) -> CanisterWsCloseResult {
     ic_websocket_cdk::ws_close(args)
 }
 
 // method called by the WS Gateway to send a message of type GatewayMessage to the canister
+#[candid_method]
 #[update]
 fn ws_message(args: CanisterWsMessageArguments) -> CanisterWsMessageResult {
     ic_websocket_cdk::ws_message(args)
 }
 
 // method called by the WS Gateway to get messages for all the clients it serves
+#[candid_method]
 #[query]
 fn ws_get_messages(args: CanisterWsGetMessagesArguments) -> CanisterWsGetMessagesResult {
     ic_websocket_cdk::ws_get_messages(args)
+}
+
+#[query(name = "__get_candid_interface_tmp_hack")]
+fn export_candid() -> String {
+    export_service!();
+    __export_service()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::export_candid;
+    #[test]
+    fn save_candid() {
+        use std::env;
+        use std::fs::write;
+        use std::path::PathBuf;
+
+        let dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+        let dir = dir
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("src")
+            .join("relay");
+        write(dir.join("relay.did"), export_candid()).expect("Write failed.");
+    }
 }

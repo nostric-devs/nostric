@@ -1,7 +1,8 @@
 
 use crate::{Principal, RuntimeState, TimestampMillis, RUNTIME_STATE};
 use candid::{CandidType, Encode, Nat};
-use ic_cdk::print;
+
+use ic_cdk::{print};
 use serde::{Deserialize, Serialize};
 use std::cell::{RefMut};
 
@@ -124,6 +125,43 @@ pub async fn spawn_bucket() -> String {
         return canister_id.to_text();
     }
     String::new()
+}
+
+pub async fn set_creator(canister_id: String) -> () {
+    let target_canister: Principal = canister_id.parse().unwrap();
+    #[derive(CandidType)]
+    struct In {
+        creator: Principal,
+    }
+
+    let in_arg = In {
+        creator: ic_cdk::caller(),
+    };
+
+    let canister_create_args =
+        RUNTIME_STATE.with(|state| prep_canister_create(state.borrow_mut()));
+
+
+    match ic_cdk::api::call::call_with_payment(
+        target_canister,
+        "set_creator",
+        (in_arg,),
+        canister_create_args.cycles,
+    )
+        .await
+    {
+        Ok(x) => x,
+        Err((code, msg)) => {
+            print(format!(
+                "An error happened during the call: {}: {}",
+                code as u8, msg
+            ));
+
+            (CanisterIdRecord {
+                canister_id: Principal::anonymous(),
+            },)
+        }
+    };
 }
 
 

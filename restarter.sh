@@ -18,12 +18,12 @@ dfx canister create frontend --specified-id bw4dl-smaaa-aaaaa-qaacq-cai
 dfx deploy frontend
 
 
-dfx canister create relay --specified-id bd3sg-teaaa-aaaaa-qaaba-cai
-dfx deploy relay
+#dfx canister create relay --specified-id bd3sg-teaaa-aaaaa-qaaba-cai
+#dfx deploy relay
 
 
-dfx canister create foreign_relay --specified-id b77ix-eeaaa-aaaaa-qaada-cai
-dfx deploy foreign_relay
+#dfx canister create foreign_relay --specified-id b77ix-eeaaa-aaaaa-qaada-cai
+#dfx deploy foreign_relay
 
 dfx canister create ckbtc_ledger --specified-id mxzaz-hqaaa-aaaar-qaada-cai
 #dfx deploy ckbtc_ledger

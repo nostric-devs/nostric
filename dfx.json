@@ -21,8 +21,7 @@
     "frontend": {
       "dependencies": [
         "backend",
-        "vetkd_system_api",
-        "relay"
+        "vetkd_system_api"
       ],
       "frontend": {
         "entrypoint": "src/frontend/public/index.html"
@@ -37,23 +36,11 @@
       "type": "custom",
       "wasm": "internet_identity.wasm"
     },
-    "relay": {
-      "candid": "src/relay/relay.did",
-      "type": "rust",
-      "package": "relay"
-    },
-    "foreign_relay": {
-      "candid": "src/relay/relay.did",
-      "type": "rust",
-      "package": "foreign_relay"
-    },
     "dynamic_relays": {
       "candid": "src/dynamic_relays/dynamic_relays.did",
       "type": "rust",
       "package": "dynamic_relays",
-      "dependencies": [
-        "relay"
-      ]
+      "dependencies": []
     }
   },
   "dfx": "0.14.2",

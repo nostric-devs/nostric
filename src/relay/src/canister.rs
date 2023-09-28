@@ -1,5 +1,5 @@
-use candid::{CandidType, encode_one, decode_one};
-use ic_cdk::{print, api::time};
+use candid::{CandidType, encode_one, decode_one, Principal, candid_method};
+use ic_cdk::{print, api::time, caller};
 use std::error::Error;
 use serde::{Deserialize, Serialize};
 
@@ -69,6 +69,20 @@ impl AppMessage {
     }
 }
 
+struct PrincipalStorage {
+    owner: Principal,
+    creator: Principal
+}
+
+impl PrincipalStorage {
+    fn new() -> Self {
+        PrincipalStorage {
+            owner: Principal::anonymous(),
+            creator: Principal::anonymous()
+        }
+    }
+}
+
 use ic_cdk::{update};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -77,6 +91,7 @@ use std::collections::HashMap;
 lazy_static! {
     static ref RECEIVED_EVENTS: Mutex<Vec<EventData>> = Mutex::new(Vec::new());
     static ref ACTIVE_SUBSCRIPTIONS: Mutex<HashMap<Vec<u8>, String>> = Mutex::new(HashMap::new());
+    static ref PRINCIPAL_STORAGE: Mutex<PrincipalStorage> = Mutex::new(PrincipalStorage::new());
 }
 
 #[update]
@@ -214,3 +229,36 @@ pub fn on_close(args: OnCloseCallbackArgs) {
     ACTIVE_SUBSCRIPTIONS.lock().unwrap().remove(&args.client_key);
     print(format!("Client {:?} disconnected", args.client_key));
 }
+
+#[candid_method]
+#[update]
+fn set_owner(owner: Principal) {
+    /*if caller() != get_creator() {
+        panic!("Only the creator can set the owner, creator: {}, caller: {}", get_creator().to_text(), caller().to_text());
+    }*/
+    let canister_id = ic_cdk::api::id();
+    PRINCIPAL_STORAGE.lock().unwrap().owner = owner;
+    let owner_result = get_owner();
+    print(format!("Owner {} set for canister: {}", owner_result.to_text(), canister_id.to_text()));
+}
+
+#[candid_method]
+#[update]
+pub fn set_creator(creator: Principal) {
+    /*if caller() != get_creator() {
+        panic!("Only the creator or owner can set the creator, creator: {}, caller: {}, requested creator: {}", get_creator().to_text(), caller().to_text(), creator);
+    }*/
+    PRINCIPAL_STORAGE.lock().unwrap().creator = creator;
+    let canister_id = ic_cdk::api::id();
+    let creator = get_creator();
+    print(format!("Initialized creator {} for canister: {}", creator.to_text(), canister_id.to_text()));
+}
+
+fn get_owner() -> Principal {
+    PRINCIPAL_STORAGE.lock().unwrap().owner
+}
+
+fn get_creator() -> Principal {
+    PRINCIPAL_STORAGE.lock().unwrap().creator
+}
+
