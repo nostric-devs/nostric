@@ -34,7 +34,7 @@
     }
     for (let event of $nostr_events) {
       if (event.pubkey !== active_hexpubkey) {
-        if (!events[event.id]) {
+        if (!(event.id in events)) {
           events[event.id] = {
             event,
             gateway_url: null,

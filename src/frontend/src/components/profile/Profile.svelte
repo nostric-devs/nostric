@@ -47,7 +47,7 @@
     }
     for (let event of $nostr_events) {
       if (event.pubkey === hexpubkey) {
-        if (!event.id in events) {
+        if (!(event.id in events)) {
           events[event.id] = {
             event, gateway_url: null, canister_id: null
           }
