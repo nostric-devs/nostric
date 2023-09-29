@@ -17,7 +17,7 @@
           class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name === ROUTES.SETTINGS }
           href="{ROUTES.SETTINGS + ROUTES.FOLLOWING}"
         >
-          Following
+          Nostr Following
         </a>
       </li>
       <li class="mb-2">
@@ -25,7 +25,7 @@
           class:active={ currentRoute.name.includes(ROUTES.EDIT_PROFILE) }
           href="{ROUTES.SETTINGS + ROUTES.EDIT_PROFILE}"
         >
-          Profile
+          Edit Nostr Profile
         </a>
       </li>
       <li class="mb-2">
@@ -41,7 +41,7 @@
           class:btn-active={ currentRoute.name.includes(ROUTES.NOSTRIC_PRO) }
           href="{ ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
         >
-          Nostric pro
+          Nostric PRO
         </a>
       </li>
     </ul>

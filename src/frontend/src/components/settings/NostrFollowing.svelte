@@ -89,7 +89,7 @@
 
 <div class="mb-6">
   <h3 class="uppercase text-xl font-bold">
-    Following list
+    Nostr Following list
   </h3>
 </div>
 

@@ -67,7 +67,7 @@
           displayClass="mt-8 mx-auto text-center"
         />
       </div>
-      <button class="btn btn-primary my-8 mx-16" on:click={ verify }>
+      <button class="btn btn-primary my-8 mx-16" on:click={ async () => await verify() }>
         Verify payment
       </button>
     </div>

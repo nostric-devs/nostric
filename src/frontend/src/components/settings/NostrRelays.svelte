@@ -5,6 +5,7 @@
   import { alert } from "../../store/alert";
   import { nostr_service, nostric_service, auth_user, actor } from "../../store/auth";
   import { nostric_events } from "../../store/nostric";
+  import { onMount } from "svelte";
 
   let nostr_gateway_url_value : string = null;
   let adding = false; // flag for adding new relay
@@ -66,8 +67,8 @@
   }
 
   let selected_index_nostric = null;
-  let nostric_gateway_url_value : string = "ws://localhost:8089";
-  let nostric_canister_id : string = "b77ix-eeaaa-aaaaa-qaada-cai";
+  let nostric_gateway_url_value : string;
+  let nostric_canister_id : string;
   let adding_nostric : boolean = false;
 
   let owner_canister_id : string = auth_user.private_relay.canister_id;
@@ -103,10 +104,14 @@
       console.error(err);
     }
 
-    nostric_gateway_url_value = "ws://localhost:8089";
-    nostric_canister_id = "b77ix-eeaaa-aaaaa-qaada-cai";
+    reset_gateway_and_canister();
     adding_nostric = false;
 
+  }
+
+  const reset_gateway_and_canister = () => {
+    nostric_gateway_url_value = process.env.DFX_NETWORK === "ic" ? "wss://gateway.icws.io" : "ws://localhost:8089";
+    nostric_canister_id = "";
   }
 
   const remove_nostric_relay = async (relay, index) => {
@@ -142,6 +147,9 @@
 
   }
 
+  onMount(() => {
+    reset_gateway_and_canister()
+  });
 
 </script>
 

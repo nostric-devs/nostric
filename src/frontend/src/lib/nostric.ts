@@ -162,7 +162,7 @@ export class NostricHandler {
       });
       this.active_subs.on("error", (error) => {
         relay_statuses.set_status(error.gateway_url, error.canister_id, STATUS.ERROR);
-        alert.error(`There was an error in connection to gateway ${error.gateway_url} with ID ${error.canister_id}. Refresh the app.`)
+        alert.error(`Refresh the app! Error in connection to gateway ${error.gateway_url} with ID ${error.canister_id}. Is the address correct?`);
       });
     }
   }
