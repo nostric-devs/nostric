@@ -11,7 +11,7 @@
 </script>
 <div class="w-full lg:w-3/4 flex flex-col lg:flex-row justify-between mx-auto relative">
   <div>
-    <ul class="menu bg-base-200 rounded-box h-min w-56">
+    <ul class="menu bg-base-200 rounded-box h-min w-full lg:w-56">
       <li class="mb-2">
         <a
           class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name === ROUTES.SETTINGS }
@@ -46,7 +46,7 @@
       </li>
     </ul>
   </div>
-  <div class="w-full lg:pl-7 pt-1">
+  <div class="w-full lg:pl-7 mt-16 lg:mt-1">
     {#if currentRoute.name.includes(ROUTES.EDIT_PROFILE)}
       <EditProfile />
     {:else if  currentRoute.name.includes(ROUTES.NOSTRIC_PRO)}

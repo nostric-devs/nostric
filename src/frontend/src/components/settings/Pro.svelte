@@ -64,7 +64,7 @@
       <div>
         <img class="w-24 text-center mx-auto my-8" src="/img/ckbtc.png" alt="ckbtc">
         <h2 class="text-xl mt-4 mb-4">Deposit 10 sats (ckBTC) to this address to become a pro:</h2>
-        <div class="w-3/4 mx-auto">
+        <div class="lg:w-3/4 mx-auto">
           <ClipboardCopy copyValue={ address }></ClipboardCopy>
         </div>
         <QRCodeImage
@@ -80,7 +80,7 @@
       </button>
     </div>
   {:else}
-    <div class="pl-6">
+    <div>
       <div class="text-3xl text-white mb-8 font-bold flex">
         Nostric
         <span class="mx-2 flex text-warning items-center">

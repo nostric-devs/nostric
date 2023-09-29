@@ -202,12 +202,12 @@
   <div>
     {#each auth_user.followed_relays.nostric as nostric_relay, index}
       <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
-        <div class="grid grid-cols-2 w-full mr-6">
+        <div class="lg:grid lg:grid-cols-2 w-full mr-6">
           <div class="flex items-center font-sans text-sm">
             <span class="text-primary font-bold mr-2">Gateway</span>
             { nostric_relay.gateway_url }
           </div>
-          <div class="flex items-center font-sans ml-4 text-sm">
+          <div class="flex items-center font-sans lg:ml-4 text-sm">
             <span class="text-primary font-bold mr-2">Canister ID</span>
             { nostric_relay.canister_id }
           </div>
