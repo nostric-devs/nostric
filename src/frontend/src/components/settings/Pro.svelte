@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { actor, auth_user, nostric_service } from "../../store/auth";
+  import { actor, auth_client, auth_user, nostric_service } from "../../store/auth";
   import { alert } from "../../store/alert";
   import { QRCodeImage } from "svelte-qrcode-image";
   import { onMount } from "svelte";
@@ -18,7 +18,7 @@
       auth_user.is_pro = true;
       auth_user.private_relay = response["ok"];
       nostric_service.close_pool();
-      nostric_service.init_private_relay(response["ok"].gateway_url, response["ok"].canister_id);
+      nostric_service.init_private_relay(response["ok"].gateway_url, response["ok"].canister_id, auth_client);
       nostric_service.init_pool(auth_user.followed_relays.nostric);
       alert.success("We have successfully verified the payment! Your relay will be activated shortly");
     } else {

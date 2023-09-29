@@ -96,6 +96,15 @@ lazy_static! {
 
 #[update]
 #[candid_method]
+pub fn get_number_of_active_subscriptions() -> i32 {
+  if caller() != get_owner() {
+      panic!("Only the owner can call this method, caller: {}, owner: {}", caller().to_text(), get_owner().to_text());
+  }
+  ACTIVE_SUBSCRIPTIONS.lock().unwrap().len() as i32
+}
+
+#[update]
+#[candid_method]
 pub fn add_new_event(event : EventData) {
   if caller() != get_owner() {
       panic!("Only the owner can add new events, caller: {}, owner: {}", caller().to_text(), get_owner().to_text());

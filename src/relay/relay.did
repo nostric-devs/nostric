@@ -39,10 +39,12 @@ type Result_1 = variant { Ok : CanisterOutputCertifiedMessages; Err : text };
 type Result_2 = variant { Ok : CanisterWsOpenResultValue; Err : text };
 service : {
   add_new_event : (EventData) -> ();
+  get_number_of_active_subscriptions : () -> (int32);
   get_owner : () -> (principal);
   set_owner : (principal) -> ();
   ws_close : (CanisterWsCloseArguments) -> (Result);
   ws_get_messages : (CanisterWsGetMessagesArguments) -> (Result_1);
   ws_message : (CanisterWsMessageArguments) -> (Result);
   ws_open : (RelayedClientMessage) -> (Result_2);
+  ws_register : (CanisterWsCloseArguments) -> (Result);
 }
