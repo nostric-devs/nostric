@@ -7,6 +7,7 @@ service : {
   add_bucket_index : (EffectiveIndex) -> (bool);
   get_all_indexes : () -> (vec principal) query;
   get_canister_id : () -> (principal);
+  get_creator : () -> (principal);
   get_global_index : () -> (vec vec text) query;
   get_index_by_tag : (text) -> (vec principal) query;
   get_metrics : () -> (text) query;

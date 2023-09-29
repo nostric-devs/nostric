@@ -95,7 +95,11 @@ lazy_static! {
 }
 
 #[update]
+#[candid_method]
 pub fn add_new_event(event : EventData) {
+  if caller() != get_owner() {
+      panic!("Only the owner can add new events, caller: {}, owner: {}", caller().to_text(), get_owner().to_text());
+  }
   print(format!("ACTOR RECEIVE: {:?}", event));
   // store the event
   RECEIVED_EVENTS.lock().unwrap().push(event.clone());
@@ -230,35 +234,24 @@ pub fn on_close(args: OnCloseCallbackArgs) {
     print(format!("Client {:?} disconnected", args.client_key));
 }
 
-#[candid_method]
 #[update]
+#[candid_method]
 fn set_owner(owner: Principal) {
-    /*if caller() != get_creator() {
-        panic!("Only the creator can set the owner, creator: {}, caller: {}", get_creator().to_text(), caller().to_text());
-    }*/
+    let is_new_canister = PRINCIPAL_STORAGE.lock().unwrap().creator == Principal::anonymous();
     let canister_id = ic_cdk::api::id();
-    PRINCIPAL_STORAGE.lock().unwrap().owner = owner;
-    let owner_result = get_owner();
-    print(format!("Owner {} set for canister: {}", owner_result.to_text(), canister_id.to_text()));
+    if is_new_canister {
+        PRINCIPAL_STORAGE.lock().unwrap().creator = caller();
+        PRINCIPAL_STORAGE.lock().unwrap().owner = owner;
+        let owner = get_owner();
+        print(format!("Initialized owner {} for canister: {}, creator: {}", owner.to_text(), canister_id.to_text(), PRINCIPAL_STORAGE.lock().unwrap().creator));
+    } else {
+        panic!("Owner is already set for canister: {}", canister_id.to_text());
+    }
 }
 
-#[candid_method]
 #[update]
-pub fn set_creator(creator: Principal) {
-    /*if caller() != get_creator() {
-        panic!("Only the creator or owner can set the creator, creator: {}, caller: {}, requested creator: {}", get_creator().to_text(), caller().to_text(), creator);
-    }*/
-    PRINCIPAL_STORAGE.lock().unwrap().creator = creator;
-    let canister_id = ic_cdk::api::id();
-    let creator = get_creator();
-    print(format!("Initialized creator {} for canister: {}", creator.to_text(), canister_id.to_text()));
-}
-
+#[candid_method]
 fn get_owner() -> Principal {
     PRINCIPAL_STORAGE.lock().unwrap().owner
-}
-
-fn get_creator() -> Principal {
-    PRINCIPAL_STORAGE.lock().unwrap().creator
 }
 

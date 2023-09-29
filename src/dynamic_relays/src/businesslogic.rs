@@ -127,44 +127,6 @@ pub async fn spawn_bucket() -> String {
     String::new()
 }
 
-pub async fn set_creator(canister_id: String) -> () {
-    let target_canister: Principal = canister_id.parse().unwrap();
-    #[derive(CandidType)]
-    struct In {
-        creator: Principal,
-    }
-
-    let in_arg = In {
-        creator: ic_cdk::caller(),
-    };
-
-    let canister_create_args =
-        RUNTIME_STATE.with(|state| prep_canister_create(state.borrow_mut()));
-
-
-    match ic_cdk::api::call::call_with_payment(
-        target_canister,
-        "set_creator",
-        (in_arg,),
-        canister_create_args.cycles,
-    )
-        .await
-    {
-        Ok(x) => x,
-        Err((code, msg)) => {
-            print(format!(
-                "An error happened during the call: {}: {}",
-                code as u8, msg
-            ));
-
-            (CanisterIdRecord {
-                canister_id: Principal::anonymous(),
-            },)
-        }
-    };
-}
-
-
 async fn call_canister_install(canister_id: &Principal, canister_install_args: Vec<u8>) -> bool {
     let install_config: CanisterInstall = CanisterInstall {
         mode: InstallMode::Install,

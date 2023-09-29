@@ -23,13 +23,23 @@ type CanisterWsOpenResultValue = record {
   nonce : nat64;
 };
 type DirectClientMessage = record { client_key : vec nat8; message : vec nat8 };
+type EventData = record {
+  id : text;
+  sig : text;
+  content : text;
+  kind : nat32;
+  tags : vec vec text;
+  pubkey : text;
+  created_at : nat32;
+};
 type GatewayStatusMessage = record { status_index : nat64 };
 type RelayedClientMessage = record { sig : vec nat8; content : vec nat8 };
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : CanisterOutputCertifiedMessages; Err : text };
 type Result_2 = variant { Ok : CanisterWsOpenResultValue; Err : text };
 service : {
-  set_creator : (principal) -> ();
+  add_new_event : (EventData) -> ();
+  get_owner : () -> (principal);
   set_owner : (principal) -> ();
   ws_close : (CanisterWsCloseArguments) -> (Result);
   ws_get_messages : (CanisterWsGetMessagesArguments) -> (Result_1);

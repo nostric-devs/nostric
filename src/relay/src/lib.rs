@@ -1,7 +1,7 @@
 use candid::{candid_method, export_service, Principal};
 use ic_cdk_macros::*;
 
-use canister::{on_close, on_message, on_open};
+use canister::{on_close, on_message, on_open, EventData};
 use ic_websocket_cdk::{
     CanisterWsCloseArguments, CanisterWsCloseResult, CanisterWsGetMessagesArguments,
     CanisterWsGetMessagesResult, CanisterWsMessageArguments, CanisterWsMessageResult,
@@ -11,13 +11,13 @@ use ic_websocket_cdk::{
 
 mod canister;
 
-// #[cfg(feature = "dev")]
+#[cfg(feature = "dev")]
 pub const GATEWAY_PRINCIPAL: &str =
     "3bccy-ycuov-uxdme-kw35s-nrwvs-53cgd-wd4hy-valqf-koy7r-3xdt2-eqe";
 
-// #[cfg(not(feature = "dev"))]
-// pub const GATEWAY_PRINCIPAL: &str =
-//     "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
+#[cfg(not(feature = "dev"))]
+pub const GATEWAY_PRINCIPAL: &str =
+     "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
 
 #[init]
 fn init() {
@@ -28,6 +28,7 @@ fn init() {
     };
 
     ic_websocket_cdk::init(handlers, GATEWAY_PRINCIPAL);
+    ic_cdk::print(format!("Canister initialized with GATEWAY_PRINCIPAL: {}", GATEWAY_PRINCIPAL));
 }
 
 #[post_upgrade]
@@ -39,6 +40,7 @@ fn post_upgrade() {
     };
 
     ic_websocket_cdk::init(handlers, GATEWAY_PRINCIPAL);
+    ic_cdk::print(format!("Canister upgraded with GATEWAY_PRINCIPAL: {}", GATEWAY_PRINCIPAL));
 }
 
 // method called by the client SDK when instantiating a new IcWebSocket
@@ -49,29 +51,29 @@ fn ws_register(args: CanisterWsRegisterArguments) -> CanisterWsRegisterResult {
 }
 
 // method called by the WS Gateway after receiving FirstMessage from the client
-#[candid_method]
 #[update]
+#[candid_method]
 fn ws_open(args: CanisterWsOpenArguments) -> CanisterWsOpenResult {
     ic_websocket_cdk::ws_open(args)
 }
 
 // method called by the Ws Gateway when closing the IcWebSocket connection
-#[candid_method]
 #[update]
+#[candid_method]
 fn ws_close(args: CanisterWsCloseArguments) -> CanisterWsCloseResult {
     ic_websocket_cdk::ws_close(args)
 }
 
 // method called by the WS Gateway to send a message of type GatewayMessage to the canister
-#[candid_method]
 #[update]
+#[candid_method]
 fn ws_message(args: CanisterWsMessageArguments) -> CanisterWsMessageResult {
     ic_websocket_cdk::ws_message(args)
 }
 
 // method called by the WS Gateway to get messages for all the clients it serves
-#[candid_method]
 #[query]
+#[candid_method]
 fn ws_get_messages(args: CanisterWsGetMessagesArguments) -> CanisterWsGetMessagesResult {
     ic_websocket_cdk::ws_get_messages(args)
 }

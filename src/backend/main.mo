@@ -414,15 +414,15 @@ shared({ caller = initializer }) actor class() = this {
             return #err(#ProfileAlreadyHasRelay);
           };
           if (await verifyPayment(msg.caller)) {
-            let resultBucket = await spawnBucket();
-            switch (resultBucket) {
+            let spawnedRelay = await spawnRelay();
+            switch (spawnedRelay) {
               case (#ok(canister_id)) {
                 var gateway_url = "wss://gateway.icws.io";
                 if (is_dev) {
                   gateway_url := "ws://localhost:8089";
                 };
                 let privateNostricRelay = addPrivateNostricRelay(gateway_url, canister_id, profile, msg.caller);
-                await setOwnerOfCanister(canister_id, msg.caller);
+                await setOwnerOfSpawnedRelay(canister_id, msg.caller);
                 return #ok(privateNostricRelay);
               };
               case (#err(_)) {
@@ -435,7 +435,7 @@ shared({ caller = initializer }) actor class() = this {
       return #err(#UnableToCreateRelay);
     };
 
-    public shared (msg) func verifyPayment(caller: Principal) : async Bool {
+    private func verifyPayment(caller: Principal) : async Bool {
         let acc : AccountType = {
         owner = Principal.fromActor(this);
         subaccount = ?Account.toSubaccount(caller);
@@ -449,8 +449,7 @@ shared({ caller = initializer }) actor class() = this {
     };
 
     private func hasPrivateRelay(profile: Profile) : Bool {
-      false;
-      //return profile.private_relay.gateway_url != "" and profile.private_relay.canister_id != "";
+      return profile.private_relay.gateway_url != "" and profile.private_relay.canister_id != "";
     };
 
     private func addPrivateNostricRelay(gateway_url: Text, canister_id: Text, profile: Profile, caller: Principal): NostricRelay {
@@ -468,7 +467,7 @@ shared({ caller = initializer }) actor class() = this {
       return privateNostricRelay;
     };
 
-    private func spawnBucket(): async Result.Result<Text, Error> {
+    private func spawnRelay(): async Result.Result<Text, Error> {
         var result: Text = "";
         let maxTries = 5;
         var tries = 0;
@@ -482,13 +481,13 @@ shared({ caller = initializer }) actor class() = this {
         };
         return #err(#UnableToCreateRelay);
     };
+    
+    private func setOwnerOfSpawnedRelay(canister_id: Text, owner: Principal): async () {
+      let externalActor: NostricRelayCanister = actor(canister_id);
+      await externalActor.set_owner(owner);
+    };
 
     private func getCanisterCreator(): async Principal {
         return await DynamicRelays.get_canister_id();
     };
-
-    private func setOwnerOfCanister(canister_id: Text, owner: Principal): async () {
-      let externalActor: NostricRelayCanister = actor(canister_id);
-      await externalActor.set_owner(owner);
-    }
 };

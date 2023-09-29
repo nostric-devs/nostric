@@ -21,5 +21,5 @@ bitcoin_hashes = { version = "0.10", features = ["serde"] }
 
 # comment out or delete `dev` feature if you want to deploy production dynamic canisters
 [features]
+default = ["dev"]
 dev = []
-
