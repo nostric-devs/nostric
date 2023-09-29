@@ -17,10 +17,18 @@
     if ("ok" in response){
       auth_user.is_pro = true;
       auth_user.private_relay = response["ok"];
-      nostric_service.close_pool();
-      nostric_service.init_private_relay(response["ok"].gateway_url, response["ok"].canister_id, auth_client);
-      nostric_service.init_pool(auth_user.followed_relays.nostric);
-      alert.success("We have successfully verified the payment! Your relay will be activated shortly");
+
+      let counter = 5;
+      setInterval(() => {
+        if (counter >= 1) {
+          alert.success(`We have successfully verified the payment! Restart to init relay in ${counter}.`);
+          counter--;
+        } else {
+          clearInterval();
+          window.location.reload();
+        }
+      }, 1000);
+
     } else {
       alert.error("Couldn't verify the payment, try again!");
     }
