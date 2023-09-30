@@ -64,4 +64,3 @@ brew install binaryen
 ```
 cargo test
 ```
-
