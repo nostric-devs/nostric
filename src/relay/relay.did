@@ -1,120 +1,50 @@
-// Application-specific types
-type AppMessage = record {
-  text : text;
-  timestamp : nat64;
-};
-
-// IC WebSocket types
-type ClientPublicKey = blob;
-
-type DirectClientMessage = record {
-  client_key : ClientPublicKey;
-  message : blob;
-};
-
-type RelayedClientMessage = record {
-  content : blob;
-  sig : blob;
-};
-
-type GatewayStatusMessage = record {
-  status_index : nat64;
-};
-
 type CanisterIncomingMessage = variant {
+  IcWebSocketGatewayStatus : GatewayStatusMessage;
+  IcWebSocketEstablished : vec nat8;
   DirectlyFromClient : DirectClientMessage;
   RelayedByGateway : RelayedClientMessage;
-  IcWebSocketEstablished : ClientPublicKey;
-  IcWebSocketGatewayStatus : GatewayStatusMessage;
 };
-
-type CanisterOutputMessage = record {
-  client_key : ClientPublicKey;
-  content : blob;
-  key : text;
-};
-
 type CanisterOutputCertifiedMessages = record {
   messages : vec CanisterOutputMessage;
-  cert : blob;
-  tree : blob;
+  cert : vec nat8;
+  tree : vec nat8;
 };
-
-type CanisterWsRegisterArguments = record {
-  client_key : ClientPublicKey;
+type CanisterOutputMessage = record {
+  key : text;
+  content : vec nat8;
+  client_key : vec nat8;
 };
-
-type CanisterWsRegisterResult = variant {
-  Ok : null;
-  Err : text;
-};
-
-type CanisterWsOpenArguments = record {
-  content : blob;
-  sig : blob;
-};
-
+type CanisterWsCloseArguments = record { client_key : vec nat8 };
+type CanisterWsGetMessagesArguments = record { nonce : nat64 };
+type CanisterWsMessageArguments = record { msg : CanisterIncomingMessage };
 type CanisterWsOpenResultValue = record {
-  client_key : ClientPublicKey;
+  client_key : vec nat8;
   canister_id : principal;
   nonce : nat64;
 };
-
-type CanisterWsOpenResult = variant {
-  Ok : CanisterWsOpenResultValue;
-  Err : text;
-};
-
-type CanisterWsCloseArguments = record {
-  client_key : ClientPublicKey;
-};
-
-type CanisterWsCloseResult = variant {
-  Ok : null;
-  Err : text;
-};
-
-type CanisterWsMessageArguments = record {
-  msg : CanisterIncomingMessage;
-};
-
-type CanisterWsMessageResult = variant {
-  Ok : null;
-  Err : text;
-};
-
-type CanisterWsGetMessagesArguments = record {
-  nonce : nat64;
-};
-
-type CanisterWsGetMessagesResult = variant {
-  Ok : CanisterOutputCertifiedMessages;
-  Err : text;
-};
-
+type DirectClientMessage = record { client_key : vec nat8; message : vec nat8 };
 type EventData = record {
-  kind: nat32;
-  created_at: nat32;
-  tags: vec vec text;
-  content: text;
-  pubkey: text;
-  id: text;
-  sig: text;
+  id : text;
+  sig : text;
+  content : text;
+  kind : nat32;
+  tags : vec vec text;
+  pubkey : text;
+  created_at : nat32;
 };
-
-type Bla = record {
-  tags: vec vec text;
-  content: text;
-  pubkey: text;
-  id: text;
-  sig: text;
-};
-
+type GatewayStatusMessage = record { status_index : nat64 };
+type RelayedClientMessage = record { sig : vec nat8; content : vec nat8 };
+type Result = variant { Ok; Err : text };
+type Result_1 = variant { Ok : CanisterOutputCertifiedMessages; Err : text };
+type Result_2 = variant { Ok : CanisterWsOpenResultValue; Err : text };
 service : {
-  "ws_register" : (CanisterWsRegisterArguments) -> (CanisterWsRegisterResult);
-  "ws_open" : (CanisterWsOpenArguments) -> (CanisterWsOpenResult);
-  "ws_close" : (CanisterWsCloseArguments) -> (CanisterWsCloseResult);
-  "ws_message" : (CanisterWsMessageArguments) -> (CanisterWsMessageResult);
-  "ws_get_messages" : (CanisterWsGetMessagesArguments) -> (CanisterWsGetMessagesResult) query;
-  "add_new_event": (EventData) -> ();
-};
+  add_new_event : (EventData) -> ();
+  get_number_of_active_subscriptions : () -> (int32);
+  get_owner : () -> (principal);
+  set_owner : (principal) -> ();
+  ws_close : (CanisterWsCloseArguments) -> (Result);
+  ws_get_messages : (CanisterWsGetMessagesArguments) -> (Result_1);
+  ws_message : (CanisterWsMessageArguments) -> (Result);
+  ws_open : (RelayedClientMessage) -> (Result_2);
+  ws_register : (CanisterWsCloseArguments) -> (Result);
+}

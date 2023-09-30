@@ -17,4 +17,4 @@ service : {
       encryption_public_key : blob;
     }
   ) -> (record { encrypted_key : blob });
-};
+}

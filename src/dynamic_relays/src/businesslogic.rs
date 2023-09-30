@@ -1,10 +1,11 @@
-use crate::businesslogic;
+
 use crate::{Principal, RuntimeState, TimestampMillis, RUNTIME_STATE};
 use candid::{CandidType, Encode, Nat};
-use ic_cdk::print;
+
+use ic_cdk::{print};
 use serde::{Deserialize, Serialize};
-use std::cell::{Ref, RefMut};
-use std::cmp::Reverse;
+use std::cell::{RefMut};
+
 use std::collections::HashMap;
 
 //Business State
@@ -32,30 +33,14 @@ pub struct EffectiveIndex {
 // bytes after the installation, in a config update call. This would create a smaller
 // Index binary but it would require a two step process in installing the canister.
 const BUCKET_WASM: &[u8] = std::include_bytes!(
-    "../../../target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm"
+    "../../../target/wasm32-unknown-unknown/release/relay-opt.wasm"
 );
 
 // This is the section that implements all our business logic, on top
 // of the business state.
-#[allow(dead_code)]
 impl BusinessState {
     pub fn add_bucket_index(&mut self, canister_id: Principal, effective_index: EffectiveIndex) {
         self.bucket_indexes.insert(canister_id, effective_index);
-    }
-
-    pub fn generate_index_tag_to_canisters(&self) -> HashMap<String, Vec<Principal>> {
-        let mut tag2can: HashMap<String, Vec<Principal>> = Default::default();
-
-        for (canister_id, effective_index) in self.bucket_indexes.iter() {
-            for tag in effective_index.tags.iter() {
-                tag2can
-                    .entry(tag.clone())
-                    .or_default()
-                    .push(canister_id.clone());
-            }
-        }
-
-        tag2can
     }
 
     pub fn get_index_by_tag(&self, tag: &str) -> Vec<Principal> {
@@ -68,10 +53,6 @@ impl BusinessState {
 
     pub fn get_all_buckets(&self) -> Vec<Principal> {
         self.bucket_indexes.keys().map(|key| key.clone()).collect()
-    }
-
-    pub fn get_global_index(&self) -> GlobalIndex {
-        self.global_index.clone()
     }
 
     // We can't send a hashmap<String, Vec<Principal>> as candid encoded data,
@@ -94,11 +75,8 @@ impl BusinessState {
 }
 
 // New bucket spawning, Inter canister communication and other canister 2 canister
-// functionality. Most of this is used in heartbeat()
-// This should probably be moved to a dedicated data structure & an impl block
-// Might need to move some things like canister settings from "global" data
 
-pub async fn spawn_bucket() {
+pub async fn spawn_bucket() -> String {
 
     // prep canister create
     let canister_create_args =
@@ -124,10 +102,10 @@ pub async fn spawn_bucket() {
         // call canister install
         let result: bool = call_canister_install(&canister_id, canister_install_args).await;
         print(format!("Cannister install: {}", result));
-
+        return canister_id.to_text();
     }
+    String::new()
 }
-
 
 async fn call_canister_install(canister_id: &Principal, canister_install_args: Vec<u8>) -> bool {
     let install_config: CanisterInstall = CanisterInstall {
@@ -137,10 +115,11 @@ async fn call_canister_install(canister_id: &Principal, canister_install_args: V
         arg: canister_install_args,
     };
 
-    match ic_cdk::api::call::call(
+    match ic_cdk::api::call::call_with_payment(
         Principal::management_canister(),
         "install_code",
         (install_config,),
+        110_000_000_000,
     )
     .await
     {
@@ -173,7 +152,7 @@ async fn call_canister_create(canister_create_args: CreateCanisterArgs) -> Princ
         Principal::management_canister(),
         "create_canister",
         (in_arg,),
-        canister_create_args.cycles,
+        110_000_000_000,
     )
     .await
     {

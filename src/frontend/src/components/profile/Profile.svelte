@@ -21,6 +21,7 @@
   let publishing : boolean = false;
   let message : string | null = null;
   let initialized : boolean = false;
+  let active_subscriptions : number = 0;
 
   let feed_events = {};
 
@@ -46,7 +47,7 @@
     }
     for (let event of $nostr_events) {
       if (event.pubkey === hexpubkey) {
-        if (!event.id in events) {
+        if (!(event.id in events)) {
           events[event.id] = {
             event, gateway_url: null, canister_id: null
           }
@@ -69,6 +70,9 @@
     private_key = nostr_service.get_private_key();
     initializing = false;
     parse_events();
+    if (auth_user.is_pro) {
+      active_subscriptions = await nostric_service.get_number_of_subscriptions();
+    }
     initialized = true;
   });
 
@@ -102,11 +106,13 @@
               </div>
               <div class="stat">
                 <div class="stat-title">Following</div>
-                <div class="stat-value">4,200</div>
+                <div class="stat-value">{ active_subscriptions }</div>
               </div>
               <div class="stat">
                 <div class="stat-title">Relays</div>
-                <div class="stat-value">1,200</div>
+                <div class="stat-value">
+                  { auth_user.followed_relays.nostr.length + auth_user.followed_relays.nostric.length }
+                </div>
               </div>
             </div>
 

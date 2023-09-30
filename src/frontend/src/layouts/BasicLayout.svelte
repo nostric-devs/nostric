@@ -46,9 +46,9 @@
   </div>
 </div>
 
-<div class="mx-auto mb-24">
-  <div class="flex justify-center mb-24">
-    <ul class="menu menu-horizontal bg-base-200 grid grid-cols-3 rounded-box">
+<div class="mx-auto mb-6 w:5/6 lg:w-auto mx-5 lg:mx-0 lg:w-full lg:mb-24">
+  <div class="flex mb-4 justify-center lg:mb-24">
+    <ul class="menu menu-horizontal w-3/4 lg:w-auto bg-base-200 grid grid-cols-3 rounded-box">
       <li class="mr-2">
         <a
           href="{ROUTES.HOME}"
@@ -81,6 +81,8 @@
   <div class="mb-6">
     <Alert />
   </div>
-  <Route {currentRoute} {params}/>
+  <div class="w-3/4 mx-auto lg:w-auto">
+    <Route {currentRoute} {params}/>
+  </div>
 </div>
 

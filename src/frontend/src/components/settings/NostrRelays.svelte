@@ -5,6 +5,7 @@
   import { alert } from "../../store/alert";
   import { nostr_service, nostric_service, auth_user, actor } from "../../store/auth";
   import { nostric_events } from "../../store/nostric";
+  import { onMount } from "svelte";
 
   let nostr_gateway_url_value : string = null;
   let adding = false; // flag for adding new relay
@@ -22,7 +23,7 @@
           private_key,
           auth_user.followed_relays.nostr.concat(nostr_gateway_url_value)
         );
-        alert.success(`Successfully added new relay ${nostr_gateway_url_value}`);
+        alert.success(`Successfully added new relay ${nostr_gateway_url_value}.`);
         auth_user.followed_relays.nostr = new_relays;
       } else {
         alert.error(`Unable to add new relay ${nostr_gateway_url_value}`);
@@ -66,8 +67,8 @@
   }
 
   let selected_index_nostric = null;
-  let nostric_gateway_url_value : string = "ws://localhost:8089";
-  let nostric_canister_id : string = "b77ix-eeaaa-aaaaa-qaada-cai";
+  let nostric_gateway_url_value : string;
+  let nostric_canister_id : string;
   let adding_nostric : boolean = false;
 
   let owner_canister_id : string = auth_user.private_relay.canister_id;
@@ -84,15 +85,19 @@
 
       let result = await actor.addNostricRelay(new_relay.gateway_url, new_relay.canister_id);
       if ("ok" in result) {
-        // clear events, close pool and re-init with new changes
-        nostric_events.clear();
-        await nostric_service.close_pool();
-        await nostric_service.init_pool(new_relays);
-
-        alert.success(`Successfully added new relay ${new_relay.gateway_url} with ID ${new_relay.canister_id}. Wait a while for it to initialize.`);
-
         // local state update
         auth_user.followed_relays.nostric = new_relays;
+
+        let counter = 5;
+        setInterval(() => {
+          if (counter >= 1) {
+            alert.success(`Successfully added new relay. The app will be restarted in ${counter}.`);
+            counter--;
+          } else {
+            clearInterval();
+            window.location.reload();
+          }
+        }, 1000);
 
       } else {
         alert.error(`Unable to add new relay ${nostric_gateway_url_value}`);
@@ -103,10 +108,14 @@
       console.error(err);
     }
 
-    nostric_gateway_url_value = "ws://localhost:8089";
-    nostric_canister_id = "b77ix-eeaaa-aaaaa-qaada-cai";
+    reset_gateway_and_canister();
     adding_nostric = false;
 
+  }
+
+  const reset_gateway_and_canister = () => {
+    nostric_gateway_url_value = process.env.DFX_NETWORK === "ic" ? "wss://gateway.icws.io" : "ws://localhost:8089";
+    nostric_canister_id = "";
   }
 
   const remove_nostric_relay = async (relay, index) => {
@@ -117,17 +126,22 @@
       let filtered_relays = auth_user.followed_relays.nostric
         .filter((item) => item.gateway_url !== relay.gateway_url && item.canister_id !== relay.canister_id);
 
-      let result = await actor.removeNostricRelay(nostric_gateway_url_value, nostric_canister_id);
-
+      let result = await actor.removeNostricRelay(relay.gateway_url, relay.canister_id);
       if ("ok" in result) {
-        // no need to clear events, the old ones can stay and new ones will be loaded
-        await nostric_service.close_pool();
-        if (filtered_relays.length > 0) {
-          await nostric_service.init_pool(filtered_relays);
-        }
-        alert.success(`Successfully removed relay ${relay.gateway_url} with ID ${relay.canister_id}`);
         // update local state
         auth_user.followed_relays.nostric = filtered_relays;
+
+        let counter = 5;
+        setInterval(() => {
+          if (counter >= 1) {
+            alert.success(`Successfully removed relay. The app will be restarted in ${counter}.`);
+            counter--;
+          } else {
+            clearInterval();
+            window.location.reload();
+          }
+        }, 1000);
+
       } else {
         alert.error(`Unable to add new relay ${relay}`);
         console.error(result["err"]);
@@ -142,8 +156,81 @@
 
   }
 
+  onMount(() => {
+    reset_gateway_and_canister()
+  });
 
 </script>
+
+<div>
+  <h3 class="mb-2 uppercase text-xl font-bold">
+    Nostr<span class="text-primary">ic</span> relays
+  </h3>
+  <div class="mb-8 text-sm text-gray-500">
+    Special Nostric relays, running on IC with address to a gateway in form "ws://example.io" and an underlying canister ID.
+  </div>
+  <div class="form-control mb-12">
+    <div class="w-full">
+      <div class="flex justify-center">
+        <input
+          class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl mr-4"
+          placeholder="type nostric gateway url"
+          bind:value={ nostric_gateway_url_value }
+          disabled={ adding || deleting || adding_nostric }
+        />
+        <input
+          class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
+          placeholder="type canister ID"
+          bind:value={ nostric_canister_id }
+          disabled={ adding || deleting || adding_nostric }
+        />
+        <button
+          disabled={ !nostric_gateway_url_value || !nostric_canister_id || adding || deleting || adding_nostric }
+          class="btn btn-primary rounded-2xl ml-3"
+          on:click={ async () => await add_nostric_relay() }
+        >
+          {#if !adding_nostric}
+            <Icon name="plus" />
+          {:else}
+            <Spinner width="2"/>
+          {/if}
+          Add relay
+        </button>
+      </div>
+    </div>
+  </div>
+  <div>
+    {#each auth_user.followed_relays.nostric as nostric_relay, index}
+      <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
+        <div class="lg:grid lg:grid-cols-2 w-full mr-6">
+          <div class="flex items-center font-sans text-sm">
+            <span class="text-primary font-bold mr-2">Gateway</span>
+            { nostric_relay.gateway_url }
+          </div>
+          <div class="flex items-center font-sans lg:ml-4 text-sm">
+            <span class="text-primary font-bold mr-2">Canister ID</span>
+            { nostric_relay.canister_id }
+          </div>
+        </div>
+        <button
+          class="btn btn-error rounded-2xl ml-3 btn-sm"
+          on:click={ async () => await remove_nostric_relay(nostric_relay, index) }
+          disabled={
+            adding || deleting || adding_nostric ||
+            (nostric_relay.gateway_url === owner_gateway_url && nostric_relay.canister_id === owner_canister_id)
+          }
+        >
+          {#if deleting && selected_index_nostric === index}
+            <Spinner width="2"/>
+          {:else}
+            <Icon name="minus" />
+          {/if}
+          remove
+        </button>
+      </div>
+    {/each}
+  </div>
+</div>
 
 <div class="mb-12">
   <h3 class="mb-2 uppercase text-xl font-bold">Nostr relays</h3>
@@ -187,76 +274,6 @@
             <Spinner width="2"/>
           {:else}
             <Icon name="minus" size="12"/>
-          {/if}
-          remove
-        </button>
-      </div>
-    {/each}
-  </div>
-</div>
-
-<div>
-  <h3 class="mb-2 uppercase text-xl font-bold">
-    Nostr<span class="text-primary">ic</span> relays
-  </h3>
-  <div class="mb-8 text-sm text-gray-500">
-    Special Nostric relays, running on IC with address to a gateway in form "ws://example.io" and an underlying canister ID.
-  </div>
-  <div class="form-control mb-12">
-    <div class="w-full">
-      <div class="flex justify-center">
-        <input
-          class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl mr-4"
-          placeholder="type nostric gateway url"
-          bind:value={ nostric_gateway_url_value }
-          disabled={ adding || deleting || adding_nostric }
-        />
-        <input
-          class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
-          placeholder="type canister ID"
-          bind:value={ nostric_canister_id }
-          disabled={ adding || deleting || adding_nostric }
-        />
-        <button
-          disabled={ !nostric_gateway_url_value || !nostric_canister_id || adding || deleting || adding_nostric }
-          class="btn btn-primary rounded-2xl ml-3"
-          on:click={ async () => await add_nostric_relay() }
-        >
-          {#if !adding_nostric}
-            <Icon name="plus" />
-          {:else}
-            <Spinner width="2"/>
-          {/if}
-          Add relay
-        </button>
-      </div>
-    </div>
-  </div>
-  <div>
-    {#each auth_user.followed_relays.nostric as nostric_relay, index}
-      <div class="bg-base-200 rounded flex my-4 px-4 py-3 justify-between items-center">
-        <div class="grid grid-cols-2 w-full mr-6">
-          <div class="flex items-center font-sans text-sm">
-            <span class="text-primary font-bold mr-2">Gateway</span>
-            { nostric_relay.gateway_url }
-          </div>
-          <div class="flex items-center font-sans ml-4 text-sm">
-            <span class="text-primary font-bold mr-2">Canister ID</span>
-            { nostric_relay.canister_id }
-          </div>
-        </div>
-        <button
-          class="btn btn-error rounded-2xl ml-3 btn-sm"
-          on:click={ async () => await remove_nostric_relay(nostric_relay, index) }
-          disabled={
-            adding || deleting || adding_nostric ||
-            (nostric_relay.gateway_url === owner_gateway_url && nostric_relay.canister_id === owner_canister_id)
-          }
-        >
-          {#if deleting && selected_index_nostric === index}
-            <Spinner width="2"/>
-          {:else}
-            <Icon name="minus" />
           {/if}
           remove
         </button>

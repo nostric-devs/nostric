@@ -4,7 +4,6 @@
   import NostrRelays from "./settings/NostrRelays.svelte";
   import EditProfile from "./settings/EditProfile.svelte";
   import Pro from "./settings/Pro.svelte";
-  import { Icon } from "svelte-feathers";
 
   export let currentRoute;
   export let params;
@@ -12,13 +11,13 @@
 </script>
 <div class="w-full lg:w-3/4 flex flex-col lg:flex-row justify-between mx-auto relative">
   <div>
-    <ul class="menu bg-base-200 rounded-box h-min w-56">
+    <ul class="menu bg-base-200 rounded-box h-min w-full lg:w-56">
       <li class="mb-2">
         <a
-          class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name===ROUTES.SETTINGS }
+          class:active={ currentRoute.name.includes(ROUTES.FOLLOWING) || currentRoute.name === ROUTES.SETTINGS }
           href="{ROUTES.SETTINGS + ROUTES.FOLLOWING}"
         >
-          Following
+          Nostr Following
         </a>
       </li>
       <li class="mb-2">
@@ -26,13 +25,13 @@
           class:active={ currentRoute.name.includes(ROUTES.EDIT_PROFILE) }
           href="{ROUTES.SETTINGS + ROUTES.EDIT_PROFILE}"
         >
-          Profile
+          Edit Nostr Profile
         </a>
       </li>
       <li class="mb-2">
         <a
           class:btn-active={ currentRoute.name.includes(ROUTES.RELAYS) }
-          href="{ROUTES.SETTINGS + ROUTES.RELAYS}"
+          href="{ ROUTES.SETTINGS + ROUTES.RELAYS}"
         >
           Relays
         </a>
@@ -40,17 +39,14 @@
       <li>
         <a
           class:btn-active={ currentRoute.name.includes(ROUTES.NOSTRIC_PRO) }
-          href="{ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
+          href="{ ROUTES.SETTINGS + ROUTES.NOSTRIC_PRO}"
         >
-          <div class="flex items-center">
-            Nostric <span class="text-warning mx-1">PRO</span>
-            <Icon name="star" width="15" height="15" color="#F7DC6F"></Icon>
-          </div>
+          Nostric PRO
         </a>
       </li>
     </ul>
   </div>
-  <div class="w-full lg:pl-7 pt-1">
+  <div class="w-full lg:pl-7 mt-16 lg:mt-1">
     {#if currentRoute.name.includes(ROUTES.EDIT_PROFILE)}
       <EditProfile />
     {:else if  currentRoute.name.includes(ROUTES.NOSTRIC_PRO)}

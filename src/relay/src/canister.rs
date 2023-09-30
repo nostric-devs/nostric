@@ -1,5 +1,5 @@
-use candid::{CandidType, encode_one, decode_one};
-use ic_cdk::{print, api::time};
+use candid::{CandidType, encode_one, decode_one, Principal, candid_method};
+use ic_cdk::{print, api::time, caller};
 use std::error::Error;
 use serde::{Deserialize, Serialize};
 
@@ -69,6 +69,20 @@ impl AppMessage {
     }
 }
 
+struct PrincipalStorage {
+    owner: Principal,
+    creator: Principal
+}
+
+impl PrincipalStorage {
+    fn new() -> Self {
+        PrincipalStorage {
+            owner: Principal::anonymous(),
+            creator: Principal::anonymous()
+        }
+    }
+}
+
 use ic_cdk::{update};
 use std::sync::Mutex;
 use lazy_static::lazy_static;
@@ -77,10 +91,24 @@ use std::collections::HashMap;
 lazy_static! {
     static ref RECEIVED_EVENTS: Mutex<Vec<EventData>> = Mutex::new(Vec::new());
     static ref ACTIVE_SUBSCRIPTIONS: Mutex<HashMap<Vec<u8>, String>> = Mutex::new(HashMap::new());
+    static ref PRINCIPAL_STORAGE: Mutex<PrincipalStorage> = Mutex::new(PrincipalStorage::new());
 }
 
 #[update]
+#[candid_method]
+pub fn get_number_of_active_subscriptions() -> i32 {
+  if caller() != get_owner() {
+      panic!("Only the owner can call this method, caller: {}, owner: {}", caller().to_text(), get_owner().to_text());
+  }
+  ACTIVE_SUBSCRIPTIONS.lock().unwrap().len() as i32
+}
+
+#[update]
+#[candid_method]
 pub fn add_new_event(event : EventData) {
+  if caller() != get_owner() {
+      panic!("Only the owner can add new events, caller: {}, owner: {}", caller().to_text(), get_owner().to_text());
+  }
   print(format!("ACTOR RECEIVE: {:?}", event));
   // store the event
   RECEIVED_EVENTS.lock().unwrap().push(event.clone());
@@ -214,3 +242,25 @@ pub fn on_close(args: OnCloseCallbackArgs) {
     ACTIVE_SUBSCRIPTIONS.lock().unwrap().remove(&args.client_key);
     print(format!("Client {:?} disconnected", args.client_key));
 }
+
+#[update]
+#[candid_method]
+fn set_owner(owner: Principal) {
+    let is_new_canister = PRINCIPAL_STORAGE.lock().unwrap().creator == Principal::anonymous();
+    let canister_id = ic_cdk::api::id();
+    if is_new_canister {
+        PRINCIPAL_STORAGE.lock().unwrap().creator = caller();
+        PRINCIPAL_STORAGE.lock().unwrap().owner = owner;
+        let owner = get_owner();
+        print(format!("Initialized owner {} for canister: {}, creator: {}", owner.to_text(), canister_id.to_text(), PRINCIPAL_STORAGE.lock().unwrap().creator));
+    } else {
+        panic!("Owner is already set for canister: {}", canister_id.to_text());
+    }
+}
+
+#[update]
+#[candid_method]
+fn get_owner() -> Principal {
+    PRINCIPAL_STORAGE.lock().unwrap().owner
+}
+

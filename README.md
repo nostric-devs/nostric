@@ -35,13 +35,13 @@ dfx start --clean
 ```
 5. Now run in the new shell execute the deploy script:
 ```
-sh ./restarter.sh
+sh ./build.sh
 ```
 Or you can execute these commands one by one:
 ```
-dfx deploy internet_identity --argument '(null)'
-dfx canister create vetkd_system_api --specified-id br5f7-7uaaa-aaaaa-qaaca-cai
-dfx deploy vetkd_system_api
+cargo build --target wasm32-unknown-unknown --release --package relay
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
+
 dfx deploy backend
 dfx deploy frontend
 ```
@@ -55,12 +55,16 @@ npm run dev
 ```
 
 Troubleshooting:
-- If you have missing `dynamic-relays-opt.wasm` file, run:
+- If you have missing `relay-opt.wasm` file, run:
 ```
-wasm-opt target/wasm32-unknown-unknown/release/foreign_relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/foreign_relay-opt.wasm
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 ```
-- If you want to regenerate dynamic-relays.did file then run:
+- If you don't have `wasm-opt` installed, run:
+```
+brew install binaryen
+```
+- If you want to regenerate `dynamic-relays.did` and `relay.did` file then run:
 ```
 cargo test
 ```
-
+- If you are planning to run this project locally you have to also deploy local ledger canister. The `build.sh` script contains local `ckbtc_ledger`.

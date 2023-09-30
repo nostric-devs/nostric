@@ -18,4 +18,8 @@ hex = "0.4"
 lazy_static = "1.4"
 ic-websocket-cdk = { git = "https://github.com/omnia-network/ic-websocket-cdk-rs", rev = "a1d05625f96faa12cad484afcdd01ddad39bb28c" }
 bitcoin_hashes = { version = "0.10", features = ["serde"] }
-secp256k1 = {version = "0.21", features = ["rand", "rand-std", "serde", "bitcoin_hashes", "global-context"] }
+
+# comment out or delete `dev` feature if you want to deploy production dynamic canisters
+[features]
+default = ["dev"]
+dev = []

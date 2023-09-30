@@ -3,7 +3,8 @@ import type { ActorSubclass } from "@dfinity/agent";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import type { _SERVICE } from "../../../relay/relay.did";
 import { NDKKind } from "@nostr-dev-kit/ndk";
-import { createActor, idlFactory } from "../../../declarations/relay";
+import { createActor, idlFactory } from "./relay_declarations";
+
 import {
   nostric_events,
   nostric_relays_count,
@@ -11,7 +12,7 @@ import {
   relay_statuses,
   STATUS
 } from "../store/nostric";
-import { nostric_service } from "../store/auth";
+import { auth_client, nostric_service } from "../store/auth";
 import { alert } from "../store/alert";
 
 export class NostricHandler {
@@ -62,14 +63,17 @@ export class NostricHandler {
 
   public async init_private_relay(
     gateway_url : string,
-    private_relay_canister_id : string
+    private_relay_canister_id : string,
   ) {
 
     this.gateway_url = gateway_url;
     this.private_relay_canister_id = private_relay_canister_id;
 
     let options = {
-      agentOptions: {host: this.ic_url}
+      agentOptions: {
+        host: this.ic_url,
+        identity: auth_client.getIdentity(),
+      }
     }
     this.private_relay_canister_actor = await createActor(
       this.private_relay_canister_id, options
@@ -158,9 +162,13 @@ export class NostricHandler {
       });
       this.active_subs.on("error", (error) => {
         relay_statuses.set_status(error.gateway_url, error.canister_id, STATUS.ERROR);
-        alert.error(`There was an error in connection to gateway ${error.gateway_url} with ID ${error.canister_id}. Refresh the app.`)
+        alert.error(`Refresh the app! Error in connection to gateway ${error.gateway_url} with ID ${error.canister_id}. Is the address correct?`);
       });
     }
+  }
+
+  public async get_number_of_subscriptions() {
+    return await this.private_relay_canister_actor.get_number_of_active_subscriptions();
   }
 
   public async publish_to_private_relay(content : string) {
@@ -175,6 +183,8 @@ export class NostricHandler {
       const signed_event = finishEvent(event, this.private_key);
       await this.private_relay_canister_actor.add_new_event(signed_event);
       return signed_event;
+    } else {
+      console.error("Private relay actor not set");
     }
   }
 

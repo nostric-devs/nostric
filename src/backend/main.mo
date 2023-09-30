@@ -8,6 +8,8 @@ import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
 import Account "./utils/Account";
+import DynamicRelays "canister:dynamic_relays";
+import vetkd_system_api "canister:vetkd_system_api";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
@@ -32,6 +34,8 @@ shared({ caller = initializer }) actor class() = this {
         #NotAuthenticated;
         #ProfileNotFound;
         #UnableToCreate;
+        #ProfileAlreadyHasRelay;
+        #UnableToCreateRelay;
     };
 
     public type AccountType = { owner : Principal; subaccount : ?Blob };
@@ -50,6 +54,10 @@ shared({ caller = initializer }) actor class() = this {
      type FollowedRelays = {
         nostr: [Text];
         nostric: [NostricRelay];
+     };
+
+     type NostricRelayCanister = actor {
+       set_owner: (owner: Principal) -> async ();
      };
 
     private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
@@ -301,22 +309,6 @@ shared({ caller = initializer }) actor class() = this {
       };
     };
 
-    // Only the ecdsa methods in the IC management canister is required here.
-    type VETKD_SYSTEM_API = actor {
-        vetkd_public_key : ({
-            canister_id : ?Principal;
-            derivation_path : [Blob];
-            key_id : { curve: { #bls12_381; } ; name: Text };
-        }) -> async ({ public_key : Blob; });
-        vetkd_encrypted_key : ({
-            public_key_derivation_path : [Blob];
-            derivation_id : Blob;
-            key_id : { curve: { #bls12_381; } ; name: Text };
-            encryption_public_key : Blob;
-        }) -> async ({ encrypted_key : Blob });
-    };
-
-    let vetkd_system_api : VETKD_SYSTEM_API = actor("br5f7-7uaaa-aaaaa-qaaca-cai");
 
     public shared({ caller }) func app_vetkd_public_key(derivation_path: [Blob]): async Text {
         let { public_key } = await vetkd_system_api.vetkd_public_key({
@@ -395,26 +387,92 @@ shared({ caller = initializer }) actor class() = this {
         return response;
     };
 
-    public shared (msg) func verifyPayment() : async Bool {
+
+    public shared (msg) func handleTransaction(is_dev : Bool) : async Result.Result<NostricRelay, Error> {
+      let result = profiles.get(msg.caller);
+      switch (result) {
+        case null {
+            return #err(#ProfileNotFound);
+        };
+        case (?profile) {
+          if (hasPrivateRelay(profile)) {
+            return #err(#ProfileAlreadyHasRelay);
+          };
+          if (await verifyPayment(msg.caller)) {
+            let spawnedRelay = await spawnRelay();
+            switch (spawnedRelay) {
+              case (#ok(canister_id)) {
+                var gateway_url = "wss://gateway.icws.io";
+                if (is_dev) {
+                  gateway_url := "ws://localhost:8089";
+                };
+                let privateNostricRelay = addPrivateNostricRelay(gateway_url, canister_id, profile, msg.caller);
+                await setOwnerOfSpawnedRelay(canister_id, msg.caller);
+                return #ok(privateNostricRelay);
+              };
+              case (#err(_)) {
+                return #err(#UnableToCreateRelay);
+              };
+            };
+          };
+        };
+      };
+      return #err(#UnableToCreateRelay);
+    };
+
+    private func verifyPayment(caller: Principal) : async Bool {
         let acc : AccountType = {
         owner = Principal.fromActor(this);
-        subaccount = ?Account.toSubaccount(msg.caller);
+        subaccount = ?Account.toSubaccount(caller);
         };
         var response : Nat = await ledgerActor.icrc1_balance_of(acc);
         if (response > 10) {
-            // If the payment is verified set the user's is_pro param
-            let result = profiles.get(msg.caller);
-            switch (result) {
-              case null {
-              };
-              case (?profile) {
-                  let updated_profile = { profile with is_pro = true };
-                  profiles.put(msg.caller, updated_profile);
-              };
-            };
             return true;
         } else {
             return false;
         };
-    }
+    };
+
+    private func hasPrivateRelay(profile: Profile) : Bool {
+      return profile.private_relay.gateway_url != "" and profile.private_relay.canister_id != "";
+    };
+
+    private func addPrivateNostricRelay(gateway_url: Text, canister_id: Text, profile: Profile, caller: Principal): NostricRelay {
+      let privateNostricRelay: NostricRelay = {
+        gateway_url = gateway_url;
+        canister_id = canister_id;
+      };
+      let updatedProfile: Profile = {
+         nostr_profile = profile.nostr_profile;
+         is_pro = true;
+         private_relay = privateNostricRelay;
+         followed_relays = profile.followed_relays;
+      };
+      profiles.put(caller, updatedProfile);
+      return privateNostricRelay;
+    };
+
+    private func spawnRelay(): async Result.Result<Text, Error> {
+        var result: Text = "";
+        let maxTries = 5;
+        var tries = 0;
+
+        while (tries < maxTries) {
+            result := await DynamicRelays.spawn_bucket();
+            if (result != "") {
+                return #ok(result);
+            };
+            tries += 1;
+        };
+        return #err(#UnableToCreateRelay);
+    };
+    
+    private func setOwnerOfSpawnedRelay(canister_id: Text, owner: Principal): async () {
+      let externalActor: NostricRelayCanister = actor(canister_id);
+      await externalActor.set_owner(owner);
+    };
+
+    private func getCanisterCreator(): async Principal {
+        return await DynamicRelays.get_canister_id();
+    };
 };

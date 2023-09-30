@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { actor, auth_user, nostric_service } from "../../store/auth";
+  import { actor, auth_client, auth_user, nostric_service } from "../../store/auth";
   import { alert } from "../../store/alert";
   import { QRCodeImage } from "svelte-qrcode-image";
   import { onMount } from "svelte";
@@ -13,13 +13,22 @@
 
   const verify = async () => {
     initializing = true;
-    let response = await actor.handlePayment(process.env.DFX_NETWORK === "ic");
-    if (response["ok"]){
+    let response = await actor.handleTransaction(process.env.DFX_NETWORK !== "ic");
+    if ("ok" in response){
       auth_user.is_pro = true;
       auth_user.private_relay = response["ok"];
-      nostric_service.close_pool();
-      nostric_service.init_private_relay(response["ok"].gateway_url, response["ok"].canister_id);
-      alert.success("We have successfully verified the payment! Your relay will be activated shortly");
+
+      let counter = 5;
+      setInterval(() => {
+        if (counter >= 1) {
+          alert.success(`We have successfully verified the payment! Restart to init relay in ${counter}.`);
+          counter--;
+        } else {
+          clearInterval();
+          window.location.reload();
+        }
+      }, 1000);
+
     } else {
       alert.error("Couldn't verify the payment, try again!");
     }
@@ -27,7 +36,7 @@
   };
 
   onMount(async () => {
-    if (!auth_user.is_pro) {
+    if (!auth_user?.is_pro) {
       initializing = true;
       address = await actor.getDepositAddress();
       principal = await actor.whoAmI();
@@ -45,7 +54,7 @@
   </div>
 {:else}
 <div class="w-full">
-  {#if !auth_user.is_pro }
+  {#if !auth_user?.is_pro }
     <div class="text-center shadow-2xl bg-base-100">
       <h1 class="text-3xl text-white mb-6 font-bold">
         Get Nostr<span class="text-primary">ic</span> Pro features
@@ -55,7 +64,7 @@
       <div>
         <img class="w-24 text-center mx-auto my-8" src="/img/ckbtc.png" alt="ckbtc">
         <h2 class="text-xl mt-4 mb-4">Deposit 10 sats (ckBTC) to this address to become a pro:</h2>
-        <div class="w-3/4">
+        <div class="lg:w-3/4 mx-auto">
           <ClipboardCopy copyValue={ address }></ClipboardCopy>
         </div>
         <QRCodeImage
@@ -66,13 +75,16 @@
           displayClass="mt-8 mx-auto text-center"
         />
       </div>
+      <button class="btn btn-primary my-8 mx-16" on:click={ async () => await verify() }>
+        Verify payment
+      </button>
     </div>
   {:else}
-    <div class="pl-6">
+    <div>
       <div class="text-3xl text-white mb-8 font-bold flex">
         Nostric
-        <span class="mx-2 flex text-warning">
-          PRO <Icon name="star" width="35" height="35" color="#F7DC6F"></Icon>
+        <span class="mx-2 flex text-warning items-center">
+          PRO <Icon name="star" width="25" height="25" color="#F7DC6F"></Icon>
         </span>
         is active
       </div>

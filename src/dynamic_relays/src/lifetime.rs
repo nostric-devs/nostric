@@ -1,6 +1,6 @@
-use crate::{businesslogic, CanisterEnv, Data, RuntimeState, RUNTIME_STATE};
-use ic_cdk::print;
-use ic_cdk_macros::{heartbeat, init, post_upgrade, pre_upgrade};
+use crate::{CanisterEnv, Data, RuntimeState, RUNTIME_STATE};
+
+use ic_cdk_macros::{init, post_upgrade, pre_upgrade};
 
 #[init]
 fn init() {

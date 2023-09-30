@@ -117,8 +117,16 @@ export class SimplePool {
               subs.push(s)
             });
 
-            r.on("error", (error) => {
+            r.on("error", (error) =>
               for (let cb of errorListeners.values()) cb({error, gateway_url, canister_id});
+            });
+
+            r.on("disconnect", () => {
+              for (let cb of errorListeners.values()) cb({
+                error: "Gateway closed the connection. Refresh the app.",
+                gateway_url,
+                canister_id
+              });
             });
 
             await r.connect();

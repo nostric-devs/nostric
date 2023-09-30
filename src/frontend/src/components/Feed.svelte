@@ -34,7 +34,7 @@
     }
     for (let event of $nostr_events) {
       if (event.pubkey !== active_hexpubkey) {
-        if (!events[event.id]) {
+        if (!(event.id in events)) {
           events[event.id] = {
             event,
             gateway_url: null,
@@ -85,6 +85,11 @@
         />
       </div>
     {/each}
+  {/if}
+  {#if feed_events.length === 0 && initialized && $nostric_relays_count === $nostric_relays_eose_count }
+    <div class="text-center">
+      No posts loaded. Try following users on Nostr or adding Nostric relays.
+    </div>
   {/if}
 </div>
 
