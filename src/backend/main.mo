@@ -9,6 +9,7 @@ import Iter "mo:base/Iter";
 import Hex "./utils/Hex";
 import Account "./utils/Account";
 import DynamicRelays "canister:dynamic_relays";
+import vetkd_system_api "canister:vetkd_system_api";
 
 // Declare a shared actor class
 // Bind the caller and the initializer
@@ -308,22 +309,6 @@ shared({ caller = initializer }) actor class() = this {
       };
     };
 
-    // Only the ecdsa methods in the IC management canister is required here.
-    type VETKD_SYSTEM_API = actor {
-        vetkd_public_key : ({
-            canister_id : ?Principal;
-            derivation_path : [Blob];
-            key_id : { curve: { #bls12_381; } ; name: Text };
-        }) -> async ({ public_key : Blob; });
-        vetkd_encrypted_key : ({
-            public_key_derivation_path : [Blob];
-            derivation_id : Blob;
-            key_id : { curve: { #bls12_381; } ; name: Text };
-            encryption_public_key : Blob;
-        }) -> async ({ encrypted_key : Blob });
-    };
-
-    let vetkd_system_api : VETKD_SYSTEM_API = actor("br5f7-7uaaa-aaaaa-qaaca-cai");
 
     public shared({ caller }) func app_vetkd_public_key(derivation_path: [Blob]): async Text {
         let { public_key } = await vetkd_system_api.vetkd_public_key({

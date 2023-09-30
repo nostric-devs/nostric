@@ -38,25 +38,9 @@ const BUCKET_WASM: &[u8] = std::include_bytes!(
 
 // This is the section that implements all our business logic, on top
 // of the business state.
-#[allow(dead_code)]
 impl BusinessState {
     pub fn add_bucket_index(&mut self, canister_id: Principal, effective_index: EffectiveIndex) {
         self.bucket_indexes.insert(canister_id, effective_index);
-    }
-
-    pub fn generate_index_tag_to_canisters(&self) -> HashMap<String, Vec<Principal>> {
-        let mut tag2can: HashMap<String, Vec<Principal>> = Default::default();
-
-        for (canister_id, effective_index) in self.bucket_indexes.iter() {
-            for tag in effective_index.tags.iter() {
-                tag2can
-                    .entry(tag.clone())
-                    .or_default()
-                    .push(canister_id.clone());
-            }
-        }
-
-        tag2can
     }
 
     pub fn get_index_by_tag(&self, tag: &str) -> Vec<Principal> {
@@ -69,10 +53,6 @@ impl BusinessState {
 
     pub fn get_all_buckets(&self) -> Vec<Principal> {
         self.bucket_indexes.keys().map(|key| key.clone()).collect()
-    }
-
-    pub fn get_global_index(&self) -> GlobalIndex {
-        self.global_index.clone()
     }
 
     // We can't send a hashmap<String, Vec<Principal>> as candid encoded data,
@@ -135,10 +115,11 @@ async fn call_canister_install(canister_id: &Principal, canister_install_args: V
         arg: canister_install_args,
     };
 
-    match ic_cdk::api::call::call(
+    match ic_cdk::api::call::call_with_payment(
         Principal::management_canister(),
         "install_code",
         (install_config,),
+        110_000_000_000,
     )
     .await
     {
@@ -171,7 +152,7 @@ async fn call_canister_create(canister_create_args: CreateCanisterArgs) -> Princ
         Principal::management_canister(),
         "create_canister",
         (in_arg,),
-        canister_create_args.cycles,
+        110_000_000_000,
     )
     .await
     {

@@ -20,8 +20,7 @@
     },
     "frontend": {
       "dependencies": [
-        "backend",
-        "vetkd_system_api"
+        "backend"
       ],
       "frontend": {
         "entrypoint": "src/frontend/public/index.html"
