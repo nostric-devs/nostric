@@ -35,13 +35,10 @@ dfx start --clean
 ```
 5. Now run in the new shell execute the deploy script:
 ```
-sh ./restarter.sh
+sh ./build.sh
 ```
 Or you can execute these commands one by one:
 ```
-dfx deploy internet_identity --argument '(null)'
-dfx canister create vetkd_system_api --specified-id br5f7-7uaaa-aaaaa-qaaca-cai
-dfx deploy vetkd_system_api
 dfx deploy backend
 dfx deploy frontend
 ```
@@ -60,12 +57,10 @@ Troubleshooting:
 wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 ```
 - If you don't have `wasm-opt` installed, run:
-
 ```
 brew install binaryen
 ```
-
-- If you want to regenerate dynamic-relays.did file then run:
+- If you want to regenerate `dynamic-relays.did` and `relay.did` file then run:
 ```
 cargo test
 ```
