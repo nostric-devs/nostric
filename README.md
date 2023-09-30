@@ -67,3 +67,4 @@ brew install binaryen
 ```
 cargo test
 ```
+- If you are planning to run this project locally you have to also deploy local ledger canister. The `build.sh` script contains local `ckbtc_ledger`.
