@@ -39,6 +39,9 @@ sh ./build.sh
 ```
 Or you can execute these commands one by one:
 ```
+cargo build --target wasm32-unknown-unknown --release --package relay
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
+
 dfx deploy backend
 dfx deploy frontend
 ```
