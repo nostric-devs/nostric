@@ -1,10 +1,7 @@
 cargo build --target wasm32-unknown-unknown --release --package relay
 wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 
-dfx canister create backend --specified-id asrmz-lmaaa-aaaaa-qaaeq-cai
 dfx deploy backend
-
-dfx canister create frontend --specified-id bw4dl-smaaa-aaaaa-qaacq-cai
 dfx deploy frontend
 
 # NOTE: this is only for local testing, relays are created dynamically
