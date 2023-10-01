@@ -49,7 +49,7 @@ export class NostrHandler {
   public async search_match(query : string) {
     let events = await this.nostr_kit.fetchEvents({
       search: query,
-      limit: 10,
+      limit: 15,
       kinds: [NDKKind.Metadata]
     });
 
@@ -65,7 +65,7 @@ export class NostrHandler {
       }
 
       await user.fetchProfile();
-      if ((user.profile.name || "").includes(query) || hexpubkey.includes(query)) {
+      if ((user.profile.name || "").includes(query) || hexpubkey.includes(query) || user.npub.includes(query)) {
         users[hexpubkey] = user;
       }
     }

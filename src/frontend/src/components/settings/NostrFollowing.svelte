@@ -98,7 +98,7 @@
     <div class="flex justify-center">
       <input
         class="input input-bordered w-full mb-1 border-primary border-2 rounded-2xl"
-        placeholder="search for a user name or public key"
+        placeholder="search for a user name, hexkey or npub"
         bind:value={ query_value }
         disabled={ searching || loading }
       />
