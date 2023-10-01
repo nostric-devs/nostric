@@ -402,7 +402,7 @@ shared({ caller = initializer }) actor class() = this {
             let spawnedRelay = await spawnRelay();
             switch (spawnedRelay) {
               case (#ok(canister_id)) {
-                var gateway_url = "wss://gateway.icws.io";
+                var gateway_url = "wss://gateway.nostric.app";
                 if (is_dev) {
                   gateway_url := "ws://localhost:8089";
                 };
