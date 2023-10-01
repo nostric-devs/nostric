@@ -99,6 +99,9 @@ pub async fn spawn_bucket() -> String {
         })
         .unwrap();
 
+        let deposit_result: bool = call_deposit_cycles(&canister_id).await;
+        print(format!("Cannister deposit: {}", deposit_result));
+
         // call canister install
         let result: bool = call_canister_install(&canister_id, canister_install_args).await;
         print(format!("Cannister install: {}", result));
@@ -115,24 +118,21 @@ async fn call_canister_install(canister_id: &Principal, canister_install_args: V
         arg: canister_install_args,
     };
 
-    match ic_cdk::api::call::call_with_payment(
+    match ic_cdk::api::call::call(
         Principal::management_canister(),
         "install_code",
         (install_config,),
-        110_000_000_000,
     )
     .await
     {
         Ok(x) => x,
         Err((code, msg)) => {
-            print(format!(
+            panic!(
                 "An error happened during the call: {}: {}",
                 code as u8, msg
-            ));
-            return false;
+            );
         }
     };
-
     true
 }
 
@@ -152,20 +152,16 @@ async fn call_canister_create(canister_create_args: CreateCanisterArgs) -> Princ
         Principal::management_canister(),
         "create_canister",
         (in_arg,),
-        110_000_000_000,
+        canister_create_args.cycles,
     )
     .await
     {
         Ok(x) => x,
         Err((code, msg)) => {
-            print(format!(
+            panic!(
                 "An error happened during the call: {}: {}",
                 code as u8, msg
-            ));
-
-            (CanisterIdRecord {
-                canister_id: Principal::anonymous(),
-            },)
+            );
         }
     };
 
@@ -197,6 +193,31 @@ fn prep_canister_create(runtime_state: RefMut<RuntimeState>) -> CreateCanisterAr
     create_args
 }
 
+async fn call_deposit_cycles(canister_id: &Principal) -> bool {
+    print("deposit to bucket...");
+
+    let canister_config: CanisterIdRecord = CanisterIdRecord {
+        canister_id: canister_id.clone(),
+    };
+
+    match ic_cdk::api::call::call_with_payment(
+        Principal::management_canister(),
+        "deposit_cycles",
+        (canister_config,),
+        100_000_000_000,
+    )
+        .await
+    {
+        Ok(x) => x,
+        Err((code, msg)) => {
+            panic!(
+                "An error happened during the call: {}: {}",
+                code as u8, msg
+            );
+        }
+    };
+    true
+}
 
 #[derive(CandidType, Deserialize)]
 struct CanisterInstallSendArgs {
