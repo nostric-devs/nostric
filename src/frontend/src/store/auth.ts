@@ -177,6 +177,5 @@ export async function logout_from_ii() {
   auth_client.logout();
   nostric_service.close_pool();
   auth_state.set_anonymous();
-  await actor.deleteProfile();
   navigateTo(ROUTES.LOGIN);
 }
