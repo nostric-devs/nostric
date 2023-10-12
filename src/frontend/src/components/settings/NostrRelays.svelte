@@ -114,7 +114,7 @@
   }
 
   const reset_gateway_and_canister = () => {
-    nostric_gateway_url_value = process.env.DFX_NETWORK === "ic" ? "wss://gateway.icws.io" : "ws://localhost:8089";
+    nostric_gateway_url_value = process.env.DFX_NETWORK === "ic" ? "wss://gateway.nostric.app" : "ws://localhost:8089";
     nostric_canister_id = "";
   }
 

@@ -17,7 +17,7 @@ pub const GATEWAY_PRINCIPAL: &str =
 
 #[cfg(not(feature = "dev"))]
 pub const GATEWAY_PRINCIPAL: &str =
-     "3656s-3kqlj-dkm5d-oputg-ymybu-4gnuq-7aojd-w2fzw-5lfp2-4zhx3-4ae";
+     "squ7d-crygw-ky7kr-yhltv-iz3zy-regab-iekgc-l2qsx-4s56t-4o4vz-bae";
 
 #[init]
 fn init() {
