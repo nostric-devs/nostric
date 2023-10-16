@@ -1,0 +1,4 @@
+node_modules/
+.dfx/
+.svelte-kit/
+build

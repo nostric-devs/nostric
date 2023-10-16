@@ -1,0 +1,61 @@
+{
+  "name": "sveltekit-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internet Computer SvelteKit starter application",
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister",
+    "SvelteKit"
+  ],
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --plugin-search-dir . --check . && eslint .",
+    "format": "prettier --plugin-search-dir . --write .",
+    "prebuild": "npm run generate",
+    "generate": "dfx generate && node ./update.types.mjs && npm run format"
+  },
+  "devDependencies": {
+    "@dfinity/identity-secp256k1": "^0.19.3",
+    "@dfinity/ledger": "next",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "@rollup/plugin-inject": "^5.0.3",
+    "@sveltejs/adapter-static": "^2.0.3",
+    "@sveltejs/kit": "^1.25.1",
+    "@types/prismjs": "^1.26.1",
+    "@types/wicg-file-system-access": "^2020.9.8",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-svelte": "^2.33.2",
+    "node-fetch": "^3.3.2",
+    "pem-file": "^1.0.1",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "prettier-plugin-svelte": "^3.0.3",
+    "sass": "^1.68.0",
+    "svelte": "^4.2.1",
+    "svelte-check": "^3.5.2",
+    "svelte-preprocess": "^5.0.4",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9"
+  },
+  "type": "module",
+  "dependencies": {
+    "@dfinity/agent": "^0.19.3",
+    "@dfinity/auth-client": "^0.19.3",
+    "@dfinity/identity": "^0.19.3",
+    "@dfinity/principal": "^0.19.3",
+    "@dfinity/utils": "next",
+    "buffer": "^6.0.3"
+  }
+}
