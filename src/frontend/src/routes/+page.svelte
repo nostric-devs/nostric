@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createActor } from '../../../declarations/backend';
-
+	import "../../../app.postcss";
 	let input = '';
 	let disabled = false;
 	let greeting = '';
@@ -35,8 +35,8 @@
 
 	<form on:submit|preventDefault={handleOnSubmit}>
 		<label for="name">Hello, Enter your name: &nbsp;</label>
-		<input id="name" alt="Name" type="text" bind:value={input} {disabled} />
-		<button type="submit">Click Me!</button>
+		<input class="input" id="name" alt="Name" type="text" bind:value={input} {disabled}  />
+		<button type="submit" class="btn variant-filled">Button</button>
 	</form>
 
 	<section id="greeting">
