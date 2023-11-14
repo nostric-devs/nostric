@@ -1,8 +1,14 @@
 {
   "canisters": {
+    "vetkd_system_api": {
+      "candid": "vetkd_system_api.did",
+      "type": "custom",
+      "wasm": "vetkd_system_api.wasm"
+    },
     "backend": {
       "main": "src/backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["vetkd_system_api"]
     },
     "frontend": {
       "dependencies": ["backend"],
@@ -11,6 +17,22 @@
       },
       "source": ["build/"],
       "type": "assets"
+    },
+    "ckbtc_ledger": {
+      "type": "custom",
+      "candid": "ledger.did",
+      "wasm": "ledger_canister.wasm"
+    },
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2023-02-12_2/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2023-02-12_2/internet_identity_dev.wasm",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
     }
   },
   "defaults": {
