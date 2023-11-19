@@ -61,7 +61,9 @@
     "@dfinity/identity": "^0.19.3",
     "@dfinity/principal": "^0.19.3",
     "@dfinity/utils": "next",
+    "@floating-ui/dom": "^1.5.3",
     "buffer": "^6.0.3",
-    "novel-svelte": "^0.1.6"
+    "novel-svelte": "^0.1.6",
+    "svelte-feathers": "^0.8.4"
   }
 }
