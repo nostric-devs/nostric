@@ -21,7 +21,7 @@ module.exports = {
   plugins: [
     // 4. Append the Skeleton plugin (after other plugins)
     skeleton({
-      themes: { preset: ["wintry", "rocket"] },
+      themes: { preset: ["wintry", "rocket", "gold-nouveau"] },
     }),
   ],
 };
