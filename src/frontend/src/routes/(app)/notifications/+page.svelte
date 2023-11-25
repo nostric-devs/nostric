@@ -1,1 +1,1 @@
-<h1 class="h1">Bookmarks</h1>
+<h1 class="h1">Notifications</h1>
