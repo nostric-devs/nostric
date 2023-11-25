@@ -3,9 +3,8 @@
     import { Avatar } from "@skeletonlabs/skeleton";
 
 </script>
-<h1 class="h1">Feed</h1>
 
-{#each [1, 2, 3] as item}
+<h1 class="h1">Post detail</h1>
 <section class="card p-5 m-5">
     <a href="/user/1">
         <div class="post-head mx-auto flex md:flex-row flex-col">
@@ -29,4 +28,3 @@
         <p class="text-sm">1 st Nov 2023</p>
     </a>
 </section>
-{/each}
