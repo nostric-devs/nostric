@@ -16,13 +16,18 @@
   import Navigation from '$lib/Navigation/Navigation.svelte';
   import PopUpSearch from "$lib/Search/PopUpSearch.svelte";
   import Logo from '$lib/Logo/Logo.svelte';
+  import { getDrawerStore } from '@skeletonlabs/skeleton';
+  
+  const drawerStore = getDrawerStore();
 
   const options = [
     { label: "Vanilla", value: "vanilla", keywords: "plain, basic", meta: { healthy: false } },
   ]
   let inputValue = "";
 
-
+  function drawerOpen(): void {
+    drawerStore.open({});
+  }
 </script>
 
 
@@ -42,8 +47,17 @@
   slotSidebarLeft="bg-surface-500/5 w-0 lg:w-16 xl:w-72"
   slotSidebarRight="bg-surface-500/5 w-0 lg:w-96 lg:px-4 lg:py-4"
   slotFooter="lg:hidden"
-  slotPageHeader="border flex justify-between items-center pl-3 pr-4 py-3"
+  slotPageHeader="lg:hidden border flex justify-between items-center pl-3 pr-4 py-3"
 >
+  <svelte:fragment slot="pageHeader">
+    <Avatar
+      src="invalid-image.jpg"
+      initials="AB"
+      cursor="cursor-pointer"
+      class="lg:hidden"
+      on:click={drawerOpen}
+    />
+  </svelte:fragment>
 
   <svelte:fragment slot="sidebarLeft">
     <div class="flex flex-col h-screen">
