@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import { page } from "$app/stores";
 
   import { AppShell, LightSwitch } from "@skeletonlabs/skeleton";
@@ -13,11 +12,12 @@
   import { initializeStores } from '@skeletonlabs/skeleton';
   initializeStores();
 
-  import Navigation from '$lib/Navigation/Navigation.svelte';
-  import PopUpSearch from "$lib/Search/PopUpSearch.svelte";
-  import Logo from '$lib/Logo/Logo.svelte';
+  import Navigation from '$lib/components/Navigation/Navigation.svelte';
+  import PopUpSearch from "$lib/components/Search/PopUpSearch.svelte";
+  import Logo from '$lib/components/Logo/Logo.svelte';
   import { getDrawerStore } from '@skeletonlabs/skeleton';
-  
+  import { get_path, ROUTES } from "$lib/utils/routes";
+
   const drawerStore = getDrawerStore();
 
   const options = [
@@ -90,13 +90,13 @@
       <TabAnchor href="/" selected={$page.url.pathname === "/"} class="py-5">
         <Home color="black" size="32" class="mx-auto"></Home>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === "/search"} class="py-5">
+      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.SEARCH)} class="py-5">
         <Search color="black" size="32" class="mx-auto"></Search>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === "/notifications"} class="py-5">
+      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.NOTIFICATIONS)} class="py-5">
         <Bell color="black" size="32" class="mx-auto"></Bell>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === "/inbox"} class="py-5">
+      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.INBOX)} class="py-5">
         <Mail color="black" size="32" class="mx-auto"></Mail>
       </TabAnchor>
     </TabGroup>

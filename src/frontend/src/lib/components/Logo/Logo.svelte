@@ -1,4 +1,4 @@
-<a href="/"
+<a href="/src/frontend/static"
     ><svg
         class="logo"
         version="1.0"

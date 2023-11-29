@@ -1,13 +1,13 @@
 <script>
-
-    import { Avatar } from "@skeletonlabs/skeleton";
-
+  import { Avatar } from "@skeletonlabs/skeleton";
+  import { get_path, ROUTES } from "$lib/utils/routes";
 </script>
+
 <h1 class="h1">Feed</h1>
 
 {#each [1, 2, 3] as item}
 <section class="card p-5 m-5">
-    <a href="/user/1">
+    <a href={get_path(ROUTES.USER, "1")}>
         <div class="post-head mx-auto flex md:flex-row flex-col">
             <div>
                 <Avatar
@@ -24,7 +24,7 @@
             </div>
         </div>
     </a>
-    <a href="/post/1">
+    <a href={get_path(ROUTES.POST, "1")}>
         <p class="my-2 text-lg">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo, ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio lorem non turpis. Nullam sit amet enim. Suspendisse id velit vitae ligula volutpat condimentum. Aliquam erat volutpat. Sed quis velit. Nulla facilisi. Nulla libero. Vivamus pharetra posuere sapien. </p>
         <p class="text-sm">1 st Nov 2023</p>
     </a>
