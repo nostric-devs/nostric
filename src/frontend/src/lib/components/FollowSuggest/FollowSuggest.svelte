@@ -1,8 +1,8 @@
 <script>
   import { Avatar } from "@skeletonlabs/skeleton";
 </script>
-
-<div class="follow-suggest mt-6">
+<h3 class="h3 my-6">People to follow</h3>
+<div class="follow-suggest">
   {#each [1, 2, 3, 5, 6, 7, 8, 9, 10] as item}
     <div
       class="post-head mx-auto my-4 flex md:flex-row flex-col justify-between items-start"
