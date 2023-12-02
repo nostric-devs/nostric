@@ -5,6 +5,10 @@
       "type": "custom",
       "wasm": "vetkd_system_api.wasm"
     },
+    "candb_file_upload": {
+      "main": "src/candb_file_upload/main.mo",
+      "type": "motoko"
+    },
     "backend": {
       "dependencies": [
         "vetkd_system_api",
@@ -46,6 +50,12 @@
       "type": "rust",
       "package": "dynamic_relays",
       "dependencies": []
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": "mops sources"
     }
   },
   "dfx": "0.14.2",

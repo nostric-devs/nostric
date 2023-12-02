@@ -13,3 +13,5 @@ src/frontend/public/build/*
 
 src/declarations
 /Cargo.lock
+
+.mops
