@@ -1,1 +1,1 @@
-<h1 class="h1">Settings</h1>
+<h1 class="h1 m-4">Settings</h1>

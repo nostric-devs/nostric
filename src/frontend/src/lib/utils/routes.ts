@@ -11,7 +11,8 @@ export const ROUTES = {
   USER: "user",
   POST: "post",
   INBOX: "inbox",
-  SEARCH: "search"
+  SEARCH: "search",
+  IMAGES: "images"
 }
 
 export const get_path = (...names : string[]) : string => {

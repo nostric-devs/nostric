@@ -1,1 +1,1 @@
-<h1 class="h1">Profile</h1>
+<h1 class="h1 m-4">Profile</h1>

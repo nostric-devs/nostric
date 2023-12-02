@@ -1,29 +1,6 @@
 <script>
-  import { Avatar } from "@skeletonlabs/skeleton";
-  import { get_path, ROUTES } from "$lib/utils/routes";
+    import Post from "$lib/components/Post/Post.svelte";
 </script>
 
-<h1 class="h1">Post detail</h1>
-<section class="card p-5 m-5">
-    <a href={get_path(ROUTES.USER, "1")}>
-        <div class="post-head mx-auto flex md:flex-row flex-col">
-            <div>
-                <Avatar
-                    src=""
-                    class="mr-4 mt-1"
-                    initials="LV"
-                    width="w-10"
-                    background="bg-primary-500"
-                />
-            </div>
-            <div>
-                <div class="font-bold">Lukas Vozda</div>
-                <span class="text-sm">@lukas</span>
-            </div>
-        </div>
-    </a>
-    <a href={get_path(ROUTES.POST, "1")}>
-        <p class="my-2 text-lg">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo, ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio lorem non turpis. Nullam sit amet enim. Suspendisse id velit vitae ligula volutpat condimentum. Aliquam erat volutpat. Sed quis velit. Nulla facilisi. Nulla libero. Vivamus pharetra posuere sapien. </p>
-        <p class="text-sm">1 st Nov 2023</p>
-    </a>
-</section>
+<h1 class="h1 m-4">Post detail</h1>
+<Post />

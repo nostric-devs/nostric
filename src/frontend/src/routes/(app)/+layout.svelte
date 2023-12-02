@@ -2,27 +2,33 @@
   import { page } from "$app/stores";
 
   import { AppShell, LightSwitch } from "@skeletonlabs/skeleton";
-  import { TabGroup, TabAnchor } from '@skeletonlabs/skeleton';
+  import { TabGroup, TabAnchor } from "@skeletonlabs/skeleton";
 
   import { Home, Search, Bell, Mail } from "svelte-feathers";
 
-  import { Avatar } from '@skeletonlabs/skeleton';
-  import { Drawer } from '@skeletonlabs/skeleton';
+  import { Avatar } from "@skeletonlabs/skeleton";
+  import { Drawer } from "@skeletonlabs/skeleton";
 
-  import { initializeStores } from '@skeletonlabs/skeleton';
+  import { initializeStores } from "@skeletonlabs/skeleton";
   initializeStores();
 
-  import Navigation from '$lib/components/Navigation/Navigation.svelte';
+  import Navigation from "$lib/components/Navigation/Navigation.svelte";
   import PopUpSearch from "$lib/components/Search/PopUpSearch.svelte";
-  import Logo from '$lib/components/Logo/Logo.svelte';
-  import { getDrawerStore } from '@skeletonlabs/skeleton';
+  import Logo from "$lib/components/Logo/Logo.svelte";
+  import { getDrawerStore } from "@skeletonlabs/skeleton";
   import { get_path, ROUTES } from "$lib/utils/routes";
+    import FollowSuggest from "$lib/components/FollowSuggest/FollowSuggest.svelte";
 
   const drawerStore = getDrawerStore();
 
   const options = [
-    { label: "Vanilla", value: "vanilla", keywords: "plain, basic", meta: { healthy: false } },
-  ]
+    {
+      label: "Vanilla",
+      value: "vanilla",
+      keywords: "plain, basic",
+      meta: { healthy: false },
+    },
+  ];
   let inputValue = "";
 
   function drawerOpen(): void {
@@ -30,14 +36,9 @@
   }
 </script>
 
-
 <Drawer width="w-9/12">
   <div class="px-4 py-4">
-    <Avatar
-      src="invalid-image.jpg"
-      initials="AB"
-      cursor="cursor-pointer"
-    />
+    <Avatar src="invalid-image.jpg" initials="AB" cursor="cursor-pointer" />
   </div>
   <Navigation />
 </Drawer>
@@ -76,6 +77,7 @@
 
   <svelte:fragment slot="sidebarRight">
     <PopUpSearch {options} {inputValue}></PopUpSearch>
+    <FollowSuggest />
   </svelte:fragment>
 
   <svelte:fragment slot="footer">
@@ -90,16 +92,27 @@
       <TabAnchor href="/" selected={$page.url.pathname === "/"} class="py-5">
         <Home color="black" size="32" class="mx-auto"></Home>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.SEARCH)} class="py-5">
+      <TabAnchor
+        href="/"
+        selected={$page.url.pathname === get_path(ROUTES.SEARCH)}
+        class="py-5"
+      >
         <Search color="black" size="32" class="mx-auto"></Search>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.NOTIFICATIONS)} class="py-5">
+      <TabAnchor
+        href="/"
+        selected={$page.url.pathname === get_path(ROUTES.NOTIFICATIONS)}
+        class="py-5"
+      >
         <Bell color="black" size="32" class="mx-auto"></Bell>
       </TabAnchor>
-      <TabAnchor href="/" selected={$page.url.pathname === get_path(ROUTES.INBOX)} class="py-5">
+      <TabAnchor
+        href="/"
+        selected={$page.url.pathname === get_path(ROUTES.INBOX)}
+        class="py-5"
+      >
         <Mail color="black" size="32" class="mx-auto"></Mail>
       </TabAnchor>
     </TabGroup>
   </svelte:fragment>
-
 </AppShell>

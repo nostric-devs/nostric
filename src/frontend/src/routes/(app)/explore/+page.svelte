@@ -1,1 +1,1 @@
-<h1 class="h1">Explore</h1>
+<h1 class="h1 m-4">Explore</h1>

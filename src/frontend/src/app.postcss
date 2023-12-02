@@ -3,11 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+	/* Reference name */
+	font-family: 'Quicksand';
+	/* For multiple files use commas, ex: url(), url(), ... */
+	src: url('/fonts/Quicksand-VariableFont_wght.ttf');
+}
+
 html,
 body {
-  @apply h-full overflow-hidden;
+	@apply bg-surface-50-900-token;
+	@apply h-full overflow-hidden;
 }
+
 
 .logo {
   @apply fill-black dark:fill-white;
+}
+
+:root [data-theme='gold-nouveau'] {
+		--theme-font-family-base: 'Quicksand', sans-serif;
+		--theme-font-family-heading: 'Quicksand', sans-serif;
 }
