@@ -1,15 +1,16 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  import { AppShell, LightSwitch } from "@skeletonlabs/skeleton";
+  import { AppShell, LightSwitch, Toast } from "@skeletonlabs/skeleton";
   import { TabGroup, TabAnchor } from "@skeletonlabs/skeleton";
 
-  import { Home, Search, Bell, Mail, LogOut, Plus } from "svelte-feathers";
+  import { Home, Search, Bell, Mail, Plus } from "svelte-feathers";
 
   import { Avatar } from "@skeletonlabs/skeleton";
   import { Drawer } from "@skeletonlabs/skeleton";
 
   import { initializeStores } from "@skeletonlabs/skeleton";
+
   initializeStores();
 
   import Navigation from "$lib/components/Navigation/Navigation.svelte";
@@ -18,6 +19,7 @@
   import { getDrawerStore } from "@skeletonlabs/skeleton";
   import { get_path, ROUTES } from "$lib/utils/routes";
   import FollowSuggest from "$lib/components/FollowSuggest/FollowSuggest.svelte";
+  import LogOut from "$lib/components/LogOut/LogOut.svelte";
 
   const drawerStore = getDrawerStore();
 
@@ -66,31 +68,21 @@
         <Logo />
         <Navigation />
         <button
-        type="button"
-        class="btn variant-filled-tertiary m-4 font-medium"
-        style="width: calc(100% - 32px);"
-      >
-        <span>
-          <Plus size="20" class="mx-auto"></Plus>
-        </span>  
-        <span class="hidden xl:inline">New post</span>
-      </button
-      >
+          type="button"
+          class="btn variant-filled-tertiary m-4 font-medium"
+          style="width: calc(100% - 32px);"
+        >
+          <span>
+            <Plus size="20" class="mx-auto"></Plus>
+          </span>
+          <span class="hidden xl:inline">New post</span>
+        </button>
       </div>
       <div class="flex-grow"></div>
       <div class="flex justify-center">
         <LightSwitch class="mb-4" />
       </div>
-      <button
-        type="button"
-        class="btn variant-filled-warning my-8 mx-4 font-medium"
-      >
-        <span>
-          <LogOut color="black" size="20" class="mx-auto"></LogOut>
-        </span>  
-        <span class="hidden xl:inline">Log out </span>
-      </button
-      >
+      <LogOut />
     </div>
   </svelte:fragment>
 
@@ -137,3 +129,4 @@
     </TabGroup>
   </svelte:fragment>
 </AppShell>
+<Toast />

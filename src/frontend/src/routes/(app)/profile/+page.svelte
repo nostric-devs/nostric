@@ -1,1 +1,6 @@
-<h1 class="h1 m-4">Profile</h1>
+<script>
+    import UserProfile from "$lib/components/UserProfile/UserProfile.svelte";
+
+</script>
+
+<UserProfile />

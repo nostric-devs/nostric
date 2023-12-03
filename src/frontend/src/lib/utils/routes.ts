@@ -7,7 +7,7 @@ export const ROUTES = {
   SETTINGS: "settings",
   RELAYS: "relays",
   PRO: "pro",
-  SIGN_UP: "sign_up",
+  SIGN_UP: "signup",
   USER: "user",
   POST: "post",
   INBOX: "inbox",

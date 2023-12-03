@@ -13,7 +13,7 @@
       <a href="/user/1" class="flex items-start">
         <div>
           <Avatar
-            src=""
+            src="/img/ape.jpeg"
             class="mr-4 mt-1"
             initials="LV"
             width="w-10"
@@ -29,9 +29,9 @@
       <!-- Follow Button -->
       <button type="button" class="btn variant-filled-primary font-normal">
         <span>
-          <UserPlus size="20" class="lg:mx-auto xl:mx-0"></UserPlus>
+          <UserPlus size="16" class="lg:mx-auto xl:mx-0"></UserPlus>
         </span>
-        <span>
+        <span class="text-sm">
           Follow
         </span>  
         </button>

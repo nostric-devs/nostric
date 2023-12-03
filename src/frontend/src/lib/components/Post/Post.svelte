@@ -18,7 +18,7 @@
         <a href={get_path(ROUTES.USER, "1")} class="flex items-start">
             <div>
                 <Avatar
-                    src=""
+                    src="/img/ape.jpeg"
                     class="mr-4 mt-1"
                     initials="LV"
                     width="w-10"
