@@ -73,7 +73,7 @@
       >
         <Bookmark size="20" class="lg:mx-auto xl:mx-0"></Bookmark>
         <span class="lg:hidden xl:block ml-3">{ROUTES.BOOKMARKS}</span>
-        <span class="badge variant-filled">PRO</span>
+        <span class="badge variant-filled hidden xl:inline">PRO</span>
       </a>
     </li>
     <!-- <li>
