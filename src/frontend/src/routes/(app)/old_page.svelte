@@ -19,7 +19,7 @@
 >
   <svelte:fragment slot="pageHeader">
     <Avatar
-      src="invalid-image.jpg"
+      src="/img/ape.jpegx"
       initials="AB"
       cursor="cursor-pointer"
       class="lg:hidden"

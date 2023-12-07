@@ -10,7 +10,7 @@
     }
 </script>
 
-<section class="card p-5 m-5">
+<section class="card card-hover p-5 m-5">
     <div
         class="post-head mx-auto flex md:flex-row flex-col justify-between items-start"
     >

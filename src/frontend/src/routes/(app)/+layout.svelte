@@ -40,7 +40,7 @@
 
 <Drawer width="w-9/12">
   <div class="px-4 py-4">
-    <Avatar src="invalid-image.jpg" initials="AB" cursor="cursor-pointer" />
+    <Avatar src="/img/ape.jpeg" initials="AB" cursor="cursor-pointer" />
   </div>
   <Navigation />
 </Drawer>
@@ -54,7 +54,7 @@
 >
   <svelte:fragment slot="pageHeader">
     <Avatar
-      src="invalid-image.jpg"
+      src="/img/ape.jpeg"
       initials="AB"
       cursor="cursor-pointer"
       class="lg:hidden"
