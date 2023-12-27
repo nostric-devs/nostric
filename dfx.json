@@ -59,7 +59,7 @@
       "packtool": "mops sources"
     }
   },
-  "dfx": "0.14.2",
+  "dfx": "0.15.2",
   "networks": {
     "local": {
       "bind": "localhost:8000",

@@ -1,2 +1,10 @@
+[package]
+name = "nostric"
+version = "1.0"
+description = " is yet a very simple Nostr client running on the Internet Computer Protocol (ICP)."
+repository = "https://github.com/lukasvozda/nostric"
+
 [dependencies]
 base = "0.9.3"
+candb = "1.0.2"
+candy = "0.3.0" # this shall be removed after the next release of candb (they are using old dependency which prevents build)
