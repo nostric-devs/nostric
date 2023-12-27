@@ -24,7 +24,8 @@
     },
     "frontend": {
       "dependencies": [
-        "backend"
+        "backend",
+        "internet_identity"
       ],
       "frontend": {
         "entrypoint": "src/frontend/public/index.html"
