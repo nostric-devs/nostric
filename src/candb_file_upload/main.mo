@@ -95,4 +95,12 @@ actor {
       await create({name = imgId; content = value});
     };
 
+    // just simple wrapper if you don't want to deal with Entity
+    public func download_wrapper(imgId : Text) : async Blob {
+          let result = await get(imgId);
+          switch(result) {
+            case (?file) { file.content };
+            case null { "\00" : Blob };
+          };
+    };
 }
