@@ -20,6 +20,7 @@
   import { get_path, ROUTES } from "$lib/utils/routes";
   import FollowSuggest from "$lib/components/FollowSuggest/FollowSuggest.svelte";
   import LogOut from "$lib/components/LogOut/LogOut.svelte";
+    import RelaySidebar from "$lib/components/RelaySidebar/RelaySidebar.svelte";
 
   const drawerStore = getDrawerStore();
 
@@ -91,6 +92,7 @@
   <svelte:fragment slot="sidebarRight">
     <PopUpSearch {options} {inputValue}></PopUpSearch>
     <FollowSuggest />
+    <RelaySidebar />
   </svelte:fragment>
 
   <svelte:fragment slot="footer">
