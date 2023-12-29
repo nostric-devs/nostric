@@ -1,5 +1,5 @@
 <script>
-    import { Server } from "svelte-feathers";
+  import { Server } from "svelte-feathers";
 </script>
 
 <h3 class="h3 my-6">Relays</h3>

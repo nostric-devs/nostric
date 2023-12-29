@@ -1,10 +1,10 @@
 <script lang="ts">
   import { page } from "$app/stores";
 
-  import { AppShell, LightSwitch, Toast } from "@skeletonlabs/skeleton";
+  import { AppShell, LightSwitch, Modal, Toast } from "@skeletonlabs/skeleton";
   import { TabGroup, TabAnchor } from "@skeletonlabs/skeleton";
 
-  import { Home, Search, Bell, Mail, Plus } from "svelte-feathers";
+  import { Home, Search, Bell, Mail } from "svelte-feathers";
 
   import { Avatar } from "@skeletonlabs/skeleton";
   import { Drawer } from "@skeletonlabs/skeleton";
@@ -20,7 +20,9 @@
   import { get_path, ROUTES } from "$lib/utils/routes";
   import FollowSuggest from "$lib/components/FollowSuggest/FollowSuggest.svelte";
   import LogOut from "$lib/components/LogOut/LogOut.svelte";
-    import RelaySidebar from "$lib/components/RelaySidebar/RelaySidebar.svelte";
+  import RelaySidebar from "$lib/components/RelaySidebar/RelaySidebar.svelte";
+  import NewPost from "$lib/components/NewPost/NewPost.svelte";
+  import { fade } from "svelte/transition";
 
   const drawerStore = getDrawerStore();
 
@@ -45,7 +47,12 @@
   </div>
   <Navigation />
 </Drawer>
-
+<Modal
+  transitionIn={fade}
+  transitionInParams={{ duration: 200 }}
+  transitionOut={fade}
+  transitionOutParams={{ duration: 200 }}
+/>
 <AppShell
   class="xl:w-[1286px] mx-auto"
   slotSidebarLeft="bg-surface-500/5 w-0 lg:w-16 xl:w-72"
@@ -68,16 +75,7 @@
       <div class="mb-auto">
         <Logo />
         <Navigation />
-        <button
-          type="button"
-          class="btn variant-filled-tertiary m-4 font-medium"
-          style="width: calc(100% - 32px);"
-        >
-          <span>
-            <Plus size="20" class="mx-auto"></Plus>
-          </span>
-          <span class="hidden xl:inline">New post</span>
-        </button>
+        <NewPost />
       </div>
       <div class="flex-grow"></div>
       <div class="flex justify-center">
