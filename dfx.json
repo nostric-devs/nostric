@@ -5,6 +5,10 @@
       "type": "custom",
       "wasm": "vetkd_system_api.wasm"
     },
+    "candb_file_upload": {
+      "main": "src/candb_file_upload/main.mo",
+      "type": "motoko"
+    },
     "backend": {
       "dependencies": [
         "vetkd_system_api",
@@ -20,7 +24,8 @@
     },
     "frontend": {
       "dependencies": [
-        "backend"
+        "backend",
+        "internet_identity"
       ],
       "frontend": {
         "entrypoint": "src/frontend/public/index.html"
@@ -48,7 +53,13 @@
       "dependencies": []
     }
   },
-  "dfx": "0.14.2",
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": "mops sources"
+    }
+  },
+  "dfx": "0.15.2",
   "networks": {
     "local": {
       "bind": "localhost:8000",

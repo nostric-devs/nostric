@@ -24,7 +24,7 @@ Current architecture consists of 4 canisters for local development:
 ```
 git clone https://github.com/lukasvozda/nostric.git
 ```
-2. [Install DFX](https://sdk.dfinity.org/docs/quickstart/local-quickstart.html)
+2. [Install DFX](https://sdk.dfinity.org/docs/quickstart/local-quickstart.html) and [install Mops](https://docs.mops.one/quick-start)
 3. Run npm install to install JS dependencies:
 ```
 npm install
