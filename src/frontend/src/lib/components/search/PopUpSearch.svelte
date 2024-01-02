@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Autocomplete } from "@skeletonlabs/skeleton";
+  import type { AutocompleteOption } from "@skeletonlabs/skeleton";
   import { computePosition, autoUpdate, offset, shift, flip, arrow } from "@floating-ui/dom";
   import { storePopup } from '@skeletonlabs/skeleton';
   import { popup } from '@skeletonlabs/skeleton';
@@ -13,12 +14,11 @@
   };
 
   function onPopUpSelect(event: CustomEvent): void {
-    console.log(event.detail.label);
     inputValue = event.detail.label;
   }
 
-  export let options = [];
-  export let inputValue = "";
+  export let options : AutocompleteOption[];
+  export let inputValue : string = "";
 
 
 </script>
@@ -31,7 +31,11 @@
   placeholder="Start typing"
   use:popup={popupSettings}
 />
-<div data-popup="popupAutocomplete">
+<div
+  data-popup="popupAutocomplete"
+  class="card w-full max-w-sm max-h-48 p-4 overflow-y-auto"
+  tabindex="-1"
+>
   <Autocomplete
     bind:input={inputValue}
     options={options}

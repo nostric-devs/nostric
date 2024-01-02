@@ -1,6 +1,20 @@
-<script>
-    import "../app.postcss";
-    // If user is logged in, redirect to app
+<script lang="ts">
+  import "../app.postcss";
+  import { initializeStores, Toast } from "@skeletonlabs/skeleton";
+  import { Modal } from "@skeletonlabs/skeleton";
+  import CreatePostModal from "$lib/components/modals/CreatePostModal.svelte";
+  import type { ModalComponent } from '@skeletonlabs/skeleton';
+
+  const modalRegistry: Record<string, ModalComponent> = {
+    createPostModal: { ref: CreatePostModal },
+  };
+
+  initializeStores();
+
 </script>
+
+<Toast/>
+
+<Modal components={modalRegistry} />
 
 <slot />

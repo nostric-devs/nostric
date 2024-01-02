@@ -7,12 +7,12 @@ export const ROUTES = {
   SETTINGS: "settings",
   RELAYS: "relays",
   PRO: "pro",
-  SIGN_UP: "signup",
+  SIGN_IN: "sign-in",
   USER: "user",
   POST: "post",
   INBOX: "inbox",
   SEARCH: "search",
-  IMAGES: "images"
+  IMAGES: "images",
 }
 
 export const get_path = (...names : string[]) : string => {

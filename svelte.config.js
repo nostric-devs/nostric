@@ -31,6 +31,10 @@ const config = {
     files: {
       assets: filesPath("static"),
       lib: filesPath("src/lib"),
+      hooks: {
+        server: filesPath("src/hooks/hooks.server.ts"),
+        client: filesPath("src/hooks/hooks.client.ts"),
+      },
       params: filesPath("src/params"),
       routes: filesPath("src/routes"),
       appTemplate: filesPath("src/app.html"),

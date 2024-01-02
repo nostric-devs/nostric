@@ -14,6 +14,7 @@
   $: isActive = (pageName: String) => {
     return $page.url.pathname === pageName;
   };
+
 </script>
 
 <nav class="list-nav xl:px-4 py-4">

@@ -2,7 +2,7 @@
 
   import { Settings } from "svelte-feathers";
   import { AppShell, Avatar, LightSwitch } from "@skeletonlabs/skeleton";
-  import PopUpSearch from "$lib/components/Search/PopUpSearch.svelte";
+  import PopUpSearch from "$lib/components/search/PopUpSearch.svelte";
 
   import { getDrawerStore } from '@skeletonlabs/skeleton';
   const drawerStore = getDrawerStore();
