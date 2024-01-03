@@ -24,6 +24,7 @@
   import type { PageData } from "../$types";
   import { goto } from "$app/navigation";
   import { AuthStates, authUser } from "$lib/stores/Auth";
+  import { fade } from "svelte/transition";
 
 
   const drawerStore = getDrawerStore();
@@ -73,7 +74,12 @@
   </div>
   <Navigation />
 </Drawer>
-
+<Modal
+  transitionIn={fade}
+  transitionInParams={{ duration: 200 }}
+  transitionOut={fade}
+  transitionOutParams={{ duration: 200 }}
+/>
 <AppShell
   class="xl:w-[1286px] mx-auto"
   slotSidebarLeft="bg-surface-500/5 w-0 lg:w-16 xl:w-72"
@@ -131,6 +137,7 @@
     {#if isAuthenticated}
       <PopUpSearch options={autocompleteOptions} inputValue={autocompleteInputValue}></PopUpSearch>
       <FollowSuggest />
+      <RelaySidebar />
     {/if}
   </svelte:fragment>
 

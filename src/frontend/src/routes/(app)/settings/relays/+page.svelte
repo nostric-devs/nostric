@@ -78,6 +78,16 @@
       >
         <span><Server color={getStatusColor(relay.status)}/></span>
         <span class="flex-auto">{relay.url}</span>
+
+        {#if relay.status == "Connected"}
+          <span class="badge variant-filled-success">{relay.status}</span>
+        {:else if relay.status == "Loading"}
+          <span class="badge variant-filled-warning">{relay.status}</span>
+        {:else}
+          <span class="badge variant-filled-error">{relay.status}</span>
+        {/if}
+
+
         {#if !nostrHandler.explicitRelays.includes(relay.url)}
           <button
             on:click={() => removeRelay(relay.url)}
