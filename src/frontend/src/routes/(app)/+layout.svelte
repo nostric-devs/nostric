@@ -1,15 +1,15 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import type { AutocompleteOption, ModalSettings } from "@skeletonlabs/skeleton";
+  import type { AutocompleteOption } from "@skeletonlabs/skeleton";
   import {
     AppShell,
     Avatar,
     Drawer,
     getDrawerStore,
-    getModalStore,
     LightSwitch,
     TabAnchor,
-    TabGroup
+    TabGroup,
+    Modal
   } from "@skeletonlabs/skeleton";
   import { Bell, Home, Mail, Plus, Search } from "svelte-feathers";
   import Navigation from "$lib/components/navigation/Navigation.svelte";
@@ -21,14 +21,13 @@
   import type { NostrUserHandler } from "$lib/nostr";
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { onMount } from "svelte";
-  import type { PageData } from "../$types";
   import { goto } from "$app/navigation";
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import { fade } from "svelte/transition";
-
+  import CreatePostTrigger from "$lib/components/modals/create-post/CreatePostTrigger.svelte";
+  import RelaySidebar from "$lib/components/relays/RelaySidebar.svelte";
 
   const drawerStore = getDrawerStore();
-  const modalStore = getModalStore();
 
   const autocompleteOptions : AutocompleteOption[] = [
     {
@@ -39,14 +38,6 @@
     },
   ];
   let autocompleteInputValue : string = "";
-
-  const postModalOptions : ModalSettings = {
-    type: "component",
-    title: "Create new post",
-    body: "",
-    valueAttr: { type: "text", minlength: 3, maxlength: 10, required: true },
-    component: "createPostModal",
-  };
 
   let userHandler : NostrUserHandler | undefined;
   let user : NDKUser | undefined;
@@ -99,18 +90,7 @@
         <Logo />
         {#if isAuthenticated}
           <Navigation />
-          <div class="mx-auto w-full xl:px-4 text-center">
-            <button
-              type="button"
-              class="btn variant-filled-tertiary font-medium w-full"
-              on:click={() => modalStore.trigger(postModalOptions)}
-            >
-              <span>
-                <Plus size="20" class="mx-auto"></Plus>
-              </span>
-              <span class="hidden xl:inline">New post</span>
-            </button>
-          </div>
+          <CreatePostTrigger />
         {/if}
       </div>
       <div class="flex-grow"></div>

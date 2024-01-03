@@ -1,9 +1,10 @@
 import { get, writable } from "svelte/store";
+import type { Writable } from "svelte/store";
 import type { NDKEvent, NDKTag } from "@nostr-dev-kit/ndk";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 
 function getEvents() {
-  const events = writable<NDKEvent[]>([]);
+  const events : Writable<NDKEvent[]> = writable<NDKEvent[]>([]);
   const { subscribe, update, set } = events;
   
   const add = (event: NDKEvent) => update((events: NDKEvent[]) => {

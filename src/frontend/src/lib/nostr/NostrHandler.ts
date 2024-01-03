@@ -1,20 +1,21 @@
+import type { NDKConstructorParams, NDKFilter, NDKRelayUrl, NDKSubscriptionOptions } from "@nostr-dev-kit/ndk";
 import NDK, {
   NDKEvent,
   NDKKind,
-  NDKPrivateKeySigner, NDKRelay,
-  NDKSubscription, NDKUser
+  NDKPrivateKeySigner,
+  NDKRelay,
+  NDKRelayStatus,
+  NDKSubscription,
+  NDKUser
 } from "@nostr-dev-kit/ndk";
 
-import type {
-  NDKFilter,
-  NDKConstructorParams,
-  NDKSubscriptionOptions
-} from "@nostr-dev-kit/ndk";
+import { EventEmitter } from "tseep";
 
 import { events } from "$lib/stores/Events";
 import type { UsersObject } from "$lib/nostr";
+import { relays } from "$lib/stores/Relays";
 
-export class NostrHandler {
+export class NostrHandler extends EventEmitter {
   
   public nostrKit: NDK;
   private subscriptions : NDKSubscription[] = [];
@@ -26,6 +27,7 @@ export class NostrHandler {
   ]
   
   constructor() {
+    super();
     let options : NDKConstructorParams = {
       explicitRelayUrls: this.explicitRelays,
     }
@@ -34,6 +36,7 @@ export class NostrHandler {
   
   public async startConnection() : Promise<void> {
     await this.nostrKit.connect();
+    relays.fill([...this.nostrKit.pool.relays.values()]);
   }
   
   public setSigner(signer : NDKPrivateKeySigner) : void {
@@ -44,18 +47,32 @@ export class NostrHandler {
     this.nostrKit.signer = NDKPrivateKeySigner.generate();
   }
   
-  public addRelay(url : string) : void {
+  public addRelay(url : NDKRelayUrl) : void {
     // with this we do not need to check whether it already exists,
     // otherwise we would have used addRelay method
     this.nostrKit?.pool.getRelay(url);
+    relays.fill([...this.nostrKit.pool.relays.values()]);
   }
   
-  public removeRelay(url : string) : void {
+  public removeRelay(url : NDKRelayUrl) : void {
     this.nostrKit?.pool.removeRelay(url);
+    relays.fill([...this.nostrKit.pool.relays.values()]);
   }
   
-  public listRelays() : IterableIterator<NDKRelay> {
-    return this.nostrKit?.pool.relays.values() || [];
+  public async reconnectRelay(relay : NDKRelay) : Promise<void> {
+    relay.disconnect();
+    relays.updateRelayStatus(relay.url, NDKRelayStatus.DISCONNECTED);
+    setTimeout(async () : Promise<void> => {
+      await relay.connect();
+      setTimeout(() => {
+        relays.fill(this.listRelays());
+        this.emit("reconnect-finished");
+      }, 1000);
+    }, 1000);
+  }
+  
+  public listRelays() : NDKRelay[] {
+    return [...this.nostrKit?.pool.relays.values()];
   }
   
   public async addSubscription(filter : NDKFilter) : Promise<void> {

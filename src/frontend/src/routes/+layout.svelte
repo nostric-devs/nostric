@@ -2,7 +2,7 @@
   import "../app.postcss";
   import { initializeStores, Toast } from "@skeletonlabs/skeleton";
   import { Modal } from "@skeletonlabs/skeleton";
-  import CreatePostModal from "$lib/components/modals/CreatePostModal.svelte";
+  import CreatePostModal from "$lib/components/modals/create-post/CreatePostModal.svelte";
   import type { ModalComponent } from '@skeletonlabs/skeleton';
 
   const modalRegistry: Record<string, ModalComponent> = {

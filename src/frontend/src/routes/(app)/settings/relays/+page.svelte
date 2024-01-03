@@ -1,46 +1,20 @@
 <script lang="ts">
-  import { Circle, Server, XCircle } from "svelte-feathers";
-  import { slide } from "svelte/transition";
+  import { Circle } from "svelte-feathers";
   import { nostrHandler } from "$lib/nostr";
-  import { onMount } from "svelte";
-  import type { NDKRelay } from "@nostr-dev-kit/ndk";
-  import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
+  import { relays } from "$lib/stores/Relays";
+  import RelayCard from "$lib/components/relays/RelayCard.svelte";
 
-  let relays : NDKRelay[] = [];
   let disabled : boolean = false;
-  let loading : string = "";
+  let loading : boolean = false;
   let newRelay : string = "";
 
-  const removeRelay = (relay : string) => {
-    loading = relay;
+  const addRelay = () => {
+    loading = true;
     disabled = true;
-    nostrHandler.removeRelay(relay);
-    relays = nostrHandler.listRelays();
-    newRelay = "";
-    loading = "";
+    nostrHandler.addRelay(newRelay);
+    loading = false;
     disabled = false;
   }
-
-  const addRelay = () => {
-    loading = "add-relay";
-    nostrHandler.addRelay(newRelay);
-    relays = nostrHandler.listRelays();
-    loading = "";
-  }
-
-  const getStatusColor = (status : NDKRelayStatus) => {
-    if (status === NDKRelayStatus.CONNECTED) {
-      return "green";
-    } else if (status === NDKRelayStatus.DISCONNECTED) {
-      return "red";
-    } else {
-      return "orange";
-    }
-  }
-
-  onMount(() => {
-    relays = nostrHandler.listRelays();
-  });
 
 </script>
 
@@ -59,7 +33,7 @@
     class="btn variant-filled-primary mt-4 w-full font-medium"
     disabled={disabled || newRelay.length === 0}
   >
-    {#if loading === 'add-relay'}
+    {#if loading}
       <span class="mr-2">
         <Circle size="15" color="white" unit="px"></Circle>
       </span>
@@ -68,42 +42,8 @@
   </button>
 </div>
 
-<div class="relays m-4 p-4">
-  <ul class="list">
-    {#each relays as relay}
-      <li
-        class="p-4 card-hover variant-glass-tertiary"
-        in:slide={{ duration: 300 }}
-        out:slide={{ duration: 300 }}
-      >
-        <span><Server color={getStatusColor(relay.status)}/></span>
-        <span class="flex-auto">{relay.url}</span>
-
-        {#if relay.status == "Connected"}
-          <span class="badge variant-filled-success">{relay.status}</span>
-        {:else if relay.status == "Loading"}
-          <span class="badge variant-filled-warning">{relay.status}</span>
-        {:else}
-          <span class="badge variant-filled-error">{relay.status}</span>
-        {/if}
-
-
-        {#if !nostrHandler.explicitRelays.includes(relay.url)}
-          <button
-            on:click={() => removeRelay(relay.url)}
-            title="Delete relay"
-            class="btn variant-filled-error"
-            disabled={disabled && loading !== relay.url}
-          >
-            {#if loading === relay.url}
-              <span class="mr-2">
-                <Circle size="15" color="white" unit="px"></Circle>
-              </span>
-            {/if}
-            <span><XCircle /></span>
-          </button>
-        {/if}
-      </li>
-    {/each}
-  </ul>
+<div class="m-4 p-4">
+  {#each Object.values($relays) as relay}
+    <RelayCard {relay} />
+  {/each}
 </div>

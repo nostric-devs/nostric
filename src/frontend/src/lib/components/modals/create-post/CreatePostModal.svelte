@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { SvelteComponent } from "svelte";
-  import { getModalStore } from "@skeletonlabs/skeleton";
+  import { getModalStore, getToastStore } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
   import type { NostrUserHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
 
   const modalStore = getModalStore();
+  const toastStore = getToastStore();
 
   let content : string = "";
   let nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
@@ -17,6 +18,10 @@
     await nostrUserHandler.createAndPublishEvent(content, NDKKind.Text, []);
     processing = false;
     modalStore.close();
+    toastStore.trigger({
+      message: "Post has been published",
+      background: "variant-filled-success",
+    });
   }
 
   export let parent : SvelteComponent;
