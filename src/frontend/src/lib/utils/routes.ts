@@ -13,8 +13,8 @@ export const ROUTES = {
   INBOX: "inbox",
   SEARCH: "search",
   IMAGES: "images",
-}
+};
 
-export const get_path = (...names : string[]) : string => {
-  return `/${names.join("/")}`
-}
+export const get_path = (...names: string[]): string => {
+  return `/${names.join("/")}`;
+};

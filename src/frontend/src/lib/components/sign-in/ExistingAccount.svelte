@@ -47,8 +47,6 @@
     }
   });
 
-  export let identity : boolean = false;
-
 </script>
 
 <div class="w-1/2 mx-auto">

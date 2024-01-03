@@ -5,7 +5,7 @@ import type { AuthUser } from "$lib/stores/Auth";
 
 declare namespace App {
   interface Locals {
-    user : AuthUser | null,
+    user: AuthUser | null;
   }
   // interface PageData {}
   // interface Error {}

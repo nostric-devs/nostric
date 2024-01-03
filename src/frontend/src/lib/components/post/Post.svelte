@@ -7,7 +7,7 @@
   import Avatar from "$lib/components/user-profile/Avatar.svelte";
   import { onMount } from "svelte";
   import { nostrHandler} from "$lib/nostr";
-  import * as dayjs from "dayjs";
+  import dayjs from "dayjs";
   import { authUser } from "$lib/stores/Auth";
 
   let isLiked : boolean = false;

@@ -2,7 +2,7 @@
 
 // 1. Import the Skeleton plugin
 const { skeleton } = require("@skeletonlabs/tw-plugin");
-import forms from '@tailwindcss/forms';
+import forms from "@tailwindcss/forms";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -22,9 +22,7 @@ module.exports = {
   plugins: [
     // 4. Append the Skeleton plugin (after other plugins)
     skeleton({
-      themes: { preset: [
-        { name: "gold-nouveau", enhancements: true}
-      ] },
+      themes: { preset: [{ name: "gold-nouveau", enhancements: true }] },
     }),
     forms,
   ],

@@ -2,7 +2,7 @@ import type { Actions } from "./$types";
 import { AuthStates } from "$lib/stores/Auth";
 
 export const actions: Actions = {
-  login: async ({cookies}) => {
+  login: async ({ cookies }) => {
     cookies.set("auth", AuthStates.NOSTR_AUTHENTICATED.toString(), {
       path: "/",
       httpOnly: true,
@@ -12,8 +12,8 @@ export const actions: Actions = {
     });
     return { success: true };
   },
-  logout: async ({cookies}) => {
+  logout: async ({ cookies }) => {
     cookies.delete("auth");
     return { success: true };
-  }
-}
+  },
+};

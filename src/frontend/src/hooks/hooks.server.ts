@@ -1,14 +1,18 @@
 import type { Handle } from "@sveltejs/kit";
 import { get_path, ROUTES } from "$lib/utils/routes";
 import { redirect } from "@sveltejs/kit";
+import { building } from "$app/environment";
 
-
-export const handle : Handle = async ({ event, resolve }) : Promise<Response> => {
-
-  let currentPath : string = event.url.pathname;
-
+export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
+  // hooks are being run during build and it causes error,
+  // this prevents it;
+  if (building) {
+    return resolve(event);
+  }
+  
+  let currentPath: string = event.url.pathname;
   const { cookies } = event;
-  const userStatus : string | undefined = cookies.get("auth");
+  const userStatus: string | undefined = cookies.get("auth");
 
   if (userStatus) {
     event.locals.user = userStatus;
@@ -22,5 +26,4 @@ export const handle : Handle = async ({ event, resolve }) : Promise<Response> =>
   }
 
   return resolve(event);
-
-}
+};
