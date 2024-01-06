@@ -4,10 +4,12 @@
   import { authUser } from "$lib/stores/Auth";
   import { relays } from "$lib/stores/Relays";
   import RelayCard from "$lib/components/relays/RelayCard.svelte";
+  import { getToastStore } from "@skeletonlabs/skeleton";
 
   let disabled : boolean = false;
   let loading : boolean = false;
   let newRelay : string = "";
+  const toastStore = getToastStore();
 
   const addRelay = async () => {
     loading = true;
@@ -19,6 +21,10 @@
     }
     loading = false;
     disabled = false;
+    toastStore.trigger({
+      message: "Relay successfully added",
+      background: "variant-filled-success",
+    });
   }
 
 </script>
