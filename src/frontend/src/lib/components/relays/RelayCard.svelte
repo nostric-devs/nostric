@@ -1,14 +1,17 @@
 <script lang="ts">
   import { RefreshCcw, Server, XCircle } from "svelte-feathers";
-  import { nostrHandler } from "$lib/nostr";
+  import { nostrHandler, NostrUserHandler } from "$lib/nostr";
   import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
   import { slide } from "svelte/transition";
   import { Circle } from "svelte-loading-spinners";
   import type { RelayObject } from "$lib/stores/Relays";
+  import { authUser } from "$lib/stores/Auth";
 
   let loading : boolean = false;
   let disabledLocal : boolean = false;
   let statusColor : string = "";
+
+  $: explicitRelay = nostrHandler.explicitRelays.includes(relay.object.url);
 
   $: if (relay.status === NDKRelayStatus.CONNECTED) {
     statusColor = "variant-filled-success";
@@ -26,6 +29,18 @@
       loading = false;
       disabledLocal = false;
     });
+  }
+
+  const removeRelay = async () => {
+    loading = true;
+    disabledLocal = true;
+    nostrHandler.removeRelay(relay.object.url);
+    const nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
+    if (nostrUserHandler) {
+      await nostrUserHandler.removeUserPreferredRelay(relay.object.url);
+    }
+    loading = false;
+    disabledLocal = false;
   }
 
   export let relay : RelayObject;
@@ -67,10 +82,10 @@
     <div class="ml-auto grow-0 max-w-[100px]">
       <div class="mb-1">
         <button
-          on:click={() => nostrHandler.removeRelay(relay.object?.url)}
+          on:click={removeRelay}
           title="Delete relay"
           class="btn btn-sm rounded-2xl variant-filled-error min-w-[50px]"
-          disabled={disabled || disabledLocal}
+          disabled={disabled || disabledLocal || explicitRelay}
         >
           <span><XCircle size="15"/></span>
           <span>remove</span>

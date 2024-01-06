@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Circle } from "svelte-feathers";
-  import { nostrHandler } from "$lib/nostr";
+  import { nostrHandler, NostrUserHandler } from "$lib/nostr";
+  import { authUser } from "$lib/stores/Auth";
   import { relays } from "$lib/stores/Relays";
   import RelayCard from "$lib/components/relays/RelayCard.svelte";
 
@@ -8,10 +9,14 @@
   let loading : boolean = false;
   let newRelay : string = "";
 
-  const addRelay = () => {
+  const addRelay = async () => {
     loading = true;
     disabled = true;
     nostrHandler.addRelay(newRelay);
+    const nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
+    if (nostrUserHandler) {
+      await nostrUserHandler.addUserPreferredRelay(newRelay);
+    }
     loading = false;
     disabled = false;
   }
@@ -43,7 +48,7 @@
 </div>
 
 <div class="m-4 p-4">
-  {#each Object.values($relays) as relay}
+  {#each $relays as relay}
     <RelayCard {relay} />
   {/each}
 </div>
