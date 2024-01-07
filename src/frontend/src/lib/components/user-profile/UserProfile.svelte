@@ -38,14 +38,14 @@
     <div class="text-sm break-words">{user?.npub}</div>
     <div class="flex mt-4">
       <a
-        href={get_path(ROUTES.USER, user?.pubkey || "", "followers")}
+        href={get_path(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWERS)}
         class="flex flex-col items-center mr-6 p-2 follow hover:bg-primary-hover-token rounded-md transition"
       >
         <span>Followers</span>
         <span class="text-4xl font-bold">50</span>
       </a>
       <a
-      href={get_path(ROUTES.USER, user?.pubkey || "", "following")}
+      href={get_path(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWING)}
         class="flex flex-col items-center p-2 follow hover:bg-primary-hover-token rounded-md transition"
       >
         <span>Following</span>
