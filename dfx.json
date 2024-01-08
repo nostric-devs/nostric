@@ -10,6 +10,10 @@
       "type": "motoko",
       "dependencies": ["vetkd_system_api"]
     },
+    "candb_file_upload": {
+      "main": "src/candb_file_upload/main.mo",
+      "type": "motoko"
+    },
     "frontend": {
       "dependencies": ["backend"],
       "frontend": {
@@ -22,10 +26,10 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
-  "dfx": "0.14.2",
+  "dfx": "0.15.2",
   "networks": {
     "local": {
       "bind": "127.0.0.1:8000",
