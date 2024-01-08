@@ -15,11 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install ESLint
+      - name: Install Nostric
         run: |
           npm install
 
-      - name: Run prettier
+      - name: Run Prettier
         run: |
           npm run prettier
         continue-on-error: false
