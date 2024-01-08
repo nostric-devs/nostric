@@ -1,0 +1,30 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  frontend-checks:
+    name: Run frontend checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install ESLint
+        run: |
+          npm install
+
+      - name: Run prettier
+        run: |
+          npm run prettier
+        continue-on-error: false
+
+      - name: Run ESLint
+        run: |
+          npm run lint
+        continue-on-error: false
