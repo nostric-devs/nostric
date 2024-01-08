@@ -113,7 +113,7 @@ export class NostrHandler extends EventEmitter {
       try {
         subscription.stop();
       } catch {
-        console.log("subscription: error")
+        console.log("subscription: error");
       }
     }
     events.clear();
