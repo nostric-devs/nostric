@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  frontend-checks:
+    name: frontend checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+
+      - name: Prettier check
+        run: |
+          npm run prettier
+        continue-on-error: false
+
+      - name: ESLint check
+        run: |
+          npm run lint
+        continue-on-error: false
