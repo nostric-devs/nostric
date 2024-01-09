@@ -66,8 +66,8 @@ jobs:
           mops test
         continue-on-error: false
 
-  integration-tests:
-    name: integration tests
+  integration-test:
+    name: integration test
     runs-on: ubuntu-latest
     permissions:
       contents: read
