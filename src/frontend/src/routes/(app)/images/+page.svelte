@@ -1,8 +1,13 @@
 <script>
   import PlaceholderImage from "$lib/assets/images/img1.jpg";
-    import { Copy, Trash } from "svelte-feathers";
-    import { filter, Emerald, BlueNight /* ... */  } from '@skeletonlabs/skeleton';
+  import { Copy, Trash, Upload } from "svelte-feathers";
+  import {
+    FileDropzone,
+    ProgressRadial,
+    clipboard,
+  } from "@skeletonlabs/skeleton";
 
+  // Images will be later loaded from store
   let images = [
     "https://images.unsplash.com/photo-1617296538902-887900d9b592?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzExMDB8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1553184570-557b84a3a308?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NTF8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
@@ -11,85 +16,101 @@
     "https://images.unsplash.com/photo-1597531072931-8fceba101e4e?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2OTB8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1597077917598-97ca3922a317?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MjF8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1510111652602-195fc654aa83?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY0Nzl8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1612145342709-eadb6e22acca?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MDh8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop"
-
+    "https://images.unsplash.com/photo-1612145342709-eadb6e22acca?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MDh8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
   ];
 
-  function getRandomImageUrl() {
-    const randomIndex = Math.floor(Math.random() * images.length);
-    return images[randomIndex];
+  function onChangeHandler(e) {
+    console.log("file data:", e);
   }
 
-  let hoveredIndex = null;
+  let copied = false;
 
-
-  function copyImageUrl(imageUrl) {
-    // Implement copying image URL logic
-    console.log("Copying URL:", imageUrl);
-  }  
+  function onClickHandler() {
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 1000);
+  }
 
   function deleteImage(index) {
     images = images.filter((_, i) => i !== index);
   }
-
 </script>
 
 <h1 class="h1 m-4">Images</h1>
-<span class="m-4"
-  >Here you can manage your uploaded media files. If you remove image from here,
-  it will not be loaded in your posts.</span
->
+<div class="m-4">
+  Here you can manage your uploaded media files. If you remove image from here,
+  it will not be loaded in your posts.
+</div>
+<div class="mx-4 my-8">
+  <FileDropzone
+    name="files-example-two"
+    accept="image/*"
+    on:change={onChangeHandler}
+  >
+    <div slot="lead" class="flex justify-center">
+      <Upload />
+    </div>
+    <svelte:fragment slot="meta">PNG, JPG, and GIF allowed.</svelte:fragment>
+  </FileDropzone>
+</div>
 
+<hr class="!border-t-2 mx-4" />
 <section class="grid my-8 mx-4 grid-cols-2 md:grid-cols-3 gap-2">
   {#each images as image, index}
     <div class="image-container">
-      <img
-        class="h-auto max-w-full rounded-md"
-        src={image}
-        alt=""
-      />
+      <img class="h-auto max-w-full rounded-md" src={image} alt="" />
       <div class="overlay"></div>
       <div class="image-icons">
-        <button on:click={() => copyImageUrl(image)} type="button" class="btn variant-filled font-normal">
+        <button
+          use:clipboard={image}
+          type="button"
+          on:click={onClickHandler}
+          class="btn variant-filled-primary font-normal"
+        >
           <span>
-            <Copy size="16" class="lg:mx-auto xl:mx-0"/>
+            <Copy size="16" class="lg:mx-auto xl:mx-0" />
           </span>
-          <span class="text-sm">
-            Copy URL
-          </span>
+          <span class="text-sm"> {copied ? "Copied 👍" : "Copy URL"} </span>
         </button>
-        <button on:click={() => deleteImage(index)} type="button" class="btn variant-filled-warning font-normal">
+        <button
+          on:click={() => deleteImage(index)}
+          type="button"
+          class="btn variant-filled-warning font-normal"
+        >
           <span>
-            <Trash size="16" class="lg:mx-auto xl:mx-0"/>
+            <Trash size="16" class="lg:mx-auto xl:mx-0" />
           </span>
-          <span class="text-sm">
-            Delete
-          </span>
+          <span class="text-sm"> Delete </span>
         </button>
       </div>
     </div>
   {/each}
 </section>
-
-<!-- <section class="grid grid-cols-2 md:grid-cols-4 gap-2">
-  <div class="grid gap-4">
-    {#each Array.from({ length: 20 }) as item}
-    <div>
-      <img src={PlaceholderImage} class="h-auto max-w-full rounded-lg" alt="Image" />
-    </div>
-    {/each}
+<hr class="!border-t-2 mx-4" />
+<div class="flex flex-col items-center justify-center mt-8">
+  <div class="text-xl font-bold m-auto text-center">
+    70 % of your storage is used
   </div>
-</section>    -->
-
-
+  <ProgressRadial
+    stroke={120}
+    value="70"
+    class="mx-auto my-8"
+    meter="stroke-primary-500"
+    track="stroke-primary-500/30"
+    strokeLinecap="butt">70%</ProgressRadial
+  >
+</div>
+<hr class="!border-t-2 mx-4" />
 
 <style>
- .image-container {
+  .image-container {
     position: relative;
+    overflow: hidden; /* Ensures that nothing spills outside the container */
   }
   .image-container img {
-    transition: all 0.3s ease; /* Transition effect for the image */
-    display: block; /* To remove bottom space under the image */
+    transition: all 0.3s ease;
+    display: block;
   }
   .overlay {
     display: block;
@@ -98,29 +119,31 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent black */
-    border-radius: inherit; /* Optional, for rounded corners if your images have them */
-    opacity: 0; /* Start with a fully transparent overlay */
-    transition: opacity 0.3s ease; /* Transition effect for the overlay */
+    background-color: rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Prevents overlay from blocking mouse events */
   }
   .image-container:hover .overlay {
-    opacity: 1; /* Fully visible on hover */
+    opacity: 1;
   }
   .image-icons {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     position: absolute;
-    margin: 5px;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Center the icons */
-    transition: opacity 0.6s ease;
-    flex-direction: column; /* Stack children vertically */
-    gap: 10px; /* Space between buttons */
-    /* Additional styling for the icons */
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none; /* Prevents icons from blocking mouse events */
   }
   .image-container:hover .image-icons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    opacity: 1;
+    pointer-events: auto; /* Allows interaction with the icons */
+  }
+  .btn {
+    transition: background-color 0.3s ease; /* Smooth background transition */
   }
 </style>

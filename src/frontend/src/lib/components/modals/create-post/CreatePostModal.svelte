@@ -1,17 +1,24 @@
 <script lang="ts">
   import type { SvelteComponent } from "svelte";
-  import { getModalStore, getToastStore } from "@skeletonlabs/skeleton";
+  import {
+    FileButton,
+    clipboard,
+    getModalStore,
+    getToastStore,
+  } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
   import type { NostrUserHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
+  import { CheckSquare, Copy, Plus } from "svelte-feathers";
+  import { ROUTES } from "$lib/utils/routes";
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
-  let content : string = "";
-  let nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
-  let processing : boolean = false;
+  let content: string = "";
+  let nostrUserHandler: NostrUserHandler = authUser.getNostrUserHandler();
+  let processing: boolean = false;
 
   async function onSubmit(): Promise<void> {
     processing = true;
@@ -24,8 +31,27 @@
     });
   }
 
-  export let parent : SvelteComponent;
+  export let parent: SvelteComponent;
 
+  // Images will be later loaded from store
+  // Only display last 6 images
+  let images = [
+    "https://images.unsplash.com/photo-1617296538902-887900d9b592?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzExMDB8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1553184570-557b84a3a308?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NTF8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1620005839871-7ac4aed5ddbc?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NzN8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1597077962467-be16edcc6a43?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2MzZ8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1597531072931-8fceba101e4e?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2OTB8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1597077917598-97ca3922a317?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MjF8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
+  ];
+
+  let copied: Boolean = false;
+
+  function onClickHandler() {
+    copied = true;
+    setTimeout(() => {
+      copied = false;
+    }, 1000);
+  }
 </script>
 
 {#if $modalStore[0]}
@@ -44,6 +70,47 @@
         />
       </label>
     </form>
+    <div class="pb-4">
+      <div class="text-md mb-2 font-bold mr-4">Images</div>
+      <div class="padding-2 flex">
+        <div class="mr-2">
+          <FileButton name="files" width="h-16 w-16 variant-filled-surface"
+            ><Plus /></FileButton
+          >
+        </div>
+        <div class="padding-2 flex items-center">
+          {#each images as image, index}
+            <div class="relative h-16 w-16 mr-2">
+              <img class="h-16 w-16 rounded-md" src={image} alt="" />
+              <div
+                class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
+              >
+                <button
+                  use:clipboard={image}
+                  class="btn h-16 w-16 variant-filled-primary font-normal"
+                  on:click={onClickHandler}
+                >
+                  <span>
+                    {#if copied}
+                      <CheckSquare size="24" class="lg:mx-auto xl:mx-0" />
+                    {:else}
+                      <Copy size="24" class="lg:mx-auto xl:mx-0" />
+                    {/if}
+                  </span>
+                </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+      <div class="mt-2">
+        You can manage your media uploads <a
+          class="anchor"
+          on:click={parent.onClose}
+          href={ROUTES.IMAGES}>here.</a
+        >
+      </div>
+    </div>
 
     <footer class="modal-footer {parent.regionFooter}">
       <button
@@ -68,3 +135,13 @@
     </footer>
   </div>
 {/if}
+
+<style>
+  .overlay {
+    background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent overlay */
+    transition: opacity 0.3s ease;
+  }
+  .relative:hover .overlay {
+    opacity: 1; /* Show overlay on hover */
+  }
+</style>
