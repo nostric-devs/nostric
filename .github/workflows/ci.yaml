@@ -28,3 +28,31 @@ jobs:
         run: |
           npm run lint
         continue-on-error: false
+  backend-checks:
+    name: backend checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+
+      - name: Prettier check
+        run: |
+          npm run prettier-motoko
+        continue-on-error: false
+
+      - name: Install DFX
+        run: |
+          sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+
+      - name: Unit tests
+        run: |
+          mops test
+        continue-on-error: false
+
