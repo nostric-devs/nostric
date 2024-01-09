@@ -1,13 +1,12 @@
 {
     "env": {
         "browser": true,
-        "es2021": true
+        "es2021": true,
+        "node": true
     },
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended"
-    ],
-    "overrides": [
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -15,8 +14,27 @@
         "sourceType": "module"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "svelte"
+    ],
+    "overrides": [
+        {
+            "files": ["*.svelte"],
+            "processor": "svelte/svelte",
+            "extends": [
+                "plugin:svelte/recommended"
+            ],
+            "parser": "svelte-eslint-parser",
+            "parserOptions": {
+                "parser": "@typescript-eslint/parser"
+            },
+            "rules": {
+                "no-unused-vars": "warn"
+            }
+        }
     ],
     "rules": {
+        // General ESLint rules
+        "@typescript-eslint/no-unused-vars": "warn"
     }
 }

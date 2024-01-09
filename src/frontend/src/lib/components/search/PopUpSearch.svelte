@@ -1,10 +1,17 @@
 <script lang="ts">
   import { Autocomplete } from "@skeletonlabs/skeleton";
   import type { AutocompleteOption } from "@skeletonlabs/skeleton";
-  import { computePosition, autoUpdate, offset, shift, flip, arrow } from "@floating-ui/dom";
-  import { storePopup } from '@skeletonlabs/skeleton';
-  import { popup } from '@skeletonlabs/skeleton';
-  import type { PopupSettings } from '@skeletonlabs/skeleton';
+  import {
+    computePosition,
+    autoUpdate,
+    offset,
+    shift,
+    flip,
+    arrow,
+  } from "@floating-ui/dom";
+  import { storePopup } from "@skeletonlabs/skeleton";
+  import { popup } from "@skeletonlabs/skeleton";
+  import type { PopupSettings } from "@skeletonlabs/skeleton";
   storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
   let popupSettings: PopupSettings = {
@@ -17,10 +24,8 @@
     inputValue = event.detail.label;
   }
 
-  export let options : AutocompleteOption[];
-  export let inputValue : string = "";
-
-
+  export let options: AutocompleteOption[];
+  export let inputValue: string = "";
 </script>
 
 <input
@@ -38,7 +43,7 @@
 >
   <Autocomplete
     bind:input={inputValue}
-    options={options}
+    {options}
     on:selection={onPopUpSelect}
   />
 </div>
