@@ -43,7 +43,6 @@
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-svelte": "^2.33.2",
-    "ic-mops": "^0.37.8",
     "node-fetch": "^3.3.2",
     "pem-file": "^1.0.1",
     "postcss": "^8.4.24",
