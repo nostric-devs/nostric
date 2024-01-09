@@ -1,14 +1,14 @@
 import { test } "mo:test";
 
 test(
-  "[backend] simple test",
+  "[backend/main] simple test",
   func() {
     assert true;
   },
 );
 
 test(
-  "[backend] test my number",
+  "[backend/main] test my number",
   func() {
     assert 1 > 0;
   },
