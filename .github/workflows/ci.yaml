@@ -47,6 +47,11 @@ jobs:
           npm run prettier-motoko
         continue-on-error: false
 
+      - name: Install Mops
+        run: |
+          npm install -g ic-mops
+        continue-on-error: false
+
       - name: Unit tests
         run: |
           mops test
