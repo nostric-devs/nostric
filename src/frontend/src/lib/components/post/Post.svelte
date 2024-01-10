@@ -6,20 +6,21 @@
   import { NostrUserHandler, Reactions } from "$lib/nostr";
   import Avatar from "$lib/components/user-profile/Avatar.svelte";
   import { onMount } from "svelte";
-  import { nostrHandler} from "$lib/nostr";
+  import { nostrHandler } from "$lib/nostr";
   import dayjs from "dayjs";
   import { authUser } from "$lib/stores/Auth";
 
-  let isLiked : boolean = false;
-  let eventReactions : NDKEvent[] = [];
-  let nostrUserHandler : NostrUserHandler | undefined;
-  let authorPromise : Promise<NDKUser | undefined>;
-  let dateCreated : string = "";
+  let isLiked: boolean = false;
+  let eventReactions: NDKEvent[] = [];
+  let nostrUserHandler: NostrUserHandler | undefined;
+  let authorPromise: Promise<NDKUser | undefined>;
+  let dateCreated: string = "";
 
-  $: $events && event, eventReactions = events.getEventReactions(event);
-  $: isLiked = eventReactions.length > 0 && eventReactions[0].content === Reactions.LIKE;
+  $: $events && event, (eventReactions = events.getEventReactions(event));
+  $: isLiked =
+    eventReactions.length > 0 && eventReactions[0].content === Reactions.LIKE;
   $: if (event && event.created_at) {
-    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM")
+    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
   }
 
   function reactToEvent() {
@@ -37,15 +38,16 @@
       nostrUserHandler = NostrUserHandler.getInstance();
     }
     if (event && !author) {
-      authorPromise = nostrHandler.fetchUserProfileByPublicKey(event.author.pubkey);
+      authorPromise = nostrHandler.fetchUserProfileByPublicKey(
+        event.author.pubkey,
+      );
     } else {
       authorPromise = Promise.resolve(author);
     }
   });
 
-  export let event : NDKEvent | undefined = undefined;
-  export let author : NDKUser | undefined = undefined;
-
+  export let event: NDKEvent | undefined = undefined;
+  export let author: NDKUser | undefined = undefined;
 </script>
 
 {#await authorPromise}
@@ -80,12 +82,17 @@
       <div
         class="post-head mx-auto flex md:flex-row flex-col justify-between items-start"
       >
-        <a href={get_path(ROUTES.USER, author?.pubkey || "")} class="flex items-start">
+        <a
+          href={get_path(ROUTES.USER, author?.pubkey || "")}
+          class="flex items-start"
+        >
           <div class="w-11 mr-2">
             <Avatar profile={author.profile} />
           </div>
           <div>
-            <div class="font-bold">{author?.profile?.displayName || author?.profile?.name || ""}</div>
+            <div class="font-bold">
+              {author?.profile?.displayName || author?.profile?.name || ""}
+            </div>
             <span class="text-sm">@{author?.profile?.name || ""}</span>
           </div>
         </a>
@@ -93,12 +100,9 @@
         <div>
           <span class="text-sm">{dateCreated}</span>
         </div>
-
       </div>
 
-      <a
-        href={get_path(ROUTES.POST, event?.id)}
-      >
+      <a href={get_path(ROUTES.POST, event?.id)}>
         <div class="my-4 text-sm text-pretty max-w-full break-words">
           {event?.content}
         </div>
@@ -109,14 +113,15 @@
           <Heart
             size="20"
             on:click={reactToEvent}
-            class="cursor-pointer {isLiked ? 'fill-red-500 stroke-red-500' : ''}"
+            class="cursor-pointer {isLiked
+              ? 'fill-red-500 stroke-red-500'
+              : ''}"
           />
           <MessageCircle size="20" class="cursor-pointer" />
           <Share size="20" class="cursor-pointer" />
           <Bookmark size="20" class="cursor-pointer" />
         </div>
       {/if}
-
     </div>
   {/if}
 {/await}

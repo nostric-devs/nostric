@@ -6,15 +6,14 @@
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { events } from "$lib/stores/Events";
 
-  let user : NDKUser | undefined;
+  let user: NDKUser | undefined;
 
   onMount(async () => {
-    let userHandler : NostrUserHandler = authUser.getNostrUserHandler();
+    let userHandler: NostrUserHandler = authUser.getNostrUserHandler();
     user = userHandler.getUser();
   });
-
 </script>
 
 {#if user}
-  <UserProfile {user} events={$events}/>
+  <UserProfile {user} events={$events} />
 {/if}

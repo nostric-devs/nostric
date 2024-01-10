@@ -1,18 +1,15 @@
 <script lang="ts">
-
   import { Settings } from "svelte-feathers";
   import { AppShell, Avatar, LightSwitch } from "@skeletonlabs/skeleton";
   import PopUpSearch from "$lib/components/search/PopUpSearch.svelte";
 
-  import { getDrawerStore } from '@skeletonlabs/skeleton';
+  import { getDrawerStore } from "@skeletonlabs/skeleton";
   const drawerStore = getDrawerStore();
 
   function drawerOpen(): void {
     drawerStore.open({});
   }
-
 </script>
-
 
 <AppShell
   slotPageHeader="border flex justify-between items-center pl-3 pr-4 py-3"

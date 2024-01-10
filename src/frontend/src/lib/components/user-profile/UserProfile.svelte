@@ -6,8 +6,8 @@
   import { nostrHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
 
-  let profile : NDKUserProfile | undefined;
-  let userEvents : Promise<NDKEvent[]>;
+  let profile: NDKUserProfile | undefined;
+  let userEvents: Promise<NDKEvent[]>;
 
   onMount(async () => {
     profile = user?.profile;
@@ -16,13 +16,12 @@
     }
   });
 
-  export let user : NDKUser;
-  export let events : NDKEvent[];
+  export let user: NDKUser;
+  export let events: NDKEvent[];
 
   $: if (events) {
     userEvents = Promise.resolve(events);
   }
-
 </script>
 
 <h1 class="h1 m-4">User profile</h1>
@@ -38,7 +37,7 @@
   </div>
 </div>
 <div class="m-4 mb-10">
-    {profile?.bio || ""}
+  {profile?.bio || ""}
 </div>
 
 <hr class="!border-t-2 mx-4" />
@@ -48,7 +47,7 @@
 {#await userEvents then fetchedEvents}
   {#if fetchedEvents}
     {#each fetchedEvents.filter((e) => e.kind === NDKKind.Text) as event}
-      <Post {event} author={user}/>
+      <Post {event} author={user} />
     {/each}
   {/if}
 {/await}

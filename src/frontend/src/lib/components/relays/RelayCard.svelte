@@ -6,9 +6,9 @@
   import { Circle } from "svelte-loading-spinners";
   import type { RelayObject } from "$lib/stores/Relays";
 
-  let loading : boolean = false;
-  let disabledLocal : boolean = false;
-  let statusColor : string = "";
+  let loading: boolean = false;
+  let disabledLocal: boolean = false;
+  let statusColor: string = "";
 
   $: if (relay.status === NDKRelayStatus.CONNECTED) {
     statusColor = "variant-filled-success";
@@ -26,13 +26,12 @@
       loading = false;
       disabledLocal = false;
     });
-  }
+  };
 
-  export let relay : RelayObject;
-  export let disabled : boolean | undefined = undefined;
+  export let relay: RelayObject;
+  export let disabled: boolean | undefined = undefined;
 
-  export let verbose : boolean | undefined = true;
-
+  export let verbose: boolean | undefined = true;
 </script>
 
 {#if verbose}
@@ -41,25 +40,33 @@
     in:slide={{ duration: 300 }}
     out:slide={{ duration: 300 }}
   >
-    <div class="flex items-center mr-4"><Server/></div>
+    <div class="flex items-center mr-4"><Server /></div>
     <div>
       <div class="flex mb-1">
-        <div class="text-xs uppercase font-semibold min-w-[65px] flex items-center">
+        <div
+          class="text-xs uppercase font-semibold min-w-[65px] flex items-center"
+        >
           URL
         </div>
         <div class="text-xs font-mono">{relay.object?.url}</div>
       </div>
       <div class="flex mb-1">
-        <div class="text-xs uppercase font-semibold min-w-[65px] flex items-center">
+        <div
+          class="text-xs uppercase font-semibold min-w-[65px] flex items-center"
+        >
           mode
         </div>
         <div class="text-xs font-mono">read & write</div>
       </div>
       <div class="flex grow">
-        <div class="text-xs uppercase font-semibold min-w-[65px] flex items-center">
+        <div
+          class="text-xs uppercase font-semibold min-w-[65px] flex items-center"
+        >
           status
         </div>
-        <div class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}">
+        <div
+          class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}"
+        >
           {NDKRelayStatus[relay.status]}
         </div>
       </div>
@@ -72,7 +79,7 @@
           class="btn btn-sm rounded-2xl variant-filled-error min-w-[50px]"
           disabled={disabled || disabledLocal}
         >
-          <span><XCircle size="15"/></span>
+          <span><XCircle size="15" /></span>
           <span>remove</span>
         </button>
       </div>
@@ -88,7 +95,7 @@
               <Circle size="15" color="white" unit="px"></Circle>
             </span>
           {:else}
-            <span><RefreshCcw size="14"/></span>
+            <span><RefreshCcw size="14" /></span>
           {/if}
           <span>refesh</span>
         </button>
@@ -97,13 +104,14 @@
   </div>
 {:else}
   <div class="variant-glass-tertiary rounded-xl p-2 flex mb-2">
-    <div class="flex items-center ml-2 mr-3"><Server/></div>
+    <div class="flex items-center ml-2 mr-3"><Server /></div>
     <div>
       <div class="font-mono text-xs">{relay.object?.url}</div>
-      <div class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}">
+      <div
+        class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}"
+      >
         {NDKRelayStatus[relay.status]}
       </div>
     </div>
   </div>
 {/if}
-

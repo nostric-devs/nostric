@@ -6,12 +6,12 @@
   import { onMount } from "svelte";
   import { navigating } from "$app/stores";
 
-  let component : ComponentType;
-  let classVariant : string = "";
-  let alertData : Alert;
+  let component: ComponentType;
+  let classVariant: string = "";
+  let alertData: Alert;
 
   $: $navigating, alert.clear();
-  $: $alert, alertData = alert.getData();
+  $: $alert, (alertData = alert.getData());
   $: if (alertData) {
     if (alertData.type === AlertTypes.ERROR) {
       component = AlertTriangle;
@@ -24,14 +24,14 @@
       classVariant = "variant-gradient-success-warning";
     }
   }
-
 </script>
+
 {#if $alert}
   <aside class="alert bg-gradient-to-br {classVariant} rounded-3xl">
     <svelte:component this={component} size="40" />
     <div class="alert-message">
-      <h3 class="h3">{ alertData.title }</h3>
-      <p>{ alertData.message }</p>
+      <h3 class="h3">{alertData.title}</h3>
+      <p>{alertData.message}</p>
     </div>
     <div class="alert-actions">
       <button

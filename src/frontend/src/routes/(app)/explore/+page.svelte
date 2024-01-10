@@ -5,14 +5,13 @@
   import type { NDKEvent } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
 
-  let randomEvents : NDKEvent[] = [];
+  let randomEvents: NDKEvent[] = [];
 
   $: randomEvents;
 
   onMount(async () => {
     randomEvents = await nostrHandler.fetchRandomEvents();
   });
-
 </script>
 
 <h1 class="h1 m-4">Explore</h1>
@@ -23,6 +22,6 @@
   </div>
 {:else}
   {#each randomEvents as event}
-    <Post {event}/>
+    <Post {event} />
   {/each}
 {/if}
