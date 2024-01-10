@@ -9,9 +9,9 @@
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
-  let content : string = "";
-  let nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
-  let processing : boolean = false;
+  let content: string = "";
+  let nostrUserHandler: NostrUserHandler = authUser.getNostrUserHandler();
+  let processing: boolean = false;
 
   async function onSubmit(): Promise<void> {
     processing = true;
@@ -24,8 +24,7 @@
     });
   }
 
-  export let parent : SvelteComponent;
-
+  export let parent: SvelteComponent;
 </script>
 
 {#if $modalStore[0]}

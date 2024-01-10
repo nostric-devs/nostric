@@ -20,14 +20,24 @@ jobs:
           npm install
         continue-on-error: false
 
-      - name: Prettier check
+      - name: Prettier TypeScript check
         run: |
           npm run prettier
         continue-on-error: false
 
-      - name: ESLint check
+      - name: Prettier Svelte check
+        run: |
+          npm run prettier-svelte
+        continue-on-error: false
+
+      - name: ESLint TypeScript check
         run: |
           npm run lint
+        continue-on-error: false
+
+      - name: ESLint Svelte check
+        run: |
+          npm run lint-svelte
         continue-on-error: false
 
   backend-checks:
