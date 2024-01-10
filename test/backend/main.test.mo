@@ -1,15 +1,18 @@
-import { test } "mo:test";
+import {test; suite} "mo:test/async";
+import Backend "../../src/backend/main";
 
-test(
-  "[backend/main] simple test",
-  func() {
-    assert true;
-  },
-);
+var backend = await Backend.Main();
 
-test(
-  "[backend/main] test my number",
-  func() {
-    assert 1 > 0;
-  },
-);
+await suite("actor greet", func() : async () {
+    await test("greet function - Greeting a name", func() : async () {
+        let greeting = await backend.greet("Alice");
+        assert greeting == "Hello, Alice!";
+    });
+
+    // Additional tests for greet function with different names
+    await test("greet function - Greeting another name", func() : async () {
+        let greeting = await backend.greet("Bob");
+        assert greeting == "Hello, Bob!";
+    });
+});
+
