@@ -6,7 +6,7 @@ import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import Account "./utils/Account";
 
-shared this actor class Main() {
+shared ({ caller = parent }) actor class Main() = this {
   public func greet(name : Text) : async Text {
     return "Hello, " # name # "!";
   };
