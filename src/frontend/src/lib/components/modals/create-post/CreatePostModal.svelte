@@ -10,12 +10,11 @@
   const toastStore = getToastStore();
 
   let content : string = "";
-  let nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
   let processing : boolean = false;
 
   async function onSubmit(): Promise<void> {
     processing = true;
-    await nostrUserHandler.createAndPublishEvent(content, NDKKind.Text, []);
+    await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
     processing = false;
     modalStore.close();
     toastStore.trigger({

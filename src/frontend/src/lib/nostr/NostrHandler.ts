@@ -112,8 +112,8 @@ export class NostrHandler extends EventEmitter {
     for (const subscription of this.subscriptions) {
       try {
         subscription.stop();
-      } catch {
-        console.log("subscription: error");
+      } catch (error) {
+        console.error(error);
       }
     }
     events.clear();
