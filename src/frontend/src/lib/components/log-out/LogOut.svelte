@@ -7,7 +7,7 @@
   import { enhance } from '$app/forms';
 
   const toastStore = getToastStore();
-  let loading : boolean = false;
+  let loading: boolean = false;
 
   const onLogOut = async () => {
     loading = true;
@@ -18,8 +18,7 @@
       background: "variant-filled-success",
     });
     loading = false;
-  }
-
+  };
 </script>
 
 <form method="POST" use:enhance={onLogOut}>

@@ -10,16 +10,17 @@
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
 
-  let isLiked : boolean = false;
-  let eventReactions : NDKEvent[] = [];
-  let nostrUserHandler : NostrUserHandler | undefined;
-  let authorPromise : Promise<NDKUser | undefined>;
-  let dateCreated : string = "";
+  let isLiked: boolean = false;
+  let eventReactions: NDKEvent[] = [];
+  let nostrUserHandler: NostrUserHandler | undefined;
+  let authorPromise: Promise<NDKUser | undefined>;
+  let dateCreated: string = "";
 
-  $: $events && event, eventReactions = events.getEventReactions(event);
-  $: isLiked = eventReactions.length > 0 && eventReactions[0].content === Reactions.LIKE;
+  $: $events && event, (eventReactions = events.getEventReactions(event));
+  $: isLiked =
+    eventReactions.length > 0 && eventReactions[0].content === Reactions.LIKE;
   $: if (event && event.created_at) {
-    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM")
+    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
   }
 
   function reactToEvent() {
@@ -37,15 +38,16 @@
       nostrUserHandler = $authUser.nostr;
     }
     if (event && !author) {
-      authorPromise = nostrHandler.fetchUserProfileByPublicKey(event.author.pubkey);
+      authorPromise = nostrHandler.fetchUserProfileByPublicKey(
+        event.author.pubkey,
+      );
     } else {
       authorPromise = Promise.resolve(author);
     }
   });
 
-  export let event : NDKEvent | undefined = undefined;
-  export let author : NDKUser | undefined = undefined;
-
+  export let event: NDKEvent | undefined = undefined;
+  export let author: NDKUser | undefined = undefined;
 </script>
 
 {#await authorPromise}
@@ -61,7 +63,9 @@
             <Avatar profile={author.profile} />
           </div>
           <div>
-            <div class="font-bold">{author?.profile?.displayName || author?.profile?.name || ""}</div>
+            <div class="font-bold">
+              {author?.profile?.displayName || author?.profile?.name || ""}
+            </div>
             <span class="text-sm">@{author?.profile?.name || ""}</span>
           </div>
         </a>
@@ -69,7 +73,6 @@
         <div>
           <span class="text-sm">{dateCreated}</span>
         </div>
-
       </div>
 
       <a
@@ -85,14 +88,15 @@
           <Heart
             size="20"
             on:click={reactToEvent}
-            class="cursor-pointer {isLiked ? 'fill-red-500 stroke-red-500' : ''}"
+            class="cursor-pointer {isLiked
+              ? 'fill-red-500 stroke-red-500'
+              : ''}"
           />
           <MessageCircle size="20" class="cursor-pointer" />
           <Share size="20" class="cursor-pointer" />
           <Bookmark size="20" class="cursor-pointer" />
         </div>
       {/if}
-
     </div>
   {/if}
 {/await}

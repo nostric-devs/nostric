@@ -9,7 +9,7 @@
     LightSwitch,
     TabAnchor,
     TabGroup,
-    Modal
+    Modal,
   } from "@skeletonlabs/skeleton";
   import { Bell, Home, Mail, Search } from "svelte-feathers";
   import Navigation from "$lib/components/navigation/Navigation.svelte";
@@ -29,7 +29,7 @@
 
   const drawerStore = getDrawerStore();
 
-  const autocompleteOptions : AutocompleteOption[] = [
+  const autocompleteOptions: AutocompleteOption[] = [
     {
       label: "Vanilla",
       value: "vanilla",
@@ -37,9 +37,9 @@
       meta: { healthy: false },
     },
   ];
-  let autocompleteInputValue : string = "";
+  let autocompleteInputValue: string = "";
 
-  let user : NDKUser | undefined;
+  let user: NDKUser | undefined;
 
   $: isAuthenticated = !$authUser.loading && authUser.authState !== AuthStates.ANONYMOUS;
 
@@ -52,7 +52,6 @@
       user = $authUser.nostr.getUser();
     }
   });
-
 </script>
 {#if $authUser.loading}
   <div class="w-full h-screen flex items-center justify-center">
@@ -116,7 +115,10 @@
 
   <svelte:fragment slot="sidebarRight">
     {#if isAuthenticated}
-      <PopUpSearch options={autocompleteOptions} inputValue={autocompleteInputValue}></PopUpSearch>
+      <PopUpSearch
+        options={autocompleteOptions}
+        inputValue={autocompleteInputValue}
+      ></PopUpSearch>
       <FollowSuggest />
       <RelaySidebar />
     {/if}
@@ -157,5 +159,4 @@
       </TabAnchor>
     </TabGroup>
   </svelte:fragment>
-
 </AppShell>

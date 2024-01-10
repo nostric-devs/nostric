@@ -8,8 +8,8 @@
   import UserProfileLoadingSkeleton from "$lib/components/user-profile/UserProfileLoadingSkeleton.svelte";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
 
-  let profile : NDKUserProfile | undefined;
-  let userEvents : Promise<NDKEvent[]>;
+  let profile: NDKUserProfile | undefined;
+  let userEvents: Promise<NDKEvent[]>;
 
   onMount(async () => {
     profile = user?.profile;
@@ -18,13 +18,12 @@
     }
   });
 
-  export let user : NDKUser;
-  export let events : NDKEvent[] = [];
+  export let user: NDKUser;
+  export let events: NDKEvent[] = [];
 
   $: if (events) {
     userEvents = Promise.resolve(events);
   }
-
 </script>
 
 <h1 class="h1 m-4">User profile</h1>
@@ -41,7 +40,7 @@
   </div>
 </div>
 <div class="m-4 mb-10">
-    {profile?.bio || ""}
+  {profile?.bio || ""}
 </div>
 {:else}
   <UserProfileLoadingSkeleton />
@@ -58,7 +57,7 @@
 {:then fetchedEvents}
   {#if fetchedEvents && fetchedEvents.length > 0}
     {#each fetchedEvents.filter((e) => e.kind === NDKKind.Text) as event}
-      <Post {event} author={user}/>
+      <Post {event} author={user} />
     {/each}
   {:else}
     <div class="px-4">No posts found for the given user so far.</div>

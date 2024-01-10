@@ -11,10 +11,9 @@
     Image,
   } from "svelte-feathers";
 
-  $: isActive = (pageName: String) => {
+  $: isActive = (pageName: string) => {
     return $page.url.pathname === pageName;
   };
-
 </script>
 
 <nav class="list-nav xl:px-4 py-4">
