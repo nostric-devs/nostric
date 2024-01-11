@@ -4,9 +4,9 @@
   import { relays } from "$lib/stores/Relays";
   import RelayCard from "$lib/components/relays/RelayCard.svelte";
 
-  let disabled : boolean = false;
-  let loading : boolean = false;
-  let newRelay : string = "";
+  let disabled: boolean = false;
+  let loading: boolean = false;
+  let newRelay: string = "";
 
   const addRelay = () => {
     loading = true;
@@ -14,8 +14,7 @@
     nostrHandler.addRelay(newRelay);
     loading = false;
     disabled = false;
-  }
-
+  };
 </script>
 
 <h1 class="h1 m-4">Relays</h1>
@@ -26,7 +25,7 @@
     bind:value={newRelay}
     class="input p-4"
     placeholder="Enter new relay URL"
-    disabled={disabled}
+    {disabled}
   />
   <button
     on:click={addRelay}

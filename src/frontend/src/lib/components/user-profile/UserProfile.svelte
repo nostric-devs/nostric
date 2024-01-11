@@ -5,7 +5,8 @@
   import Avatar from "$lib/components/user-profile/Avatar.svelte";
   import { nostrHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
-  import { ROUTES, get_path } from "$lib/utils/routes";
+  import UserProfileLoadingSkeleton from "$lib/components/user-profile/UserProfileLoadingSkeleton.svelte";
+  import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
 
   let profile: NDKUserProfile | undefined;
   let userEvents: Promise<NDKEvent[]>;
@@ -14,12 +15,11 @@
     profile = user?.profile;
     if (!events) {
       userEvents = await nostrHandler.fetchEventsByAuthorPubkey(user.pubkey);
-      console.log(user)
     }
   });
 
   export let user: NDKUser;
-  export let events: NDKEvent[];
+  export let events: NDKEvent[] = [];
 
   $: if (events) {
     userEvents = Promise.resolve(events);
@@ -28,7 +28,8 @@
 
 <h1 class="h1 m-4">User profile</h1>
 
-<div class="mx-auto flex md:flex-row flex-col ml-4 mt-8">
+{#if user}
+<div class="mx-auto flex md:flex-row flex-col ml-4 my-8">
   <div class="w-1/5">
     <Avatar {profile} />
   </div>
@@ -55,18 +56,26 @@
   </div>
 </div>
 <div class="m-4 mb-10">
-  {profile?.bio ||
-    "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Morbi commodo, ipsum sed pharetra gravida, orci magna rhoncus neque, id pulvinar odio lorem non turpis. Nullam sit amet enim."}
+  {profile?.bio || ""}
 </div>
+{:else}
+  <UserProfileLoadingSkeleton />
+{/if}
 
 <hr class="!border-t-2 mx-4" />
 
 <div class="text-3xl my-8 mx-4 font-bold">Posts</div>
 
-{#await userEvents then fetchedEvents}
-  {#if fetchedEvents}
+{#await userEvents}
+  {#each {length:6} as _}
+    <PostLoadingSkeleton />
+  {/each}
+{:then fetchedEvents}
+  {#if fetchedEvents && fetchedEvents.length > 0}
     {#each fetchedEvents.filter((e) => e.kind === NDKKind.Text) as event}
-      <Post {event} author={user} />
+      <Post {event} author={user}/>
     {/each}
+  {:else}
+    <div class="px-4">No posts found for the given user so far.</div>
   {/if}
 {/await}

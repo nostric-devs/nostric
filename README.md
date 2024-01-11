@@ -1,115 +1,95 @@
-<p align="left" >
-  <img width="240"  src="./src/frontend/static/logo.png">
-</p>
+# Nostric
 
-# SvelteKit Dapp template
+Nostric is yet a very simple Nostr client running on the Internet Computer Protocol (ICP). We started this project as a submission to the Vetkey challenge bounty released by the DFINITY foundation. The main idea is to store Nostr private keys encrypted in the backend of the application. This makes managing private keys secure and also improves UX as an user does not need to use any Chrome extensions to sign posts.
 
-This repository is meant to give [SvelteKit](https://kit.svelte.dev/) developers an easy on-ramp to get started with developing decentralized applications (Dapps in short) for the Internet Computer blockchain.
+However, there we see more synergies between Nostr and ICP and it would be great to continue with this project to deliver a fully featured Nostr client and eventually relay server as well.
 
-## What is the Internet Computer?
+### Supported features
 
-The Internet Computer is a novel blockchain that has the unique capability to serve web content while not requiring the end users to use a browser extension, such as Metamask.
+Our client currently supports these features:
 
-Coupled with super fast execution the Internet Computer provides the worlds first truly user friendly Web 3.0 experience.
+- Generate PK, SK
+- Create a profile
+- Update profile
+- NIP-01 kind:1 Post publish
+- NIP-01 kind:0 User Metadata publish
 
-## What are canisters?
+### Canisters
 
-Dapps on the Internet Computer live in canisters, which are special smart contracts that run WebAssembly, and can respond to regular HTTP requests, among other capabilities.
+Current architecture consists of 4 canisters for local development:
 
-This repository uses Svelte for the frontend, and can upload it to an `asset` type canister that can host your frontend on the Internet Computer.
+- frontend canister
+- backend canister
+- vetkd_system_api canister
+- internet identity canister (for local developlment only)
 
-## Security Considerations and Security Best Practices
+## Deploy locally
 
-If you base your application on this example, we recommend you familiarize yourself with and adhere to the [Security Best Practices](https://internetcomputer.org/docs/current/references/security/) for developing on the Internet Computer. This example may not implement all the best practices.
-
-For example, the following aspects are particularly relevant for creating frontends:
-
-- [Use a well-audited authentication service and client side IC libraries](https://internetcomputer.org/docs/current/references/security/web-app-development-security-best-practices#use-a-well-audited-authentication-service-and-client-side-ic-libraries)
-- [Define security headers including a Content Security Policy (CSP)](https://internetcomputer.org/docs/current/references/security/web-app-development-security-best-practices#define-security-headers-including-a-content-security-policy-csp)
-- [Don’t load JavaScript (and other assets) from untrusted domains](https://internetcomputer.org/docs/current/references/security/web-app-development-security-best-practices#dont-load-javascript-and-other-assets-from-untrusted-domains)
-
-## Getting started
-
-Make sure you have [node.js](https://nodejs.org/) installed.
+1. Get a clone of this repository:
 
 ```
-git clone https://github.com/dfinity/examples
-cd svelte/sveltekit-starter
-npm ci
+git clone https://github.com/lukasvozda/nostric.git
 ```
 
-## DFX
-
-Install `dfx` by running
-
-```
-sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
-```
-
-### Start and stop the local replica
-
-Open a new terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless `dfx.json` exists in the current directory.
+2. [Install DFX](https://sdk.dfinity.org/docs/quickstart/local-quickstart.html) and [install Mops](https://docs.mops.one/quick-start)
+3. Run npm install to install JS dependencies:
 
 ```
-dfx start --background
+npm install
 ```
 
-When you're done with development, or you're switching to a different dfx project, running
+4. Start your local replica:
 
 ```
-dfx stop
+dfx start --clean
 ```
 
-from the project directory will stop the local replica.
-
-## Build & run the dapp
-
-To build and deploy the project locally run
+5. Now run in the new shell execute the deploy script:
 
 ```
-dfx deploy
+sh ./build.sh
 ```
 
-When the process completes you'll have a frontend canister running locally. To find the frontend canister's ID, run
+Or you can execute these commands one by one:
 
 ```
-dfx canister id frontend
+cargo build --target wasm32-unknown-unknown --release --package relay
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
+
+dfx deploy backend
+dfx deploy frontend
 ```
 
-It will output something similar to `rno2w-sqaaa-aaaaa-aaacq-cai`. Copy this ID and open it in the browser using `http://<canister ID>localhost:8000`, eg. `http://rno2w-sqaaa-aaaaa-aaacq-cai.localhost:8000`.
+If your src/declarations folder does not create run:
 
-## Local development
+```
+dfx generate
+```
 
-You can serve the frontend in development mode like you normally develop an app using the command
+6. Run your development server:
 
 ```
 npm run dev
 ```
 
-it is not necessary to deploy it to the frontend canister during development.
+Troubleshooting:
 
-## Deploying to the IC
-
-To host the Svelte app on the IC, you'll need to have some cycles available. Cycles pay for the execution of your app, and they are also needed to create canisters.
-
-You can get $20 worth of cycles for free from the [Cycles Faucet](faucet.dfinity.org).
-
-You should have a canister running the cycles wallet on the IC at this point. The cycles wallet makes it easy to pay for canister creation.
-
-You can check the balance by running
+- If you have missing `relay-opt.wasm` file, run:
 
 ```
-dfx wallet --network ic balance
+wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
 ```
 
-After making sure you have cycles available you can run
+- If you don't have `wasm-opt` installed, run:
 
 ```
-dfx deploy --network ic
+brew install binaryen
 ```
 
-The command will build the project, create a new canister on the IC and deploy the Svelte app into it. The command will also create a new file `canister_ids.json` which will help the dfx tool deploy to the same canister in future updates. You can commit this file in your repository.
+- If you want to regenerate `dynamic-relays.did` and `relay.did` file then run:
 
-You can now open your Svelte app running on the IC. You can find the canister ID in the deploy command output, or use the ID in `canister_ids.json`.
+```
+cargo test
+```
 
-The link to your app is `<canister_id>.ic0.app`. For example if your canister ID is `zgvi5-hiaaa-aaaam-aaasq-cai`, your app will be at `https://zgvi5-hiaaa-aaaam-aaasq-cai.ic0.app/`.
+- If you are planning to run this project locally you have to also deploy local ledger canister. The `build.sh` script contains local `ckbtc_ledger`.

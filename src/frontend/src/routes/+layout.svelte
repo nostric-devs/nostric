@@ -3,17 +3,16 @@
   import { initializeStores, Toast } from "@skeletonlabs/skeleton";
   import { Modal } from "@skeletonlabs/skeleton";
   import CreatePostModal from "$lib/components/modals/create-post/CreatePostModal.svelte";
-  import type { ModalComponent } from '@skeletonlabs/skeleton';
+  import type { ModalComponent } from "@skeletonlabs/skeleton";
 
   const modalRegistry: Record<string, ModalComponent> = {
     createPostModal: { ref: CreatePostModal },
   };
 
   initializeStores();
-
 </script>
 
-<Toast/>
+<Toast />
 
 <Modal components={modalRegistry} />
 

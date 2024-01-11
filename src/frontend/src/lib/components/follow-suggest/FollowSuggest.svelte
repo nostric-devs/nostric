@@ -31,10 +31,8 @@
         <span>
           <UserPlus size="16" class="lg:mx-auto xl:mx-0"></UserPlus>
         </span>
-        <span class="text-sm">
-          Follow
-        </span>  
-        </button>
+        <span class="text-sm"> Follow </span>
+      </button>
     </div>
   {/each}
 </div>

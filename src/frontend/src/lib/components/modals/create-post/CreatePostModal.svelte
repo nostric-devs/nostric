@@ -9,13 +9,12 @@
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
-  let content : string = "";
-  let nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
-  let processing : boolean = false;
+  let content: string = "";
+  let processing: boolean = false;
 
   async function onSubmit(): Promise<void> {
     processing = true;
-    await nostrUserHandler.createAndPublishEvent(content, NDKKind.Text, []);
+    await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
     processing = false;
     modalStore.close();
     toastStore.trigger({
@@ -24,8 +23,7 @@
     });
   }
 
-  export let parent : SvelteComponent;
-
+  export let parent: SvelteComponent;
 </script>
 
 {#if $modalStore[0]}
