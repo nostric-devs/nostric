@@ -1,41 +1,42 @@
-<script>
+<script lang="ts">
+  import { page } from "$app/stores";
+  import { nostrHandler } from "$lib/nostr";
+  import { onMount } from "svelte";
+  import type { NDKUser } from "@nostr-dev-kit/ndk";
+  import { AuthStates, authUser } from "$lib/stores/Auth";
+  import UserFollowLoadingSkeleton from "$lib/components/user/follow/UserFollowLoadingSkeleton.svelte";
+  import { followedUsers } from "$lib/stores/FollowedUsers";
+  import FollowCard from "$lib/components/user/follow/FollowCard.svelte";
 
-    import { Avatar } from "@skeletonlabs/skeleton";
-    import { UserMinus } from "svelte-feathers";
+  let followedUsersPromise: Promise<NDKUser[]>;
+  let disabled: boolean = false;
+
+  onMount(async () => {
+    if ($authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+      const user: NDKUser = $authUser.nostr.getUser();
+      if ($page.params.slug == user.pubkey) {
+        followedUsersPromise = Promise.resolve($followedUsers);
+        return;
+      }
+    }
+    followedUsersPromise = nostrHandler.fetchUserFollowingByPublicKey($page.params.slug);
+  });
 
 </script>
-<h1 class="h1 m-4">Following</h1>
 
+<h1 class="h1 m-4">Following</h1>
 <div class="px-4">
-  {#each Array.from({ length: 30 }) as item}
-    <div
-      class="post-head mx-auto my-4 flex md:flex-row flex-col justify-between items-start"
-    >
-      <!-- Avatar, Username and Link -->
-      <a href="/user/1" class="flex items-start">
-        <div>
-          <Avatar
-            src="/img/ape.jpeg"
-            class="mr-4 mt-1"
-            initials="LV"
-            width="w-10"
-            background="bg-primary-500"
-          />
-        </div>
-        <div>
-          <div class="font-bold">Lukas Vozda</div>
-          <span class="text-sm username"
-            >npub241BKSDASUDSAasDASFASDFADFASDFSasdfs
-          </span>
-        </div>
-      </a>
-      <!-- We can only unfollow people that we follow -->
-      <button type="button" class="btn variant-filled-warning font-normal">
-        <span>
-          <UserMinus size="16" class="lg:mx-auto xl:mx-0"></UserMinus>
-        </span>
-        <span class="text-sm"> Unfollow </span>
-      </button> 
-    </div>
-  {/each}
+  {#await followedUsersPromise}
+    {#each {length: 10} as _}
+      <UserFollowLoadingSkeleton />
+    {/each}
+  {:then followedUsers}
+    {#if followedUsers && followedUsers.length > 0}
+      {#each followedUsers as user}
+        <FollowCard bind:disabled {user} />
+      {/each}
+    {:else}
+      <div class="mt-2">This user does not yet follow anyone.</div>
+    {/if}
+  {/await}
 </div>

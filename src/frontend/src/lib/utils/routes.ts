@@ -17,7 +17,7 @@ export const ROUTES = {
   REGISTER_ANONYMOUS: "register-anonymous",
   REGISTER_IDENTITY: "register-identity",
   FOLLOWERS: "followers",
-  FOLLOWING: "following"
+  FOLLOWING: "following",
 };
 
 export const getPath = (...names: string[]): string => {

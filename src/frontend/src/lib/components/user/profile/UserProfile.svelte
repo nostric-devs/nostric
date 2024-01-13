@@ -2,24 +2,40 @@
   import Post from "$lib/components/post/Post.svelte";
   import type { NDKEvent, NDKUser, NDKUserProfile } from "@nostr-dev-kit/ndk";
   import { onMount } from "svelte";
-  import Avatar from "$lib/components/user-profile/Avatar.svelte";
+  import Avatar from "$lib/components/user/Avatar.svelte";
   import { nostrHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
-  import UserProfileLoadingSkeleton from "$lib/components/user-profile/UserProfileLoadingSkeleton.svelte";
+  import UserProfileLoadingSkeleton from "$lib/components/user/profile/UserProfileLoadingSkeleton.svelte";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
+  import { getPath, ROUTES } from "$lib/utils/routes";
+  import { AuthStates, authUser } from "$lib/stores/Auth";
+  import { followedUsers } from "$lib/stores/FollowedUsers";
+  import { Circle } from "svelte-loading-spinners";
 
   let profile: NDKUserProfile | undefined;
   let userEvents: Promise<NDKEvent[]>;
+  let userFollowersPromise: Promise<NDKUser[]>;
+  let userFollowingPromise: Promise<NDKUser[]>;
 
   onMount(async () => {
     profile = user?.profile;
-    if (!events) {
-      userEvents = await nostrHandler.fetchEventsByAuthorPubkey(user.pubkey);
+    if (events === undefined) {
+      userEvents = nostrHandler.fetchEventsByAuthorPublicKey(user.pubkey);
+    }
+    userFollowersPromise = nostrHandler.fetchUserFollowersByPublicKey(user.pubkey);
+    if (
+      $authUser.authState !== AuthStates.ANONYMOUS &&
+      $authUser.nostr &&
+      $authUser.nostr?.getPublicKey() === user.pubkey
+    ) {
+      userFollowingPromise = Promise.resolve($followedUsers);
+    } else {
+      userFollowingPromise = nostrHandler.fetchUserFollowingByPublicKey(user.pubkey);
     }
   });
 
   export let user: NDKUser;
-  export let events: NDKEvent[] = [];
+  export let events: NDKEvent[] | undefined = undefined;
 
   $: if (events) {
     userEvents = Promise.resolve(events);
@@ -39,18 +55,26 @@
     <div class="text-sm break-words">{user?.npub}</div>
     <div class="flex mt-4">
       <a
-        href={get_path(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWERS)}
+        href={getPath(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWERS)}
         class="flex flex-col items-center mr-6 p-2 follow hover:bg-primary-hover-token rounded-md transition"
       >
         <span>Followers</span>
-        <span class="text-4xl font-bold">50</span>
+        {#await userFollowersPromise}
+          <div class="mt-2"><Circle size="25" color="black" unit="px" /></div>
+        {:then userFollowers}
+          <span class="text-4xl font-bold">{userFollowers ? userFollowers.length : 0}</span>
+        {/await}
       </a>
       <a
-      href={get_path(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWING)}
+      href={getPath(ROUTES.USER, user?.pubkey || "", ROUTES.FOLLOWING)}
         class="flex flex-col items-center p-2 follow hover:bg-primary-hover-token rounded-md transition"
       >
         <span>Following</span>
-        <span class="text-4xl font-bold">78</span>
+        {#await userFollowingPromise}
+          <div class="mt-2"><Circle size="25" color="black" unit="px" /></div>
+        {:then userFollowing}
+          <span class="text-4xl font-bold">{userFollowing ? userFollowing.length : 0}</span>
+        {/await}
       </a>
     </div>
   </div>

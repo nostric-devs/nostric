@@ -87,7 +87,7 @@
           status
         </div>
         <div
-          class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}"
+          class="badge text-xs font-light font-mono py-0 px-2 rounded lowercase {statusColor}"
         >
           {NDKRelayStatus[relay.status]}
         </div>
@@ -98,7 +98,7 @@
         <button
           on:click={removeRelay}
           title="Delete relay"
-          class="btn btn-sm rounded-2xl variant-filled-error w-full"
+          class="btn btn-sm rounded variant-filled-error w-full"
           disabled={disabled || disabledLocal || explicitRelay}
         >
           <span><XCircle size="15" /></span>
@@ -109,7 +109,7 @@
         <button
           on:click={attemptReconnect}
           title="Delete relay"
-          class="btn btn-sm rounded-2xl variant-filled-primary w-full"
+          class="btn btn-sm rounded variant-filled-primary w-full"
           disabled={disabled || disabledLocal}
         >
           {#if loading}

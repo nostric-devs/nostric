@@ -1,5 +1,5 @@
 <script lang="ts">
-  import UserProfile from "$lib/components/user-profile/UserProfile.svelte";
+  import UserProfile from "$lib/components/user/profile/UserProfile.svelte";
   import { authUser } from "$lib/stores/Auth";
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { events } from "$lib/stores/Events";
@@ -11,5 +11,5 @@
 
 </script>
 
-<UserProfile {user} events={$events}/>
+<UserProfile {user} events={$events.filter((event) => event.author.pubkey === user.pubkey)}/>
 

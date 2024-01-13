@@ -90,4 +90,3 @@ export class IdentityHandler {
     return this.backendActor?.getProfile();
   }
 }
-
