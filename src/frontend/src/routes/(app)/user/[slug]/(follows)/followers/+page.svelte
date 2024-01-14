@@ -18,31 +18,30 @@
   });
 </script>
 
-<div class="h-full flex flex-col">
-  <h1 class="h1 px-4 my-4">Followers</h1>
-  {#await followersPromise}
+<h1 class="h1 px-4 my-4">Followers</h1>
+{#await followersPromise}
+  <div class="px-4 mb-4">
+    <div class="placeholder animate-pulse" />
+  </div>
+  <hr class="!border-t-2 mx-4" />
+  <div class="px-4 mt-3">
+    {#each { length: 10 } as _}
+      <UserFollowLoadingSkeleton />
+    {/each}
+  </div>
+{:then followers}
+  {#if followers && followers.length > 0}
     <div class="px-4 mb-4">
-      <div class="placeholder animate-pulse" />
+      This user has total of { followers.length } followers
     </div>
     <hr class="!border-t-2 mx-4" />
-    <div class="px-4 mt-3">
-      {#each { length: 10 } as _}
-        <UserFollowLoadingSkeleton />
-      {/each}
-    </div>
-  {:then followers}
-    {#if followers && followers.length > 0}
-      <div class="px-4 mb-4">
-        This user has total of { followers.length } followers
-      </div>
-      <hr class="!border-t-2 mx-4" />
-      <InfiniteScrollContainer allItems={followers} >
-        <svelte:fragment slot="listItem" let:item={item} >
-          <FollowCard user={item} {disabled}/>
-        </svelte:fragment>
-      </InfiniteScrollContainer>
-    {:else}
-      <div class="mt-2">This user has not followers yet.</div>
-    {/if}
-  {/await}
-</div>
+    <InfiniteScrollContainer allItems={followers} >
+      <svelte:fragment slot="listItem" let:item={item} >
+        <FollowCard user={item} {disabled}/>
+      </svelte:fragment>
+    </InfiniteScrollContainer>
+  {:else}
+    <div class="mt-2">This user has not followers yet.</div>
+  {/if}
+{/await}
+

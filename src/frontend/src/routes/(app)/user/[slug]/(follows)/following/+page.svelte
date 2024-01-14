@@ -27,31 +27,30 @@
   });
 </script>
 
-<div class="h-full flex flex-col">
-  <h1 class="h1 px-4 mt-4 mb-6">Following</h1>
-  {#await followedUsersPromise}
+
+<h1 class="h1 px-4 mt-4 mb-6">Following</h1>
+{#await followedUsersPromise}
+  <div class="px-4 mb-4">
+    <div class="placeholder animate-pulse" />
+  </div>
+  <hr class="!border-t-2 mx-4" />
+  <div class="px-4 mt-3">
+    {#each { length: 10 } as _}
+      <UserFollowLoadingSkeleton />
+    {/each}
+  </div>
+{:then followedUsers}
+  {#if followedUsers && followedUsers.length > 0}
     <div class="px-4 mb-4">
-      <div class="placeholder animate-pulse" />
+      This user has total of { followedUsers.length } followers
     </div>
     <hr class="!border-t-2 mx-4" />
-    <div class="px-4 mt-3">
-      {#each { length: 10 } as _}
-        <UserFollowLoadingSkeleton />
-      {/each}
-    </div>
-  {:then followedUsers}
-    {#if followedUsers && followedUsers.length > 0}
-      <div class="px-4 mb-4">
-        This user has total of { followedUsers.length } followers
-      </div>
-      <hr class="!border-t-2 mx-4" />
-      <InfiniteScrollContainer allItems={followedUsers} >
-        <svelte:fragment slot="listItem" let:item={item} >
-          <FollowCard user={item} {disabled}/>
-        </svelte:fragment>
-      </InfiniteScrollContainer>
-    {:else}
-      <div class="mt-2">This user does not yet follow anyone.</div>
-    {/if}
-  {/await}
-</div>
+    <InfiniteScrollContainer allItems={followedUsers} >
+      <svelte:fragment slot="listItem" let:item={item} >
+        <FollowCard user={item} {disabled}/>
+      </svelte:fragment>
+    </InfiniteScrollContainer>
+  {:else}
+    <div class="mt-2">This user does not yet follow anyone.</div>
+  {/if}
+{/await}

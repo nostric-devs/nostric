@@ -33,7 +33,7 @@
 
 </script>
 
-<div bind:this={itemsWrapper} class="overflow-y-scroll px-4 h-screen">
+<div bind:this={itemsWrapper} class="overflow-y-scroll px-4 grow">
   {#each displayedItems as item}
     <slot name="listItem" {item} {disabled} />
   {/each}
