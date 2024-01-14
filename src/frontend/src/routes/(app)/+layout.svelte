@@ -11,14 +11,13 @@
     TabGroup,
     Modal,
   } from "@skeletonlabs/skeleton";
-  import { Bell, Home, Mail, Plus, Search } from "svelte-feathers";
+  import { Bell, Home, Mail, Search } from "svelte-feathers";
   import Navigation from "$lib/components/navigation/Navigation.svelte";
   import PopUpSearch from "$lib/components/search/PopUpSearch.svelte";
   import Logo from "$lib/components/logo/Logo.svelte";
-  import { get_path, ROUTES } from "$lib/utils/routes";
+  import { getPath, ROUTES } from "$lib/utils/routes";
   import FollowSuggest from "$lib/components/follow-suggest/FollowSuggest.svelte";
   import LogOut from "$lib/components/log-out/LogOut.svelte";
-  import type { NostrUserHandler } from "$lib/nostr";
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
@@ -26,6 +25,7 @@
   import { fade } from "svelte/transition";
   import CreatePostTrigger from "$lib/components/modals/create-post/CreatePostTrigger.svelte";
   import RelaySidebar from "$lib/components/relays/RelaySidebar.svelte";
+  import { Circle } from "svelte-loading-spinners";
 
   const drawerStore = getDrawerStore();
 
@@ -39,24 +39,27 @@
   ];
   let autocompleteInputValue: string = "";
 
-  let userHandler: NostrUserHandler | undefined;
   let user: NDKUser | undefined;
 
-  $: isAuthenticated = $authUser !== AuthStates.ANONYMOUS;
+  $: isAuthenticated =
+    !$authUser.loading && authUser.authState !== AuthStates.ANONYMOUS;
 
   function drawerOpen(): void {
     drawerStore.open({});
   }
 
   onMount(() => {
-    if (!authUser.isAnonymous()) {
-      userHandler = authUser.getNostrUserHandler();
-      if (userHandler) {
-        user = userHandler.getUser();
-      }
+    if ($authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+      user = $authUser.nostr.getUser();
     }
   });
 </script>
+
+{#if $authUser.loading}
+  <div class="w-full h-screen flex items-center justify-center">
+    <Circle size="200" color="white" unit="px" duration="2s" />
+  </div>
+{/if}
 
 <Drawer width="w-9/12">
   <div class="px-4 py-4">
@@ -71,7 +74,7 @@
   transitionOutParams={{ duration: 200 }}
 />
 <AppShell
-  class="xl:w-[1286px] mx-auto"
+  class="xl:w-[1286px] mx-auto {$authUser.loading ? 'hidden' : ''}"
   slotSidebarLeft="bg-surface-500/5 w-0 lg:w-16 xl:w-72"
   slotSidebarRight="bg-surface-500/5 w-0 lg:w-96 lg:px-4 lg:py-4"
   slotFooter="{isAuthenticated ? 'hidden' : ''} lg:hidden"
@@ -101,7 +104,7 @@
       {:else}
         <button
           type="button"
-          on:click={() => goto(get_path(ROUTES.SIGN_IN))}
+          on:click={() => goto(getPath(ROUTES.SIGN_IN))}
           class="btn variant-filled-warning my-8 mx-4 font-medium"
         >
           Log in
@@ -137,21 +140,21 @@
       </TabAnchor>
       <TabAnchor
         href="/"
-        selected={$page.url.pathname === get_path(ROUTES.SEARCH)}
+        selected={$page.url.pathname === getPath(ROUTES.SEARCH)}
         class="py-5"
       >
         <Search color="black" size="32" class="mx-auto"></Search>
       </TabAnchor>
       <TabAnchor
         href="/"
-        selected={$page.url.pathname === get_path(ROUTES.NOTIFICATIONS)}
+        selected={$page.url.pathname === getPath(ROUTES.NOTIFICATIONS)}
         class="py-5"
       >
         <Bell color="black" size="32" class="mx-auto"></Bell>
       </TabAnchor>
       <TabAnchor
         href="/"
-        selected={$page.url.pathname === get_path(ROUTES.INBOX)}
+        selected={$page.url.pathname === getPath(ROUTES.INBOX)}
         class="py-5"
       >
         <Mail color="black" size="32" class="mx-auto"></Mail>
