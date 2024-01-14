@@ -18,11 +18,11 @@
   };
 </script>
 
-<form method="POST" use:enhance={onLogOut}>
+<form method="POST" use:enhance={onLogOut} class="w-full xl:px-4">
   <button
     type="submit"
     formaction="/sign-in?/logout"
-    class="btn variant-filled-warning my-8 mx-4 font-medium"
+    class="btn variant-filled-warning my-8 font-medium w-full"
   >
     <span>
       <LogOut color="black" size="20" class="mx-auto"></LogOut>
