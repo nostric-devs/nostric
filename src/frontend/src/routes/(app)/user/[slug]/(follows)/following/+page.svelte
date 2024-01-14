@@ -19,15 +19,16 @@
         return;
       }
     }
-    followedUsersPromise = nostrHandler.fetchUserFollowingByPublicKey($page.params.slug);
+    followedUsersPromise = nostrHandler.fetchUserFollowingByPublicKey(
+      $page.params.slug,
+    );
   });
-
 </script>
 
 <h1 class="h1 m-4">Following</h1>
 <div class="px-4">
   {#await followedUsersPromise}
-    {#each {length: 10} as _}
+    {#each { length: 10 } as _}
       <UserFollowLoadingSkeleton />
     {/each}
   {:then followedUsers}

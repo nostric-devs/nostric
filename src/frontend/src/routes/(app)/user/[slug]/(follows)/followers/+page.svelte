@@ -10,14 +10,16 @@
   let disabled: boolean = false;
 
   onMount(async () => {
-    followersPromise = nostrHandler.fetchUserFollowersByPublicKey($page.params.slug);
+    followersPromise = nostrHandler.fetchUserFollowersByPublicKey(
+      $page.params.slug,
+    );
   });
 </script>
 
 <h1 class="h1 m-4">Followers</h1>
 <div class="px-4">
   {#await followersPromise}
-    {#each {length: 10} as _}
+    {#each { length: 10 } as _}
       <UserFollowLoadingSkeleton />
     {/each}
   {:then followers}

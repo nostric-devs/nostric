@@ -6,15 +6,15 @@
   import { getPath, ROUTES } from "$lib/utils/routes";
   import { onMount } from "svelte";
   import { localAuthStorage } from "$lib/stores/LocalStorage";
-  import { enhance } from '$app/forms';
+  import { enhance } from "$app/forms";
   import { getToastStore } from "@skeletonlabs/skeleton";
 
   const toastStore = getToastStore();
 
-  let loading : boolean = false;
-  let disabled : boolean = false;
-  let privateKey : string | null = null;
-  let publicKey : string | null = null;
+  let loading: boolean = false;
+  let disabled: boolean = false;
+  let privateKey: string | null = null;
+  let publicKey: string | null = null;
 
   const onSubmit = async () => {
     loading = true;
@@ -23,7 +23,7 @@
       try {
         await authUser.logInAnonymously(undefined, privateKey);
         await goto(getPath(ROUTES.FEED));
-      } catch(error : any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error.message,
           background: "variant-filled-error",
@@ -34,23 +34,25 @@
         loading = false;
         disabled = false;
       }
-    }
-  }
+    };
+  };
 
   onMount(async () => {
     privateKey = $localAuthStorage?.privateKey;
     if (privateKey) {
-      publicKey = await nostrHandler.generatePublicKeyFromPrivateKey(privateKey);
+      publicKey =
+        await nostrHandler.generatePublicKeyFromPrivateKey(privateKey);
     }
   });
-
 </script>
 
 <div class="w-screen h-screen flex justify-center items-center">
   <div class="w-1/2 mx-auto">
     <form method="POST" class="w-full" use:enhance={onSubmit}>
       <h2 class="mb-3 pl-1 h2 text-center">
-        <span class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone">
+        <span
+          class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"
+        >
           Nostr login
         </span>
       </h2>
@@ -63,7 +65,7 @@
           type="text"
           class="input px-3 py-2 rounded-2xl mb-4"
           placeholder="type your private key"
-          disabled={disabled}
+          {disabled}
           bind:value={privateKey}
         />
         <div class="font-semibold pl-1 mb-2">Your public key</div>
@@ -71,14 +73,14 @@
           type="text"
           class="input px-3 py-2 rounded-2xl mb-4"
           placeholder="type your public key"
-          disabled={disabled}
+          {disabled}
           bind:value={publicKey}
         />
       </div>
       <button
         type="submit"
         class="btn bg-gradient-to-r from-blue-800 to-cyan-300 rounded-2xl w-full font-semibold mt-2"
-        disabled={disabled}
+        {disabled}
         formaction="/sign-in?/login-anonymous"
       >
         {#if loading}

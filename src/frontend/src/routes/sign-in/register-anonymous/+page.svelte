@@ -11,27 +11,27 @@
   import { getPath, ROUTES } from "$lib/utils/routes";
   import { authUser } from "$lib/stores/Auth";
 
-  const toastStore : ToastStore = getToastStore();
+  const toastStore: ToastStore = getToastStore();
 
-  let loading : boolean = false;
-  let disabled : boolean = false;
+  let loading: boolean = false;
+  let disabled: boolean = false;
 
-  let privateKey : string;
-  let publicKey : string;
-  let userProfile : NDKUserProfile = {
+  let privateKey: string;
+  let publicKey: string;
+  let userProfile: NDKUserProfile = {
     name: "",
     image: "",
     bio: "",
-  }
+  };
 
-  const triggerClipboardToast = (message: string) : void => {
+  const triggerClipboardToast = (message: string): void => {
     toastStore.trigger({
       message,
       background: "variant-filled-secondary",
       classes: "rounded-2xl, font-semibold",
       timeout: 1000,
     });
-  }
+  };
 
   const onSubmit = async () => {
     loading = true;
@@ -40,7 +40,7 @@
       try {
         await authUser.registerAnonymously(privateKey, userProfile);
         await goto(getPath(ROUTES.FEED));
-      } catch(error : any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error,
           background: "variant-filled-error",
@@ -51,23 +51,26 @@
         disabled = false;
       }
     };
-  }
+  };
 
   onMount(async () => {
     ({ privateKey, publicKey } = await nostrHandler.generateKeyPair());
   });
-
 </script>
+
 <div class="w-screen h-screen flex justify-center items-center">
   <div class="w-1/2 mx-auto">
     <form method="POST" class="w-full" use:enhance={onSubmit}>
       <h2 class="mb-3 pl-1 h2 text-3xl text-center">
-        <span class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone">
+        <span
+          class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"
+        >
           Create new Nostr account
         </span>
       </h2>
       <div class="text-center mb-6">
-        Your keys will not be stored in our backend, make a copy for any future use.
+        Your keys will not be stored in our backend, make a copy for any future
+        use.
       </div>
       <div class="mt-6">
         <div class="font-semibold pl-1 mb-2">Your new username</div>
@@ -77,7 +80,7 @@
           class="input px-3 py-2 rounded-2xl mr-2 mb-4"
           placeholder="type in your new Nostr user name"
           bind:value={userProfile.name}
-          disabled={disabled}
+          {disabled}
         />
       </div>
       <div class="mb-4">
@@ -95,7 +98,8 @@
             type="button"
             use:clipboard={{ input: "privateKey" }}
             class="btn variant-filled rounded-2xl font-semibold"
-            on:click={() => triggerClipboardToast("Private key copied to clipboard")}
+            on:click={() =>
+              triggerClipboardToast("Private key copied to clipboard")}
           >
             <span>Copy</span>
             <Copy size="15"></Copy>
@@ -117,7 +121,8 @@
             type="button"
             use:clipboard={{ input: "publicKey" }}
             class="btn variant-filled rounded-2xl font-semibold"
-            on:click={() => triggerClipboardToast("Public key copied to clipboard")}
+            on:click={() =>
+              triggerClipboardToast("Public key copied to clipboard")}
           >
             <span>Copy</span>
             <Copy size="15"></Copy>
@@ -127,7 +132,12 @@
       <div class="mb-8">
         <div class="font-semibold pl-1 mb-2">Your bio</div>
         <div>
-          <textarea class="textarea rounded-2xl" rows="3" name="bio" bind:value={userProfile.bio}></textarea>
+          <textarea
+            class="textarea rounded-2xl"
+            rows="3"
+            name="bio"
+            bind:value={userProfile.bio}
+          ></textarea>
         </div>
       </div>
       <button
@@ -146,4 +156,3 @@
     </form>
   </div>
 </div>
-

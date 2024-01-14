@@ -19,7 +19,11 @@
   }
 
   const follow = async () => {
-    if (user !== undefined && $authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+    if (
+      user !== undefined &&
+      $authUser.authState !== AuthStates.ANONYMOUS &&
+      $authUser.nostr
+    ) {
       loading = true;
       disabled = true;
       try {
@@ -28,7 +32,7 @@
           message: `Successfully followed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch(error: any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error,
           background: "variant-filled-error",
@@ -38,7 +42,7 @@
         disabled = false;
       }
     }
-  }
+  };
 
   const unfollow = async () => {
     if (user !== undefined && $authUser.authState !== AuthStates.ANONYMOUS) {
@@ -50,7 +54,7 @@
           message: `Successfully unfollowed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch(error: any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error,
           background: "variant-filled-error",
@@ -60,7 +64,7 @@
         disabled = false;
       }
     }
-  }
+  };
   export let user: NDKUser | undefined = undefined;
   export let disabled: boolean = false;
 </script>
@@ -68,9 +72,7 @@
 {#if user === undefined}
   <UserFollowLoadingSkeleton />
 {:else}
-  <div
-    class="post-head mx-auto my-5 flex md:flex-row flex-col items-center"
-  >
+  <div class="post-head mx-auto my-5 flex md:flex-row flex-col items-center">
     <div class="grow">
       <a href={getPath(ROUTES.USER, user.pubkey)} class="flex items-center">
         <div class="w-[65px]">
@@ -94,7 +96,7 @@
             type="button"
             class="btn variant-filled-warning font-normal w-full"
             on:click={unfollow}
-            disabled={disabled}
+            {disabled}
           >
             {#if loading}
               <span class="mr-2">
@@ -114,7 +116,7 @@
             type="button"
             class="btn variant-filled-primary font-normal w-full"
             on:click={follow}
-            disabled={disabled}
+            {disabled}
           >
             {#if loading}
               <span class="mr-2">
@@ -132,4 +134,3 @@
     {/if}
   </div>
 {/if}
-

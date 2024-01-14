@@ -23,7 +23,11 @@
   }
 
   function reactToEvent() {
-    if ($authUser.nostr && event && $authUser.authState !== AuthStates.ANONYMOUS) {
+    if (
+      $authUser.nostr &&
+      event &&
+      $authUser.authState !== AuthStates.ANONYMOUS
+    ) {
       if (isLiked) {
         $authUser.nostr.dislikeEvent(event);
       } else {
@@ -54,7 +58,10 @@
       <div
         class="post-head mx-auto flex md:flex-row flex-col justify-between items-start"
       >
-        <a href={getPath(ROUTES.USER, author?.pubkey || "")} class="flex items-start">
+        <a
+          href={getPath(ROUTES.USER, author?.pubkey || "")}
+          class="flex items-start"
+        >
           <div class="w-11 mr-2">
             <Avatar profile={author.profile} />
           </div>
@@ -71,9 +78,7 @@
         </div>
       </div>
 
-      <a
-        href={getPath(ROUTES.POST, event?.id)}
-      >
+      <a href={getPath(ROUTES.POST, event?.id)}>
         <div class="my-4 text-sm text-pretty max-w-full break-words">
           {event?.content}
         </div>

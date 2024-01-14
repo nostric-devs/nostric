@@ -49,7 +49,7 @@
     "pem-file": "^1.0.1",
     "postcss": "^8.4.24",
     "postcss-load-config": "^4.0.1",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.2",
     "prettier-plugin-organize-imports": "^3.2.3",
     "prettier-plugin-svelte": "^3.1.2",
     "sass": "^1.68.0",

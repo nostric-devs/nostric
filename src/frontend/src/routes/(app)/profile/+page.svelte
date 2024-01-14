@@ -8,8 +8,9 @@
   $: if ($authUser.nostr) {
     user = $authUser.nostr.getUser();
   }
-
 </script>
 
-<UserProfile {user} events={$events.filter((event) => event.author.pubkey === user.pubkey)}/>
-
+<UserProfile
+  {user}
+  events={$events.filter((event) => event.author.pubkey === user.pubkey)}
+/>

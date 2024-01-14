@@ -14,7 +14,9 @@
   </div>
   {#if $authUser.authState !== AuthStates.ANONYMOUS}
     <div class="col-span-2 flex flex-col justify-center">
-      <div class="col-span-2 placeholder animate-pulse py-5 max-w-[150px] rounded"></div>
+      <div
+        class="col-span-2 placeholder animate-pulse py-5 max-w-[150px] rounded"
+      ></div>
     </div>
   {/if}
 </div>

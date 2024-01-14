@@ -38,7 +38,7 @@
     loading = true;
     disabledLocal = true;
     nostrHandler.removeRelay(relay.object.url);
-    const nostrUserHandler : NostrUserHandler = authUser.getNostrUserHandler();
+    const nostrUserHandler: NostrUserHandler = authUser.getNostrUserHandler();
     if (nostrUserHandler) {
       await nostrUserHandler.removeUserPreferredRelay(relay.object.url);
     }
@@ -48,7 +48,7 @@
       message: "Relay successfully removed",
       background: "variant-filled-success",
     });
-  }
+  };
 
   export let relay: RelayObject;
   export let disabled: boolean | undefined = undefined;
@@ -93,7 +93,9 @@
         </div>
       </div>
     </div>
-    <div class="md:ml-auto mt-4 md:mt-0 grow-0 w-full md:max-w-[200px] xl:max-w-[100px] flex md:flex-col">
+    <div
+      class="md:ml-auto mt-4 md:mt-0 grow-0 w-full md:max-w-[200px] xl:max-w-[100px] flex md:flex-col"
+    >
       <div class="mb-1 w-1/2 md:w-auto mr-1 md:mr-0">
         <button
           on:click={removeRelay}
