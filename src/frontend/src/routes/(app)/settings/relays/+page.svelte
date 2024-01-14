@@ -9,7 +9,6 @@
   let disabled: boolean = false;
   let loading: boolean = false;
   let newRelay: string = "";
-
   const toastStore = getToastStore();
 
   const addRelay = async () => {
