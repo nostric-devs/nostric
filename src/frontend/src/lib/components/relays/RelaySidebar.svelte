@@ -1,5 +1,5 @@
 <script>
-  import { get_path, ROUTES } from "$lib/utils/routes";
+  import { getPath, ROUTES } from "$lib/utils/routes";
   import { relays } from "$lib/stores/Relays";
   import RelayCard from "$lib/components/relays/RelayCard.svelte";
 </script>
@@ -12,7 +12,7 @@
 
 <span>
   You can manage your relays in
-  <a href={get_path(ROUTES.SETTINGS, ROUTES.RELAYS)} class="anchor">
+  <a href={getPath(ROUTES.SETTINGS, ROUTES.RELAYS)} class="anchor">
     settings.
   </a>
 </span>
