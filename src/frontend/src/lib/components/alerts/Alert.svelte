@@ -3,7 +3,6 @@
   import type { Alert } from "$lib/stores/Alerts";
   import { CheckCircle, AlertCircle, AlertTriangle, X } from "svelte-feathers";
   import type { ComponentType } from "svelte";
-  import { onMount } from "svelte";
   import { navigating } from "$app/stores";
 
   let component: ComponentType;

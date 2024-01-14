@@ -18,12 +18,12 @@
   let loading: IdentitySubmit | null = null;
   let disabled: boolean = false;
   enum IdentitySubmits {
-    SIGN_UP,
-    LOG_IN,
+    SIGN_UP = 0,
+    LOG_IN = 1,
   }
   type IdentitySubmit = IdentitySubmits.LOG_IN | IdentitySubmits.SIGN_UP;
 
-  const onSubmit = async (submitType: IdentitySubmit, cancel: Function) => {
+  const onSubmit = async (submitType: IdentitySubmit, cancel: unknown) => {
     loading = submitType;
     disabled = true;
     return async () => {

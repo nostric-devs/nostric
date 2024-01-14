@@ -40,9 +40,9 @@
       try {
         await authUser.registerAnonymously(privateKey, userProfile);
         await goto(getPath(ROUTES.FEED));
-      } catch (error: any) {
+      } catch (error) {
         toastStore.trigger({
-          message: error,
+          message: error as string,
           background: "variant-filled-error",
           classes: "rounded-2xl, font-semibold",
         });

@@ -7,17 +7,14 @@
   import { enhance } from "$app/forms";
 
   const toastStore = getToastStore();
-  let loading: boolean = false;
 
   const onLogOut = async () => {
-    loading = true;
     authUser.logOut();
     await goto(getPath(ROUTES.HOMEPAGE));
     toastStore.trigger({
       message: "You are now logged out",
       background: "variant-filled-success",
     });
-    loading = false;
   };
 </script>
 
