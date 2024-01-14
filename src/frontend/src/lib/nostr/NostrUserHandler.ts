@@ -2,7 +2,7 @@ import {
   NDKEvent,
   NDKKind,
   NDKPrivateKeySigner,
-  NDKUser
+  NDKUser,
 } from "@nostr-dev-kit/ndk";
 
 import type {
@@ -63,11 +63,11 @@ export class NostrUserHandler {
     this.nostrUser = await this.signer.user();
     this.nostrUser.ndk = nostrHandler.nostrKit;
 
-    let userPreferredRelays: NDKRelayList | undefined =
+    const userPreferredRelays: NDKRelayList | undefined =
       await this.nostrUser.relayList();
-    
+
     if (userPreferredRelays) {
-      for (let relay of userPreferredRelays.relays) {
+      for (const relay of userPreferredRelays.relays) {
         nostrHandler.addRelay(relay);
       }
     }
@@ -75,7 +75,7 @@ export class NostrUserHandler {
     await this.nostrUser.fetchProfile();
     this.followedUsers = await this.fetchFollowedUsersWithProfiles();
 
-    let filters: NDKFilter = {
+    const filters: NDKFilter = {
       kinds: [
         NDKKind.Text,
         NDKKind.Reaction,
@@ -101,7 +101,7 @@ export class NostrUserHandler {
     this.nostrUser.profile = profile;
     await this.nostrUser.publish();
 
-    let filters: NDKFilter = {
+    const filters: NDKFilter = {
       kinds: [
         NDKKind.Text,
         NDKKind.Reaction,
@@ -119,36 +119,38 @@ export class NostrUserHandler {
   public getUser(): NDKUser | undefined {
     return this.nostrUser;
   }
-  
+
   /**
    * Add new relay to user's relay metadata list, as per NIP-65
    *
    * @param url - The url of the relay to add
    */
-  public async addUserPreferredRelay(url : NDKRelayUrl) : Promise<void> {
-    let userPreferredRelays: NDKRelayList | undefined = await this.nostrUser.relayList();
-    let relayTags : NDKTag[] = [];
-    
+  public async addUserPreferredRelay(url: NDKRelayUrl): Promise<void> {
+    const userPreferredRelays: NDKRelayList | undefined =
+      await this.nostrUser.relayList();
+    let relayTags: NDKTag[] = [];
+
     if (userPreferredRelays) {
       relayTags = userPreferredRelays.getMatchingTags("r");
     }
-    if (!relayTags.find((tag : NDKTag) => tag[1] === url)) {
+    if (!relayTags.find((tag: NDKTag) => tag[1] === url)) {
       relayTags.push(["r", url]);
       await this.createAndPublishEvent("", NDKKind.RelayList, relayTags);
     }
   }
-  
+
   /**
    * Removes a relay from user's relay metadata list, as per NIP-65
    *
    * @param url - The url of the relay to remove
    */
-  public async removeUserPreferredRelay(url : NDKRelayUrl) : Promise<void> {
-    let userPreferredRelays: NDKRelayList | undefined = await this.nostrUser.relayList();
-    let relayTags : NDKTag[] = [];
+  public async removeUserPreferredRelay(url: NDKRelayUrl): Promise<void> {
+    const userPreferredRelays: NDKRelayList | undefined =
+      await this.nostrUser.relayList();
+    let relayTags: NDKTag[] = [];
     if (userPreferredRelays) {
       relayTags = userPreferredRelays.getMatchingTags("r");
-      relayTags = relayTags.filter((tag : NDKTag) => tag[1] !== url);
+      relayTags = relayTags.filter((tag: NDKTag) => tag[1] !== url);
       await this.createAndPublishEvent("", NDKKind.RelayList, relayTags);
     }
   }
@@ -162,7 +164,7 @@ export class NostrUserHandler {
     this.nostrUser.profile = profile;
     await this.nostrUser.publish();
   }
-  
+
   /**
    * @returns private key of the current active Nostr user
    */
@@ -261,8 +263,8 @@ export class NostrUserHandler {
    * @returns followed users as values denoted by their public keys as keys in json
    */
   public async fetchFollowedUsersWithProfiles(): Promise<UsersObject> {
-    let users: NDKUser[] = [...(await this.nostrUser.follows())];
-    let fetchedUsersProfiles: UsersObject = {};
+    const users: NDKUser[] = [...(await this.nostrUser.follows())];
+    const fetchedUsersProfiles: UsersObject = {};
     for (const user of users) {
       user.ndk = this.nostrHandler.nostrKit;
       await user.fetchProfile();
@@ -278,7 +280,7 @@ export class NostrUserHandler {
    * @param user - The NDKUser user to be added to the follow list
    * @returns True if successfully removed, False if not
    */
-  public async addUserToFollowedUsers(user: NDKUser): Promise<Boolean> {
+  public async addUserToFollowedUsers(user: NDKUser): Promise<boolean> {
     if (await this.nostrUser.follow(user)) {
       this.followedUsers[user.pubkey] = user;
       // we need to renew subscription to receive new events
@@ -297,8 +299,8 @@ export class NostrUserHandler {
    * @param user - The NDKUser user to be removed from the follow list
    * @returns True if successfully removed, False if not
    */
-  public async removeUserFromFollowedUsers(user: NDKUser): Promise<Boolean> {
-    let newFollowedUsers = JSON.parse(JSON.stringify(this.followedUsers));
+  public async removeUserFromFollowedUsers(user: NDKUser): Promise<boolean> {
+    const newFollowedUsers = JSON.parse(JSON.stringify(this.followedUsers));
     delete newFollowedUsers[user.pubkey];
     try {
       // mirrored from NDK

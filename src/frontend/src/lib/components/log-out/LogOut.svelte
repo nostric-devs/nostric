@@ -3,22 +3,20 @@
   import { getToastStore } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
   import { goto } from "$app/navigation";
-  import { get_path, ROUTES } from "$lib/utils/routes";
-  import { enhance } from '$app/forms';
+  import { getPath, ROUTES } from "$lib/utils/routes";
+  import { enhance } from "$app/forms";
 
   const toastStore = getToastStore();
 
   const onLogOut = async () => {
     authUser.logOut();
-    await goto(get_path(ROUTES.EXPLORE))
+    await goto(getPath(ROUTES.HOMEPAGE));
     toastStore.trigger({
       message: "You are now logged out",
       background: "variant-filled-success",
     });
-  }
-
+  };
 </script>
-
 
 <form method="POST" use:enhance={onLogOut} class="w-full xl:px-4">
   <button
@@ -32,4 +30,3 @@
     <span class="hidden xl:inline">Log out</span>
   </button>
 </form>
-

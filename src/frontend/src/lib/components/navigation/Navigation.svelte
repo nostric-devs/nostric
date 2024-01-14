@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { ROUTES, get_path } from "$lib/utils/routes";
+  import { ROUTES, getPath } from "$lib/utils/routes";
   import {
     Home,
     Search,
@@ -11,18 +11,17 @@
     Image,
   } from "svelte-feathers";
 
-  $: isActive = (pageName: String) => {
+  $: isActive = (pageName: string) => {
     return $page.url.pathname === pageName;
   };
-
 </script>
 
 <nav class="list-nav xl:px-4 py-4">
   <ul>
     <li>
       <a
-        href={get_path(ROUTES.FEED)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.FEED))}
+        href={getPath(ROUTES.FEED)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.FEED))}
         class="capitalize"
       >
         <Home size="20" class="lg:mx-auto xl:mx-0"></Home>
@@ -31,8 +30,8 @@
     </li>
     <li>
       <a
-        href={get_path(ROUTES.EXPLORE)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.EXPLORE))}
+        href={getPath(ROUTES.EXPLORE)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.EXPLORE))}
         class="capitalize"
       >
         <Search size="20" class="lg:mx-auto xl:mx-0"></Search>
@@ -41,8 +40,8 @@
     </li>
     <li>
       <a
-        href={get_path(ROUTES.NOTIFICATIONS)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.NOTIFICATIONS))}
+        href={getPath(ROUTES.NOTIFICATIONS)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.NOTIFICATIONS))}
         class="capitalize"
       >
         <div class="relative inline-block">
@@ -58,8 +57,8 @@
     </li>
     <li>
       <a
-        href={get_path(ROUTES.PROFILE)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.PROFILE))}
+        href={getPath(ROUTES.PROFILE)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.PROFILE))}
         class="capitalize"
       >
         <User size="20" class="lg:mx-auto xl:mx-0"></User>
@@ -68,8 +67,8 @@
     </li>
     <li>
       <a
-        href={get_path(ROUTES.BOOKMARKS)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.BOOKMARKS))}
+        href={getPath(ROUTES.BOOKMARKS)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.BOOKMARKS))}
         class="capitalize"
       >
         <Bookmark size="20" class="lg:mx-auto xl:mx-0"></Bookmark>
@@ -79,8 +78,8 @@
     </li>
     <!-- <li>
       <a
-        href={get_path(ROUTES.IMAGES)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.IMAGES))}
+        href={getPath(ROUTES.IMAGES)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.IMAGES))}
         class="capitalize"
       >
         <Image size="20" class="lg:mx-auto xl:mx-0"></Image>
@@ -90,8 +89,8 @@
     </li>     -->
     <li>
       <a
-        href={get_path(ROUTES.SETTINGS)}
-        class:bg-primary-active-token={isActive(get_path(ROUTES.SETTINGS))}
+        href={getPath(ROUTES.SETTINGS)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.SETTINGS))}
         class="capitalize"
       >
         <Settings size="20" class="lg:mx-auto xl:mx-0"></Settings>
@@ -102,27 +101,27 @@
   {#if $page.url.pathname.includes(ROUTES.SETTINGS)}
     <ul class="pl-8 pt-2">
       <a
-        href={get_path(ROUTES.SETTINGS, ROUTES.PROFILE)}
+        href={getPath(ROUTES.SETTINGS, ROUTES.PROFILE)}
         class:bg-primary-active-token={isActive(
-          get_path(ROUTES.SETTINGS, ROUTES.PROFILE),
+          getPath(ROUTES.SETTINGS, ROUTES.PROFILE),
         )}
         class="capitalize"
       >
         <span class="lg:hidden xl:block ml-3">{ROUTES.PROFILE}</span>
       </a>
       <a
-        href={get_path(ROUTES.SETTINGS, ROUTES.RELAYS)}
+        href={getPath(ROUTES.SETTINGS, ROUTES.RELAYS)}
         class:bg-primary-active-token={isActive(
-          get_path(ROUTES.SETTINGS, ROUTES.RELAYS),
+          getPath(ROUTES.SETTINGS, ROUTES.RELAYS),
         )}
         class="capitalize"
       >
         <span class="lg:hidden xl:block ml-3">{ROUTES.RELAYS}</span>
       </a>
       <a
-        href={get_path(ROUTES.SETTINGS, ROUTES.PRO)}
+        href={getPath(ROUTES.SETTINGS, ROUTES.PRO)}
         class:bg-primary-active-token={isActive(
-          get_path(ROUTES.SETTINGS, ROUTES.PRO),
+          getPath(ROUTES.SETTINGS, ROUTES.PRO),
         )}
         class="capitalize"
       >

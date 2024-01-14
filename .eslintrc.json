@@ -1,0 +1,42 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint",
+        "svelte"
+    ],
+    "overrides": [
+        {
+            "files": ["*.svelte"],
+            "processor": "svelte/svelte",
+            "extends": [
+                "plugin:svelte/recommended"
+            ],
+            "parser": "svelte-eslint-parser",
+            "parserOptions": {
+                "parser": "@typescript-eslint/parser"
+            },
+            "rules": {
+              "no-unused-vars": "off",
+              "@typescript-eslint/no-unused-vars": "warn"
+            }
+        }
+    ],
+    "rules": {
+        // General ESLint rules
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "warn"
+    }
+}

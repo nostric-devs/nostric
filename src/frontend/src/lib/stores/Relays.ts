@@ -18,16 +18,15 @@ function getRelays() {
   const { subscribe, update, set } = relays;
 
   const fill = (relays: NDKRelay[]): void => {
-    let parsed: RelayObject[] = [];
-    let injectedStatus : NDKRelayStatus | null = null;
-    
-    for (let relay of relays) {
+    const parsed: RelayObject[] = [];
+
+    for (const relay of relays) {
       parsed.push({
         url: relay.url,
         object: relay,
-        status: relay.status
+        status: relay.status,
       });
-      
+
       relay.on("connect", () => {
         updateRelayStatus(relay.url, relay.connectivity.status);
       });
@@ -43,7 +42,9 @@ function getRelays() {
     status: NDKRelayStatus,
   ): void => {
     update((relays: RelayObject[]): RelayObject[] => {
-      let index : number = relays.findIndex((relay : RelayObject) => relay.url === url);
+      const index: number = relays.findIndex(
+        (relay: RelayObject): boolean => relay.url === url,
+      );
       if (index !== -1) {
         relays[index].status = status;
       }
