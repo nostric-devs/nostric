@@ -133,7 +133,7 @@ export class NostrUserHandler {
   public async addUserPreferredRelay(url: NDKRelayUrl): Promise<void> {
     const userPreferredRelays: NDKRelayList | undefined =
       await this.nostrUser.relayList();
-    
+
     let relayTags: NDKTag[] = [];
 
     if (userPreferredRelays) {
