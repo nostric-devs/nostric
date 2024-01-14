@@ -69,7 +69,7 @@ export class NostrHandler extends EventEmitter {
     this.nostrKit?.pool.removeRelay(url);
     relays.fill(this.listRelays());
   }
-  
+
   /**
    * Attempts to refresh a connection to a relay. First disconnects and
    * updates the relay status in store.
@@ -91,7 +91,7 @@ export class NostrHandler extends EventEmitter {
       }
     }, 1000);
   }
-  
+
   /**
    * @returns Return list of relays in the current pool.
    */
@@ -101,7 +101,7 @@ export class NostrHandler extends EventEmitter {
     }
     return [];
   }
-  
+
   /**
    * Adds new subscription to the list of subscriptions
    *
@@ -142,7 +142,7 @@ export class NostrHandler extends EventEmitter {
     }
     events.clear();
   }
-  
+
   /**
    * @returns An array of NDKEvents kind 1 fetched by random.
    */
@@ -154,7 +154,7 @@ export class NostrHandler extends EventEmitter {
     const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
     return [...events];
   }
-  
+
   /**
    * @param eventId - ID of the event to be fetched.
    * @returns Fetched NDKEvent.
@@ -162,8 +162,7 @@ export class NostrHandler extends EventEmitter {
   public async fetchEventById(eventId: string): Promise<NDKEvent | null> {
     return this.nostrKit.fetchEvent(eventId);
   }
-  
-  
+
   /**
    * Fetches direct replies to an event. This is done through filtering for events which
    * have the ID of the given event in their #e tags marked as root.
@@ -181,12 +180,14 @@ export class NostrHandler extends EventEmitter {
     const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
     return [...events];
   }
-  
+
   /**
    * @param publicKey - The public key of the user whose events are to be fetched.
    * @returns An array of NDKEvents produced by the user given by the public key.
    */
-  public async fetchEventsByAuthorPublicKey(publicKey: string): Promise<NDKEvent[]> {
+  public async fetchEventsByAuthorPublicKey(
+    publicKey: string,
+  ): Promise<NDKEvent[]> {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
       authors: [publicKey],
@@ -234,7 +235,7 @@ export class NostrHandler extends EventEmitter {
     await user.fetchProfile();
     return user;
   }
-  
+
   /**
    * Fetch users (and their profiles) that the user given by public key is following.
    * NIP-02: https://github.com/nostr-protocol/nips/blob/master/02.md
@@ -258,7 +259,7 @@ export class NostrHandler extends EventEmitter {
     }
     return followedUsers;
   }
-  
+
   /**
    * Fetch followers (and their profiles) of a user by the user's public key. This is done through
    * filtering for kind 3 messages with one of the #p tags containing the given user public key.
