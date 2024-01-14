@@ -26,9 +26,7 @@
   <UserFollowLoadingSkeleton />
 {:then user}
   {#if user}
-    <div
-      class="post-head mx-auto my-5 flex md:flex-row flex-col items-center"
-    >
+    <div class="post-head mx-auto my-5 flex md:flex-row flex-col items-center">
       <div class="grow">
         <a href={getPath(ROUTES.USER, user.pubkey)} class="flex items-center">
           <div class="w-[65px]">

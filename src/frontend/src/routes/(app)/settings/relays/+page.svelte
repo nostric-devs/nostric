@@ -25,8 +25,7 @@
         background: "variant-filled-success",
       });
     }
-  }
-
+  };
 </script>
 
 <h1 class="h1 m-4">Relays</h1>

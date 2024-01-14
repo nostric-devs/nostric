@@ -59,21 +59,18 @@
   <div class="flex items-center">
     <h1 class="h1 m-4">User profile</h1>
     <div class="flex ml-auto mr-3">
-      {#if
-        $authUser.authState !== AuthStates.ANONYMOUS &&
-        $authUser.nostr.getPublicKey() !== $page.params.slug &&
-        $page.url.pathname !== getPath(ROUTES.PROFILE)
-      }
+      {#if $authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr.getPublicKey() !== $page.params.slug && $page.url.pathname !== getPath(ROUTES.PROFILE)}
         <FollowButton {user} />
       {/if}
       <div class="w-[130px] ml-2">
         <button
           type="button"
           use:clipboard={$page.url.pathname}
-          on:click={() => toastStore.trigger({
-            message: "User URL copied to clipboard",
-            background: "variant-filled-success",
-          })}
+          on:click={() =>
+            toastStore.trigger({
+              message: "User URL copied to clipboard",
+              background: "variant-filled-success",
+            })}
           class="btn variant-filled-primary mr-4 font-medium w-full"
         >
           <span>

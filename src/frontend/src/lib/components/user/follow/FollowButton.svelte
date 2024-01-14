@@ -16,7 +16,11 @@
   }
 
   const follow = async () => {
-    if (user !== undefined && $authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+    if (
+      user !== undefined &&
+      $authUser.authState !== AuthStates.ANONYMOUS &&
+      $authUser.nostr
+    ) {
       loading = true;
       disabled = true;
       try {
@@ -25,7 +29,7 @@
           message: `Successfully followed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch(error: any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error,
           background: "variant-filled-error",
@@ -35,7 +39,7 @@
         disabled = false;
       }
     }
-  }
+  };
 
   const unfollow = async () => {
     if (user !== undefined && $authUser.authState !== AuthStates.ANONYMOUS) {
@@ -47,7 +51,7 @@
           message: `Successfully unfollowed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch(error: any) {
+      } catch (error: any) {
         toastStore.trigger({
           message: error,
           background: "variant-filled-error",
@@ -57,11 +61,10 @@
         disabled = false;
       }
     }
-  }
+  };
   export let user: NDKUser | undefined = undefined;
   export let disabled: boolean = false;
 </script>
-
 
 {#if followedList.includes(user.pubkey)}
   <div class="w-[130px]">
@@ -69,7 +72,7 @@
       type="button"
       class="btn variant-filled-warning font-normal w-full"
       on:click={unfollow}
-      disabled={disabled}
+      {disabled}
     >
       {#if loading}
         <span class="mr-2">
@@ -89,7 +92,7 @@
       type="button"
       class="btn variant-filled-primary font-normal w-full"
       on:click={follow}
-      disabled={disabled}
+      {disabled}
     >
       {#if loading}
         <span class="mr-2">
@@ -104,6 +107,3 @@
     </button>
   </div>
 {/if}
-
-
-

@@ -5,7 +5,10 @@
   let displayedItems: T[] = [];
 
   const loadMore = () => {
-    if (itemsWrapper.scrollTop + itemsWrapper.clientHeight >= itemsWrapper.scrollHeight) {
+    if (
+      itemsWrapper.scrollTop + itemsWrapper.clientHeight >=
+      itemsWrapper.scrollHeight
+    ) {
       let initialLength = displayedItems.length;
       for (let index = initialLength; index < initialLength + 5; index++) {
         if (allItems.length < index) {
@@ -15,7 +18,7 @@
         }
       }
     }
-  }
+  };
 
   onMount(() => {
     displayedItems = allItems.slice(0, 10);
@@ -30,7 +33,6 @@
 
   export let allItems: T[] = [];
   export let disabled: boolean = false;
-
 </script>
 
 <div bind:this={itemsWrapper} class="overflow-y-scroll px-4 grow">

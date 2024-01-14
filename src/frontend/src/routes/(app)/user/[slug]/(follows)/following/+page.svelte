@@ -22,11 +22,10 @@
     }
     followedUsersPromise = nostrHandler.fetchUserFollowingByPublicKey(
       $page.params.slug,
-      true
+      true,
     );
   });
 </script>
-
 
 <h1 class="h1 px-4 mt-4 mb-6">Following</h1>
 {#await followedUsersPromise}
@@ -42,12 +41,12 @@
 {:then followedUsers}
   {#if followedUsers && followedUsers.length > 0}
     <div class="px-4 mb-4">
-      This user has total of { followedUsers.length } followers
+      This user has total of {followedUsers.length} followers
     </div>
     <hr class="!border-t-2 mx-4" />
-    <InfiniteScrollContainer allItems={followedUsers} >
-      <svelte:fragment slot="listItem" let:item={item} >
-        <FollowCard user={item} {disabled}/>
+    <InfiniteScrollContainer allItems={followedUsers}>
+      <svelte:fragment slot="listItem" let:item>
+        <FollowCard user={item} {disabled} />
       </svelte:fragment>
     </InfiniteScrollContainer>
   {:else}

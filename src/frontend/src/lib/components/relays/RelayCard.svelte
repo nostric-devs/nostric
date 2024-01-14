@@ -45,7 +45,7 @@
         background: "variant-filled-success",
       });
     }
-  }
+  };
 
   export let relay: RelayObject;
   export let disabled: boolean | undefined = undefined;

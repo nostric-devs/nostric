@@ -13,7 +13,7 @@
   onMount(async () => {
     followersPromise = nostrHandler.fetchUserFollowersByPublicKey(
       $page.params.slug,
-      true
+      true,
     );
   });
 </script>
@@ -32,16 +32,15 @@
 {:then followers}
   {#if followers && followers.length > 0}
     <div class="px-4 mb-4">
-      This user has total of { followers.length } followers
+      This user has total of {followers.length} followers
     </div>
     <hr class="!border-t-2 mx-4" />
-    <InfiniteScrollContainer allItems={followers} >
-      <svelte:fragment slot="listItem" let:item={item} >
-        <FollowCard user={item} {disabled}/>
+    <InfiniteScrollContainer allItems={followers}>
+      <svelte:fragment slot="listItem" let:item>
+        <FollowCard user={item} {disabled} />
       </svelte:fragment>
     </InfiniteScrollContainer>
   {:else}
     <div class="mt-2">This user has not followers yet.</div>
   {/if}
 {/await}
-
