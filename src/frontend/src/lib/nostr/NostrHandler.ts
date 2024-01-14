@@ -15,15 +15,13 @@ import NDK, {
   NDKUser,
 } from "@nostr-dev-kit/ndk";
 
-import { EventEmitter } from "tseep";
-
 import { events } from "$lib/stores/Events";
 import type { UsersObject } from "$lib/nostr";
 import { relays } from "$lib/stores/Relays";
 
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 
-export class NostrHandler extends EventEmitter {
+export class NostrHandler {
   public nostrKit: NDK;
   private subscriptions: NDKSubscription[] = [];
 
@@ -34,7 +32,6 @@ export class NostrHandler extends EventEmitter {
   ];
 
   constructor() {
-    super();
     const dexieAdapter: NDKCacheAdapter = new NDKCacheAdapterDexie({
       dbName: "nostric",
     });
@@ -58,6 +55,9 @@ export class NostrHandler extends EventEmitter {
     this.nostrKit.signer = NDKPrivateKeySigner.generate();
   }
 
+  /**
+   * @param url - Url of the relay which is ti be added to the pool and store.
+   */
   public addRelay(url: NDKRelayUrl): void {
     // with this we do not need to check whether it already exists,
     // otherwise we would have used addRelay method
@@ -65,6 +65,9 @@ export class NostrHandler extends EventEmitter {
     relays.fill(this.listRelays());
   }
 
+  /**
+   * @param url - Url of the relay which is ti be removed from the pool and store.
+   */
   public removeRelay(url: NDKRelayUrl): void {
     this.nostrKit?.pool.removeRelay(url);
     relays.fill(this.listRelays());
@@ -72,7 +75,10 @@ export class NostrHandler extends EventEmitter {
 
   /**
    * Attempts to refresh a connection to a relay. First disconnects and
-   * updates the relay status in store.
+   * updates the relay status in store. Then, to debounce, waits 1000ms
+   * and tries to connect once again. After this try, regardless of the result,
+   * we update the relay status in store to match its real current state
+   * and resolve the promise.
    *
    * @param relay - Relay whose connection is to be refreshed.
    */
@@ -81,15 +87,16 @@ export class NostrHandler extends EventEmitter {
     // does not every emit change of status, and we must check it manually.
     relay.disconnect();
     relays.updateRelayStatus(relay.url, relay.connectivity.status);
-    setTimeout(async (): Promise<void> => {
-      try {
-        await relay.connect();
-      } catch {
-        relays.updateRelayStatus(relay.url, relay.connectivity.status);
-      } finally {
-        this.emit("reconnect-finished");
-      }
-    }, 1000);
+    return new Promise((resolve) =>
+      setTimeout(async (): Promise<void> => {
+        try {
+          await relay.connect();
+        } finally {
+          relays.updateRelayStatus(relay.url, relay.connectivity.status);
+          resolve();
+        }
+      }, 1000),
+    );
   }
 
   /**
@@ -241,22 +248,30 @@ export class NostrHandler extends EventEmitter {
    * NIP-02: https://github.com/nostr-protocol/nips/blob/master/02.md
    *
    * @param publicKey - Public key of the user.
+   * @param omitProfiles - Flag whether to also fetch the user profiles or not.
    * @returns An array of NDKUsers who the user given by the public key follows.
    */
   public async fetchUserFollowingByPublicKey(
     publicKey: string,
+    omitProfiles?: boolean,
   ): Promise<NDKUser[]> {
     const user: NDKUser = new NDKUser({ pubkey: publicKey });
     user.ndk = this.nostrKit;
+
     const options: NDKSubscriptionOptions = {
       closeOnEose: true,
       cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
     };
+
     const followedUsers: NDKUser[] = [...(await user.follows(options))];
-    for (const followedUser of followedUsers) {
-      followedUser.ndk = this.nostrKit;
-      await followedUser.fetchProfile();
+
+    if (omitProfiles == undefined || !omitProfiles) {
+      for (const followedUser of followedUsers) {
+        followedUser.ndk = this.nostrKit;
+        await followedUser.fetchProfile();
+      }
     }
+
     return followedUsers;
   }
 
@@ -265,11 +280,13 @@ export class NostrHandler extends EventEmitter {
    * filtering for kind 3 messages with one of the #p tags containing the given user public key.
    * NIP-02: https://github.com/nostr-protocol/nips/blob/master/02.md
    *
-   * @param publicKey - Public key of the user.
+   * @param publicKey - Public key of the user
+   * @param omitProfiles - Flag whether to also fetch the user profiles or not.
    * @returns An array of NDKUsers who follow the user given by the public key.
    */
   public async fetchUserFollowersByPublicKey(
     publicKey: string,
+    omitProfiles?: boolean,
   ): Promise<NDKUser[]> {
     const filter: NDKFilter = {
       kinds: [NDKKind.Contacts],
@@ -285,8 +302,16 @@ export class NostrHandler extends EventEmitter {
     ];
 
     const authors: NDKUser[] = [];
-    for (const event of events) {
-      authors.push(await this.fetchUserProfileByPublicKey(event.author.pubkey));
+    if (omitProfiles !== undefined && omitProfiles) {
+      for (const event of events) {
+        authors.push(event.author);
+      }
+    } else {
+      for (const event of events) {
+        authors.push(
+          await this.fetchUserProfileByPublicKey(event.author.pubkey),
+        );
+      }
     }
 
     return authors;
