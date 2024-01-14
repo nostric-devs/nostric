@@ -17,7 +17,7 @@
 <h1 class="h1 m-4">Explore</h1>
 
 {#if randomEvents.length === 0}
-  {#each {length: 6} as _}
+  {#each { length: 6 } as _}
     <PostLoadingSkeleton />
   {/each}
 {:else}

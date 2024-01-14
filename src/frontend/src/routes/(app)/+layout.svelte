@@ -41,7 +41,8 @@
 
   let user: NDKUser | undefined;
 
-  $: isAuthenticated = !$authUser.loading && authUser.authState !== AuthStates.ANONYMOUS;
+  $: isAuthenticated =
+    !$authUser.loading && authUser.authState !== AuthStates.ANONYMOUS;
 
   function drawerOpen(): void {
     drawerStore.open({});
@@ -53,6 +54,7 @@
     }
   });
 </script>
+
 {#if $authUser.loading}
   <div class="w-full h-screen flex items-center justify-center">
     <Circle size="200" color="white" unit="px" duration="2s" />

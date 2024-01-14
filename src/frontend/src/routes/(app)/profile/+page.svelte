@@ -8,8 +8,6 @@
   $: if ($authUser.nostr) {
     user = $authUser.nostr.getUser();
   }
-
 </script>
 
-<UserProfile {user} events={$events}/>
-
+<UserProfile {user} events={$events} />
