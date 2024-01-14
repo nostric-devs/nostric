@@ -14,16 +14,16 @@ actor this {
 	};
 
 	type NostrProfile = {
-		pk : Text;
-		encrypted_sk : Text;
-		username : Text;
-		about : Text;
-		avatar_url : Text;
+		publicKey : Text;
+		encryptedPrivateKey : Text;
+		name : Text;
+		bio : Text;
+		image : Text;
 	};
 
 	type Profile = {
-		nostr_profile : NostrProfile;
-		is_pro : Bool;
+		nostrProfile : NostrProfile;
+		isPro : Bool;
 	};
 
 	private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
@@ -45,22 +45,22 @@ actor this {
 			return #err(#NotAuthenticated);
 		};
 
-		let nostr_profile : NostrProfile = {
-			pk = p.pk;
-			encrypted_sk = p.encrypted_sk;
-			username = p.username;
-			about = p.about;
-			avatar_url = p.avatar_url;
+		let nostrProfile : NostrProfile = {
+			publicKey = p.publicKey;
+			encryptedPrivateKey = p.encryptedPrivateKey;
+			name = p.name;
+			bio = p.bio;
+			image = p.image;
 		};
 
 		let profile : Profile = {
-			nostr_profile = nostr_profile;
-			is_pro = false;
+			nostrProfile = nostrProfile;
+			isPro = false;
 		};
 
 		profiles.put(msg.caller, profile);
-		let saved_profile = profiles.get(msg.caller);
-		return Result.fromOption(saved_profile, #UnableToCreate);
+		let savedProfile = profiles.get(msg.caller);
+		return Result.fromOption(savedProfile, #UnableToCreate);
 	};
 
 	public query (msg) func getProfile() : async Result.Result<Profile, Error> {
@@ -83,15 +83,15 @@ actor this {
 				return #err(#ProfileNotFound);
 			};
 			case (?profile) {
-				let nostr_profile : NostrProfile = {
-					pk = profile.nostr_profile.pk;
-					encrypted_sk = profile.nostr_profile.encrypted_sk;
-					username = p.username;
-					about = p.about;
-					avatar_url = p.avatar_url;
+				let nostrProfile : NostrProfile = {
+					publicKey = profile.nostrProfile.publicKey;
+					encryptedPrivateKey = profile.nostrProfile.encryptedPrivateKey;
+					name = p.name;
+					bio = p.bio;
+					image = p.image;
 				};
-				let updated_profile = { profile with nostr_profile = nostr_profile };
-				profiles.put(id, updated_profile);
+				let updatedProfile = { profile with nostrProfile = nostrProfile };
+				profiles.put(id, updatedProfile);
 				return #ok(profile);
 			};
 		};

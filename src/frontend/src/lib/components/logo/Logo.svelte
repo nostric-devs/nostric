@@ -1,22 +1,22 @@
 <a href="/"
-    ><svg
-        class="logo"
-        version="1.0"
-        xmlns="http://www.w3.org/2000/svg"
-        width="967.000000pt"
-        height="1280.000000pt"
-        viewBox="0 0 967.000000 1280.000000"
-        preserveAspectRatio="xMidYMid meet"
+  ><svg
+    class="logo"
+    version="1.0"
+    xmlns="http://www.w3.org/2000/svg"
+    width="967.000000pt"
+    height="1280.000000pt"
+    viewBox="0 0 967.000000 1280.000000"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <metadata>
+      Created by potrace 1.15, written by Peter Selinger 2001-2017
+    </metadata>
+    <g
+      transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)"
+      stroke="none"
     >
-        <metadata>
-            Created by potrace 1.15, written by Peter Selinger 2001-2017
-        </metadata>
-        <g
-            transform="translate(0.000000,1280.000000) scale(0.100000,-0.100000)"
-            stroke="none"
-        >
-            <path
-                d="M8556 12789 c-60 -14 -168 -75 -225 -127 -51 -46 -53 -50 -98 -197
+      <path
+        d="M8556 12789 c-60 -14 -168 -75 -225 -127 -51 -46 -53 -50 -98 -197
 l-45 -150 11 -175 c7 -96 15 -339 18 -540 l5 -365 188 -1130 188 -1130 6 -211
 c5 -168 3 -222 -9 -267 -67 -259 -460 -693 -727 -804 -87 -36 -211 -39 -279
 -5 -42 20 -54 35 -130 164 -76 127 -94 150 -194 245 -110 104 -350 275 -480
@@ -57,16 +57,16 @@ c144 0 189 3 189 13 0 25 61 131 112 194 62 76 223 213 251 213 31 0 71 -35
 268 80 107 131 147 356 274 l215 122 110 -2 c143 -2 217 16 263 64 17 19 32
 38 32 43 0 4 -27 14 -60 20 -133 28 -303 117 -494 261 l-111 83 -170 29 c-179
 30 -216 33 -279 18z"
-            />
-        </g>
-    </svg>
+      />
+    </g>
+  </svg>
 </a>
 
 <style>
-    .logo {
-        width: 50px;
-        height: 50px;
-        text-align: center;
-        margin: 10px;
-    }
+  .logo {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    margin: 10px;
+  }
 </style>
