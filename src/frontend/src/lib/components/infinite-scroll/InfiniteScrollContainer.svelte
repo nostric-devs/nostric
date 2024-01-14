@@ -1,8 +1,8 @@
-<script lang="ts" generics="T">
+<script lang="ts">
   import { onMount, onDestroy } from "svelte";
 
   let itemsWrapper: HTMLDivElement;
-  let displayedItems: T[] = [];
+  let displayedItems: unknown[] = [];
 
   const loadMore = () => {
     if (
@@ -31,7 +31,7 @@
     itemsWrapper.removeEventListener("scroll", loadMore);
   });
 
-  export let allItems: T[] = [];
+  export let allItems: unknown[] = [];
   export let disabled: boolean = false;
 </script>
 

@@ -29,9 +29,9 @@
           message: `Successfully followed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch (error: any) {
+      } catch (error) {
         toastStore.trigger({
-          message: error,
+          message: error as string,
           background: "variant-filled-error",
         });
       } finally {
@@ -51,9 +51,9 @@
           message: `Successfully unfollowed user ${user.profile?.name}`,
           background: "variant-filled-success",
         });
-      } catch (error: any) {
+      } catch (error) {
         toastStore.trigger({
-          message: error,
+          message: error as string,
           background: "variant-filled-error",
         });
       } finally {
