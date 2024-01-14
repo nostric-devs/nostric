@@ -2,7 +2,7 @@ import Array "mo:base/Array";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 
-actor {
+shared ({ caller = parent }) actor class Main() = this {
   // initializes an instance of CanDB - yes, that's all you need!
   stable let db = CanDB.init();
 
