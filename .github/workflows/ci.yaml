@@ -67,7 +67,17 @@ jobs:
 
       - name: Install DFX
         run: |
-          sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          # Define the path to your JSON file
+          json_file="dfx.json"
+          # Extract the dfx value using jq
+          dfx_version=$(jq -r '.dfx' "$json_file")
+          if [ -n "$dfx_version" ]; then
+            echo "Downloading DFX version: $dfx_version"
+            DFX_VERSION=$dfx_version sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          else
+            echo "Failed to extract DFX version from JSON using the latest version"
+            sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          fi
           dfx start --clean --background
         continue-on-error: false
 
