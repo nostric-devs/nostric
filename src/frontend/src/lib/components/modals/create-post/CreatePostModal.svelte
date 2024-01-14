@@ -2,7 +2,6 @@
   import type { SvelteComponent } from "svelte";
   import { getModalStore, getToastStore } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
-  import type { NostrUserHandler } from "$lib/nostr";
   import { NDKKind } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
 

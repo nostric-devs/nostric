@@ -23,7 +23,7 @@
   }
   type IdentitySubmit = IdentitySubmits.LOG_IN | IdentitySubmits.SIGN_UP;
 
-  const onSubmit = async (submitType: IdentitySubmit, cancel: Function) => {
+  const onSubmit = async (submitType: IdentitySubmit, cancel: unknown) => {
     loading = submitType;
     disabled = true;
     return async () => {

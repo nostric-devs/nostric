@@ -1,5 +1,5 @@
 <script>
-  import { AppShell, Avatar } from "@skeletonlabs/skeleton";
+  // import { AppShell, Avatar } from "@skeletonlabs/skeleton";
 </script>
 
 <!-- <AppShell
