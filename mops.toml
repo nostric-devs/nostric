@@ -1,0 +1,13 @@
+[package]
+name = "nostric"
+version = "2.0"
+description = " is yet a very simple Nostr client running on the Internet Computer Protocol (ICP)."
+repository = "https://github.com/nostric-devs/nostric"
+
+[dependencies]
+base = "0.10.3"
+candb = "1.0.2"
+candy = "0.3.0"
+
+[dev-dependencies]
+test = "1.2.0"

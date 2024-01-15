@@ -1,4 +1,5 @@
 import type {
+  NDKCacheAdapter,
   NDKConstructorParams,
   NDKFilter,
   NDKRelayUrl,
@@ -9,18 +10,18 @@ import NDK, {
   NDKKind,
   NDKPrivateKeySigner,
   NDKRelay,
-  NDKRelayStatus,
   NDKSubscription,
+  NDKSubscriptionCacheUsage,
   NDKUser,
 } from "@nostr-dev-kit/ndk";
-
-import { EventEmitter } from "tseep";
 
 import { events } from "$lib/stores/Events";
 import type { UsersObject } from "$lib/nostr";
 import { relays } from "$lib/stores/Relays";
 
-export class NostrHandler extends EventEmitter {
+import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
+
+export class NostrHandler {
   public nostrKit: NDK;
   private subscriptions: NDKSubscription[] = [];
 
@@ -31,16 +32,19 @@ export class NostrHandler extends EventEmitter {
   ];
 
   constructor() {
-    super();
-    let options: NDKConstructorParams = {
+    const dexieAdapter: NDKCacheAdapter = new NDKCacheAdapterDexie({
+      dbName: "nostric",
+    });
+    const options: NDKConstructorParams = {
       explicitRelayUrls: this.explicitRelays,
+      cacheAdapter: dexieAdapter,
     };
     this.nostrKit = new NDK(options);
   }
 
   public async startConnection(): Promise<void> {
     await this.nostrKit.connect();
-    relays.fill([...this.nostrKit.pool.relays.values()]);
+    relays.fill(this.listRelays());
   }
 
   public setSigner(signer: NDKPrivateKeySigner): void {
@@ -51,42 +55,72 @@ export class NostrHandler extends EventEmitter {
     this.nostrKit.signer = NDKPrivateKeySigner.generate();
   }
 
+  /**
+   * @param url - Url of the relay which is ti be added to the pool and store.
+   */
   public addRelay(url: NDKRelayUrl): void {
     // with this we do not need to check whether it already exists,
     // otherwise we would have used addRelay method
     this.nostrKit?.pool.getRelay(url);
-    relays.fill([...this.nostrKit.pool.relays.values()]);
+    relays.fill(this.listRelays());
   }
 
+  /**
+   * @param url - Url of the relay which is ti be removed from the pool and store.
+   */
   public removeRelay(url: NDKRelayUrl): void {
     this.nostrKit?.pool.removeRelay(url);
-    relays.fill([...this.nostrKit.pool.relays.values()]);
+    relays.fill(this.listRelays());
   }
 
+  /**
+   * Attempts to refresh a connection to a relay. First disconnects and
+   * updates the relay status in store. Then, to debounce, waits 1000ms
+   * and tries to connect once again. After this try, regardless of the result,
+   * we update the relay status in store to match its real current state
+   * and resolve the promise.
+   *
+   * @param relay - Relay whose connection is to be refreshed.
+   */
   public async reconnectRelay(relay: NDKRelay): Promise<void> {
+    // this magic is here because the NDK relay connectivity class
+    // does not every emit change of status, and we must check it manually.
     relay.disconnect();
-    relays.updateRelayStatus(relay.url, NDKRelayStatus.DISCONNECTED);
-    setTimeout(async (): Promise<void> => {
-      await relay.connect();
-      setTimeout(() => {
-        relays.fill(this.listRelays());
-        this.emit("reconnect-finished");
-      }, 1000);
-    }, 1000);
+    relays.updateRelayStatus(relay.url, relay.connectivity.status);
+    return new Promise((resolve) =>
+      setTimeout(async (): Promise<void> => {
+        try {
+          await relay.connect();
+        } finally {
+          relays.updateRelayStatus(relay.url, relay.connectivity.status);
+          resolve();
+        }
+      }, 1000),
+    );
   }
 
+  /**
+   * @returns Return list of relays in the current pool.
+   */
   public listRelays(): NDKRelay[] {
-    return [...this.nostrKit?.pool.relays.values()];
+    if (this.nostrKit && this.nostrKit.pool && this.nostrKit.pool.relays) {
+      return [...this.nostrKit.pool.relays.values()];
+    }
+    return [];
   }
 
+  /**
+   * Adds new subscription to the list of subscriptions
+   *
+   * @param filter - Filter for the subscription
+   */
   public async addSubscription(filter: NDKFilter): Promise<void> {
-    /**
-     * Adds new subscription to the list of subscriptions
-     *
-     * @param filter - Filter for the subscription
-     */
-    let options: NDKSubscriptionOptions = { closeOnEose: false };
-    let subscription: NDKSubscription = this.nostrKit.subscribe(
+    const options: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      groupable: true,
+    };
+    const subscription: NDKSubscription = this.nostrKit.subscribe(
       filter,
       options,
     );
@@ -106,56 +140,79 @@ export class NostrHandler extends EventEmitter {
    * Clears all active subscriptions and stored events
    */
   public async clearSubscriptions(): Promise<void> {
-    for (let subscription of this.subscriptions) {
+    for (const subscription of this.subscriptions) {
       try {
         subscription.stop();
-      } catch {}
+      } catch (error) {
+        console.error(error);
+      }
     }
     events.clear();
   }
 
+  /**
+   * @returns An array of NDKEvents kind 1 fetched by random.
+   */
   public async fetchRandomEvents(): Promise<NDKEvent[]> {
-    let filters: NDKFilter = {
+    const filters: NDKFilter = {
       kinds: [NDKKind.Text],
       limit: 5,
     };
-    let events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
-    return [...events];
-  }
-
-  public async fetchEventById(eventId: string): Promise<NDKEvent | null> {
-    return this.nostrKit.fetchEvent(eventId);
-  }
-
-  public async fetchEventReplies(event: NDKEvent): Promise<NDKEvent[]> {
-    let filters: NDKFilter = {
-      kinds: [NDKKind.Text],
-      "#e": [event.id, "", "root"],
-      limit: 5,
-    };
-    let events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
-    return [...events];
-  }
-
-  public async fetchEventsByAuthorPubkey(pubkey: string): Promise<NDKEvent[]> {
-    let filters: NDKFilter = {
-      kinds: [NDKKind.Text],
-      authors: [pubkey],
-      limit: 5,
-    };
-    let events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
+    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
     return [...events];
   }
 
   /**
-   * @returns A json containing newly generate private and public key pair
+   * @param eventId - ID of the event to be fetched.
+   * @returns Fetched NDKEvent.
+   */
+  public async fetchEventById(eventId: string): Promise<NDKEvent | null> {
+    return this.nostrKit.fetchEvent(eventId);
+  }
+
+  /**
+   * Fetches direct replies to an event. This is done through filtering for events which
+   * have the ID of the given event in their #e tags marked as root.
+   * NIP-10: https://github.com/nostr-protocol/nips/blob/master/10.md
+   *
+   * @param event - The event which we want to find the replies to.
+   * @returns An array of NDKEvents who reply to the event.
+   */
+  public async fetchEventReplies(event: NDKEvent): Promise<NDKEvent[]> {
+    const filters: NDKFilter = {
+      kinds: [NDKKind.Text],
+      "#e": [event.id, "", "root"],
+      limit: 5,
+    };
+    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
+    return [...events];
+  }
+
+  /**
+   * @param publicKey - The public key of the user whose events are to be fetched.
+   * @returns An array of NDKEvents produced by the user given by the public key.
+   */
+  public async fetchEventsByAuthorPublicKey(
+    publicKey: string,
+  ): Promise<NDKEvent[]> {
+    const filters: NDKFilter = {
+      kinds: [NDKKind.Text],
+      authors: [publicKey],
+      limit: 5,
+    };
+    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
+    return [...events];
+  }
+
+  /**
+   * @returns A json containing newly generate private and public key pair.
    */
   public async generateKeyPair(): Promise<{
     privateKey: string;
     publicKey: string;
   }> {
-    let signer: NDKPrivateKeySigner = NDKPrivateKeySigner.generate();
-    let user: NDKUser = await signer.user();
+    const signer: NDKPrivateKeySigner = NDKPrivateKeySigner.generate();
+    const user: NDKUser = await signer.user();
     return {
       privateKey: signer.privateKey,
       publicKey: user.pubkey,
@@ -163,46 +220,120 @@ export class NostrHandler extends EventEmitter {
   }
 
   /**
-   * @returns A generated public key
+   * @returns A generated public key.
    */
   public async generatePublicKeyFromPrivateKey(
     privateKey: string,
   ): Promise<string> {
-    let signer: NDKPrivateKeySigner = new NDKPrivateKeySigner(privateKey);
-    let user: NDKUser = await signer.user();
+    const signer: NDKPrivateKeySigner = new NDKPrivateKeySigner(privateKey);
+    const user: NDKUser = await signer.user();
     return user.pubkey;
   }
 
   /**
-   * @param publicKey - The public key of the user to be fetched
+   * @param publicKey - The public key of the user to be fetched.
    * @returns An instance of NDKUser matching the public key, with their profile.
    */
   public async fetchUserProfileByPublicKey(
     publicKey: string,
   ): Promise<NDKUser> {
-    let user: NDKUser = new NDKUser({ pubkey: publicKey });
+    const user: NDKUser = new NDKUser({ pubkey: publicKey });
     user.ndk = this.nostrKit;
     await user.fetchProfile();
     return user;
   }
 
   /**
-   * @param query - A string containing a query to search for
-   * @returns An instance of NDKUser matching the public key, with their profile.
+   * Fetch users (and their profiles) that the user given by public key is following.
+   * NIP-02: https://github.com/nostr-protocol/nips/blob/master/02.md
+   *
+   * @param publicKey - Public key of the user.
+   * @param omitProfiles - Flag whether to also fetch the user profiles or not.
+   * @returns An array of NDKUsers who the user given by the public key follows.
+   */
+  public async fetchUserFollowingByPublicKey(
+    publicKey: string,
+    omitProfiles?: boolean,
+  ): Promise<NDKUser[]> {
+    const user: NDKUser = new NDKUser({ pubkey: publicKey });
+    user.ndk = this.nostrKit;
+
+    const options: NDKSubscriptionOptions = {
+      closeOnEose: true,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    };
+
+    const followedUsers: NDKUser[] = [...(await user.follows(options))];
+
+    if (omitProfiles == undefined || !omitProfiles) {
+      for (const followedUser of followedUsers) {
+        followedUser.ndk = this.nostrKit;
+        await followedUser.fetchProfile();
+      }
+    }
+
+    return followedUsers;
+  }
+
+  /**
+   * Fetch followers (and their profiles) of a user by the user's public key. This is done through
+   * filtering for kind 3 messages with one of the #p tags containing the given user public key.
+   * NIP-02: https://github.com/nostr-protocol/nips/blob/master/02.md
+   *
+   * @param publicKey - Public key of the user
+   * @param omitProfiles - Flag whether to also fetch the user profiles or not.
+   * @returns An array of NDKUsers who follow the user given by the public key.
+   */
+  public async fetchUserFollowersByPublicKey(
+    publicKey: string,
+    omitProfiles?: boolean,
+  ): Promise<NDKUser[]> {
+    const filter: NDKFilter = {
+      kinds: [NDKKind.Contacts],
+      "#p": [publicKey],
+    };
+    const options: NDKSubscriptionOptions = {
+      closeOnEose: true,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    };
+
+    const events: NDKEvent[] = [
+      ...(await this.nostrKit.fetchEvents(filter, options)),
+    ];
+
+    const authors: NDKUser[] = [];
+    if (omitProfiles !== undefined && omitProfiles) {
+      for (const event of events) {
+        authors.push(event.author);
+      }
+    } else {
+      for (const event of events) {
+        authors.push(
+          await this.fetchUserProfileByPublicKey(event.author.pubkey),
+        );
+      }
+    }
+
+    return authors;
+  }
+
+  /**
+   * @param query - A string containing a query to search for.
+   * @returns UsersObject of users matching the query.
    */
   public async searchByQuery(query: string): Promise<UsersObject> {
-    let events: Set<NDKEvent> = await this.nostrKit.fetchEvents({
+    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents({
       search: query,
       limit: 15,
       kinds: [NDKKind.Metadata],
     });
 
-    let users: UsersObject = {};
+    const users: UsersObject = {};
 
     for (const event of events) {
-      let user: NDKUser = new NDKUser({ pubkey: event.pubkey });
+      const user: NDKUser = new NDKUser({ pubkey: event.pubkey });
       user.ndk = this.nostrKit;
-      let pubkey: string = user.pubkey;
+      const pubkey: string = user.pubkey;
 
       // we already have this user in this list
       if (pubkey in users) {
@@ -225,4 +356,4 @@ export class NostrHandler extends EventEmitter {
 }
 
 export const nostrHandler: NostrHandler = new NostrHandler();
-nostrHandler.startConnection();
+await nostrHandler.startConnection();

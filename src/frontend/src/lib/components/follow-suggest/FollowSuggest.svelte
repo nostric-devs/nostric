@@ -5,7 +5,7 @@
 
 <h3 class="h3 my-6">People to follow</h3>
 <div class="follow-suggest">
-  {#each [1, 2, 3, 5, 6, 7, 8] as item}
+  {#each [1, 2, 3, 5, 6, 7, 8] as _}
     <div
       class="post-head mx-auto my-4 flex md:flex-row flex-col justify-between items-start"
     >
@@ -31,10 +31,8 @@
         <span>
           <UserPlus size="16" class="lg:mx-auto xl:mx-0"></UserPlus>
         </span>
-        <span class="text-sm">
-          Follow
-        </span>  
-        </button>
+        <span class="text-sm"> Follow </span>
+      </button>
     </div>
   {/each}
 </div>

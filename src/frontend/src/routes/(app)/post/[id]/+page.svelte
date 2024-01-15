@@ -5,21 +5,20 @@
   import { nostrHandler } from "$lib/nostr";
   import { page } from "$app/stores";
 
-  let eventPromise : Promise<NDKEvent>;
-  let repliesPromise : Promise<NDKEvent[]>;
+  let eventPromise: Promise<NDKEvent>;
+  let repliesPromise: Promise<NDKEvent[]>;
 
   onMount(async () => {
     eventPromise = nostrHandler.fetchEventById($page.params.id);
     repliesPromise = nostrHandler.fetchEventReplies($page.params.id);
   });
-
 </script>
 
 <h1 class="h1 m-4">Post detail</h1>
 
 {#await eventPromise then event}
   {#if event}
-    <Post {event}/>
+    <Post {event} />
   {/if}
 {/await}
 

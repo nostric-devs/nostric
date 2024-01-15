@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  frontend-checks:
+    name: frontend checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+        continue-on-error: false
+
+      - name: Prettier TypeScript check
+        run: |
+          npm run prettier
+        continue-on-error: false
+
+      - name: Prettier Svelte check
+        run: |
+          npm run prettier-svelte
+        continue-on-error: false
+
+      - name: ESLint TypeScript check
+        run: |
+          npm run lint
+        continue-on-error: false
+
+      - name: ESLint Svelte check
+        run: |
+          npm run lint-svelte
+        continue-on-error: false
+
+  backend-checks:
+    name: backend checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+        continue-on-error: false
+
+      - name: Prettier check
+        run: |
+          npm run prettier-motoko
+        continue-on-error: false
+
+      - name: Install Mops
+        run: |
+          npm install -g ic-mops
+        continue-on-error: false
+
+      - name: Install DFX
+        run: |
+          # Define the path to your JSON file
+          json_file="dfx.json"
+          # Extract the dfx value using jq
+          dfx_version=$(jq -r '.dfx' "$json_file")
+          if [ -n "$dfx_version" ]; then
+            echo "Downloading DFX version: $dfx_version"
+            DFX_VERSION=$dfx_version sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          else
+            echo "Failed to extract DFX version from JSON using the latest version"
+            sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          fi
+          dfx start --clean --background
+        continue-on-error: false
+
+      - name: Unit tests
+        run: |
+          mops test
+        continue-on-error: false
+
+  integration-test:
+    name: integration test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+        continue-on-error: false
+
+      - name: Install Mops
+        run: |
+          npm install -g ic-mops
+        continue-on-error: false
+
+      - name: Install DFX
+        run: |
+          # Define the path to your JSON file
+          json_file="dfx.json"
+          # Extract the dfx value using jq
+          dfx_version=$(jq -r '.dfx' "$json_file")
+          if [ -n "$dfx_version" ]; then
+            echo "Downloading DFX version: $dfx_version"
+            DFX_VERSION=$dfx_version sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          else
+            echo "Failed to extract DFX version from JSON using the latest version"
+            sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          fi
+          dfx start --clean --background
+        continue-on-error: false
+
+      - name: Local deployment
+        run: |
+          dfx deploy
+        continue-on-error: false
