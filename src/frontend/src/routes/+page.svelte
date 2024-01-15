@@ -18,8 +18,8 @@
   let loading: IdentitySubmit | null = null;
   let disabled: boolean = false;
   enum IdentitySubmits {
-    SIGN_UP = 0,
-    LOG_IN = 1,
+    SIGN_UP,
+    LOG_IN,
   }
   type IdentitySubmit = IdentitySubmits.LOG_IN | IdentitySubmits.SIGN_UP;
 

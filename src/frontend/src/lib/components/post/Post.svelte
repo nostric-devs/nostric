@@ -3,8 +3,8 @@
   import { getPath, ROUTES } from "$lib/utils/routes";
   import type { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
   import { events } from "$lib/stores/Events";
-  import { nostrHandler, NostrUserHandler, Reactions } from "$lib/nostr";
-  import Avatar from "$lib/components/user-profile/Avatar.svelte";
+  import { nostrHandler, Reactions } from "$lib/nostr";
+  import Avatar from "$lib/components/user/Avatar.svelte";
   import { onMount } from "svelte";
   import dayjs from "dayjs";
   import { AuthStates, authUser } from "$lib/stores/Auth";
@@ -12,7 +12,6 @@
 
   let isLiked: boolean = false;
   let eventReactions: NDKEvent[] = [];
-  let nostrUserHandler: NostrUserHandler | undefined;
   let authorPromise: Promise<NDKUser | undefined>;
   let dateCreated: string = "";
 
@@ -24,20 +23,21 @@
   }
 
   function reactToEvent() {
-    if (nostrUserHandler && event) {
+    if (
+      $authUser.nostr &&
+      event &&
+      $authUser.authState !== AuthStates.ANONYMOUS
+    ) {
       if (isLiked) {
-        nostrUserHandler.dislikeEvent(event);
+        $authUser.nostr.dislikeEvent(event);
       } else {
-        nostrUserHandler.likeEvent(event);
+        $authUser.nostr.likeEvent(event);
       }
     }
   }
 
   onMount(async () => {
-    if ($authUser.authState !== AuthStates.ANONYMOUS) {
-      nostrUserHandler = $authUser.nostr;
-    }
-    if (event && !author) {
+    if (event && author === undefined) {
       authorPromise = nostrHandler.fetchUserProfileByPublicKey(
         event.author.pubkey,
       );

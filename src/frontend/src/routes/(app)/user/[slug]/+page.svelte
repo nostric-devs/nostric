@@ -1,5 +1,5 @@
 <script lang="ts">
-  import UserProfile from "$lib/components/user-profile/UserProfile.svelte";
+  import UserProfile from "$lib/components/user/profile/UserProfile.svelte";
   import { onMount } from "svelte";
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { nostrHandler } from "$lib/nostr";

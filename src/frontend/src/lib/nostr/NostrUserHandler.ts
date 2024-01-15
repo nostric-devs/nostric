@@ -14,14 +14,14 @@ import type {
 } from "@nostr-dev-kit/ndk";
 
 import { nostrHandler, Reactions } from "$lib/nostr";
-import type { NostrHandler, UsersObject } from "$lib/nostr";
+import type { NostrHandler } from "$lib/nostr";
+import { followedUsers } from "$lib/stores/FollowedUsers";
+import { get } from "svelte/store";
 
 export class NostrUserHandler {
   private nostrUser: NDKUser;
   private readonly signer: NDKPrivateKeySigner;
   private nostrHandler: NostrHandler;
-
-  private followedUsers: UsersObject = {};
 
   public static instance: NostrUserHandler;
 
@@ -57,7 +57,7 @@ export class NostrUserHandler {
 
   /**
    * Sets up with an existing user, fetches their profile, their relays, their user follow list,
-   * and starts subscriptions for this list
+   * and starts subscriptions for this list.
    */
   public async initExistingUser(): Promise<void> {
     this.nostrUser = await this.signer.user();
@@ -73,7 +73,7 @@ export class NostrUserHandler {
     }
 
     await this.nostrUser.fetchProfile();
-    this.followedUsers = await this.fetchFollowedUsersWithProfiles();
+    followedUsers.init(await this.fetchFollowedUsersWithProfiles());
 
     const filters: NDKFilter = {
       kinds: [
@@ -82,7 +82,11 @@ export class NostrUserHandler {
         NDKKind.Repost,
         NDKKind.EncryptedDirectMessage,
       ],
-      authors: [this.nostrUser.pubkey, ...Object.keys(this.followedUsers)],
+      authors: [
+        this.nostrUser.pubkey,
+        ...get(followedUsers).map((user: NDKUser) => user.pubkey),
+      ],
+      limit: 5,
     };
     // subscribe to the users in addition to the current user's posts
     await this.nostrHandler.addSubscription(filters);
@@ -90,9 +94,9 @@ export class NostrUserHandler {
 
   /**
    * Connects NDK, gets the user from signer, fills up their profile,
-   * publishes the new user to Nostr and starts subscribing to themselves
+   * publishes the new user to Nostr and starts subscribing to themselves.
    *
-   * @param profile - The profile to fill the user data
+   * @param profile - The profile to fill the user data.
    */
   public async initNewUser(profile: NDKUserProfile): Promise<void> {
     this.nostrUser = await this.signer.user();
@@ -121,13 +125,15 @@ export class NostrUserHandler {
   }
 
   /**
-   * Add new relay to user's relay metadata list, as per NIP-65
+   * Add new relay to user's relay metadata list.
+   * NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
    *
-   * @param url - The url of the relay to add
+   * @param url - The url of the relay to add.
    */
   public async addUserPreferredRelay(url: NDKRelayUrl): Promise<void> {
     const userPreferredRelays: NDKRelayList | undefined =
       await this.nostrUser.relayList();
+
     let relayTags: NDKTag[] = [];
 
     if (userPreferredRelays) {
@@ -140,9 +146,10 @@ export class NostrUserHandler {
   }
 
   /**
-   * Removes a relay from user's relay metadata list, as per NIP-65
+   * Removes a relay from user's relay metadata list.
+   * NIP-65: https://github.com/nostr-protocol/nips/blob/master/65.md
    *
-   * @param url - The url of the relay to remove
+   * @param url - The url of the relay to remove.
    */
   public async removeUserPreferredRelay(url: NDKRelayUrl): Promise<void> {
     const userPreferredRelays: NDKRelayList | undefined =
@@ -156,9 +163,9 @@ export class NostrUserHandler {
   }
 
   /**
-   * Updates the current active user profile info
+   * Updates the current active user profile info.
    *
-   * @param profile - The profile to use for updating
+   * @param profile - The profile to use for updating.
    */
   public async updateProfile(profile: NDKUserProfile): Promise<void> {
     this.nostrUser.profile = profile;
@@ -166,18 +173,25 @@ export class NostrUserHandler {
   }
 
   /**
-   * @returns private key of the current active Nostr user
+   * @returns Private key of the current active Nostr user.
    */
   public getPrivateKey(): string | undefined {
     return this.signer?.privateKey;
   }
 
   /**
+   * @returns Public key of the current active Nostr user.
+   */
+  public getPublicKey(): string | undefined {
+    return this.nostrUser.pubkey;
+  }
+
+  /**
    * Creates and publishes an event
    *
-   * @param content - The content of the event
-   * @param kind - The kind of the message, Text by default
-   * @param tags - The list of NDKTags to include in the message
+   * @param content - The content of the event.
+   * @param kind - The kind of the message, Text by default.
+   * @param tags - The list of NDKTags to include in the message.
    */
   public async createAndPublishEvent(
     content: string,
@@ -192,12 +206,12 @@ export class NostrUserHandler {
   }
 
   /**
-   * Creates and publishes an encrypted private event
+   * Creates and publishes an encrypted private event.
    *
-   * @param content - The content to be encrypted
-   * @param kind - The kind of the message, Text by default
-   * @param tags - The list of NDKTags to include in the event
-   * @param recipient - The recipient of the private event
+   * @param content - The content to be encrypted.
+   * @param kind - The kind of the message, Text by default.
+   * @param tags - The list of NDKTags to include in the event.
+   * @param recipient - The recipient of the private event.
    */
   public async createAndPublishEncryptedEvent(
     content: string,
@@ -216,15 +230,16 @@ export class NostrUserHandler {
   /**
    * Reposts an event, based on
    * https://github.com/nostr-dev-kit/ndk/blob/master/ndk/src/events/repost.ts
+   * NIP-18: https://github.com/nostr-protocol/nips/blob/master/18.md
    *
-   * @param eventToRepost - The NDKEvent event to repost
+   * @param eventToRepost - The NDKEvent event to repost.
    */
   public async repostEvent(eventToRepost: NDKEvent): Promise<void> {
     await eventToRepost.repost();
   }
 
   /**
-   * A base method for reacting to an event, based on
+   * A base method for reacting to an event, based on NIP-25
    * https://github.com/nostr-protocol/nips/blob/master/25.md
    *
    * @param eventToReactTo - The NDKEvent event to react to
@@ -239,9 +254,8 @@ export class NostrUserHandler {
 
   /**
    * Creates a dislike reaction event for an event.
-   * and restarts the subscriptions using this new list.
    *
-   * @param eventToReactTo - The NDKEvent event to react to
+   * @param eventToReactTo - The NDKEvent event to react to.
    */
   public async dislikeEvent(eventToReactTo: NDKEvent): Promise<void> {
     await this.reactToEvent(eventToReactTo, Reactions.DISLIKE);
@@ -249,75 +263,65 @@ export class NostrUserHandler {
 
   /**
    * Creates a like reaction event for an event.
-   * and restarts the subscriptions using this new list.
    *
-   * @param eventToReactTo - The NDKEvent event to react to
+   * @param eventToReactTo - The NDKEvent event to react to.
    */
   public async likeEvent(eventToReactTo: NDKEvent): Promise<void> {
     await this.reactToEvent(eventToReactTo, Reactions.LIKE);
   }
 
   /**
-   * Fetch followed users along with their profiles
+   * Fetch followed users along with their profiles.
    *
-   * @returns followed users as values denoted by their public keys as keys in json
+   * @returns Followed users as values denoted by their public keys as keys in JSON.
    */
-  public async fetchFollowedUsersWithProfiles(): Promise<UsersObject> {
+  public async fetchFollowedUsersWithProfiles(): Promise<NDKUser[]> {
     const users: NDKUser[] = [...(await this.nostrUser.follows())];
-    const fetchedUsersProfiles: UsersObject = {};
+    const fetchedUsersProfiles: NDKUser[] = [];
     for (const user of users) {
       user.ndk = this.nostrHandler.nostrKit;
       await user.fetchProfile();
-      fetchedUsersProfiles[user.pubkey] = user;
+      fetchedUsersProfiles.push(user);
     }
     return fetchedUsersProfiles;
   }
 
   /**
-   * Updates the Nostr contact list, adds the user to our local followed users list
-   * and restarts the subscriptions using this new list.
+   * Updates the Nostr contact list, adds the user to our followed users store.
    *
    * @param user - The NDKUser user to be added to the follow list
-   * @returns True if successfully removed, False if not
    */
-  public async addUserToFollowedUsers(user: NDKUser): Promise<boolean> {
+  public async addUserToFollowedUsers(user: NDKUser): Promise<void> {
     if (await this.nostrUser.follow(user)) {
-      this.followedUsers[user.pubkey] = user;
-      // we need to renew subscription to receive new events
-      // await this.startSubscriptions(Object.keys(this.followedUsers));
-      return true;
+      followedUsers.add(user);
     } else {
-      return false;
+      throw Error(
+        "Something went wrong, unable to add the user to the follow list.",
+      );
     }
   }
 
   /**
-   * Create a copy of the follow list sans the user to be deleted, updates the Nostr contact list,
-   * restarts the subscriptions using this new shortened user list and if this operation
-   * was successful, it saves the new list into the old list.
+   * Updates the Nostr contact list, removing the given user (also from the store).
    *
-   * @param user - The NDKUser user to be removed from the follow list
-   * @returns True if successfully removed, False if not
+   * @param user - The NDKUser user to be removed from the follow list and store.
    */
-  public async removeUserFromFollowedUsers(user: NDKUser): Promise<boolean> {
-    const newFollowedUsers = JSON.parse(JSON.stringify(this.followedUsers));
-    delete newFollowedUsers[user.pubkey];
+  public async removeUserFromFollowedUsers(removeUser: NDKUser): Promise<void> {
+    const users: NDKUser[] = get(followedUsers).filter(
+      (user: NDKUser): boolean => user.pubkey !== removeUser.pubkey,
+    );
+
     try {
-      // mirrored from NDK
       const event: NDKEvent = new NDKEvent(this.nostrHandler.nostrKit, {
         kind: NDKKind.Contacts,
       });
-      for (const user of Object.values(newFollowedUsers)) {
+      for (const user of users) {
         event.tag(user);
       }
       await event.publish();
-      // we need to renew subscription to cancel receiving the removed user posts
-      // await this.startSubscriptions(Object.keys(newFollowedUsers));
-      // we were successful, so we save the shortened list into the real list
-      this.followedUsers = newFollowedUsers;
-      return true;
-    } catch {
-      return false;
+      followedUsers.remove(removeUser);
+    } catch (error) {
+      throw Error(`Unable to unfollow user ${removeUser.name}`);
     }
   }
 }

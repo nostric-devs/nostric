@@ -16,6 +16,8 @@ export const ROUTES = {
   IMAGES: "images",
   REGISTER_ANONYMOUS: "register-anonymous",
   REGISTER_IDENTITY: "register-identity",
+  FOLLOWERS: "followers",
+  FOLLOWING: "following",
 };
 
 export const getPath = (...names: string[]): string => {

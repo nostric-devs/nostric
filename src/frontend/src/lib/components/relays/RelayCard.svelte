@@ -1,11 +1,11 @@
 <script lang="ts">
   import { RefreshCcw, Server, XCircle } from "svelte-feathers";
-  import { nostrHandler, NostrUserHandler } from "$lib/nostr";
+  import { nostrHandler } from "$lib/nostr";
   import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
   import { slide } from "svelte/transition";
   import { Circle } from "svelte-loading-spinners";
   import type { RelayObject } from "$lib/stores/Relays";
-  import { authUser } from "$lib/stores/Auth";
+  import { AuthStates, authUser } from "$lib/stores/Auth";
   import { getToastStore } from "@skeletonlabs/skeleton";
 
   const toastStore = getToastStore();
@@ -28,26 +28,23 @@
     loading = true;
     disabledLocal = true;
     await nostrHandler.reconnectRelay(relay.object);
-    nostrHandler.on("reconnect-finished", () => {
-      loading = false;
-      disabledLocal = false;
-    });
+    loading = false;
+    disabledLocal = false;
   };
 
   const removeRelay = async () => {
-    loading = true;
-    disabledLocal = true;
-    nostrHandler.removeRelay(relay.object.url);
-    const nostrUserHandler: NostrUserHandler = authUser.getNostrUserHandler();
-    if (nostrUserHandler) {
-      await nostrUserHandler.removeUserPreferredRelay(relay.object.url);
+    if ($authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+      loading = true;
+      disabledLocal = true;
+      nostrHandler.removeRelay(relay.object.url);
+      await $authUser.nostr.removeUserPreferredRelay(relay.object.url);
+      loading = false;
+      disabledLocal = false;
+      toastStore.trigger({
+        message: "Relay successfully removed",
+        background: "variant-filled-success",
+      });
     }
-    loading = false;
-    disabledLocal = false;
-    toastStore.trigger({
-      message: "Relay successfully removed",
-      background: "variant-filled-success",
-    });
   };
 
   export let relay: RelayObject;
@@ -62,7 +59,7 @@
     in:slide={{ duration: 300 }}
     out:slide={{ duration: 300 }}
   >
-    <div class="flex items-center md:block mr-4"><Server /></div>
+    <div class="flex items-center mr-4 md:block hidden"><Server /></div>
     <div>
       <div class="flex mb-1">
         <div
@@ -87,7 +84,7 @@
           status
         </div>
         <div
-          class="badge text-xs font-light font-mono py-0 px-2 rounded-xl lowercase {statusColor}"
+          class="badge text-xs font-light font-mono py-0 px-2 rounded lowercase {statusColor}"
         >
           {NDKRelayStatus[relay.status]}
         </div>
@@ -100,7 +97,7 @@
         <button
           on:click={removeRelay}
           title="Delete relay"
-          class="btn btn-sm rounded-2xl variant-filled-error w-full"
+          class="btn btn-sm rounded variant-filled-error w-full"
           disabled={disabled || disabledLocal || explicitRelay}
         >
           <span><XCircle size="15" /></span>
@@ -111,7 +108,7 @@
         <button
           on:click={attemptReconnect}
           title="Delete relay"
-          class="btn btn-sm rounded-2xl variant-filled-primary w-full"
+          class="btn btn-sm rounded variant-filled-primary w-full"
           disabled={disabled || disabledLocal}
         >
           {#if loading}
