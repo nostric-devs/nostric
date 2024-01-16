@@ -8,7 +8,6 @@ import UUID "mo:uuid/UUID";
 import Source "mo:uuid/async/SourceV4";
 
 actor class Main() = this {
-  // initializes an instance of CanDB - yes, that's all you need!
   stable let db = CanDB.init();
   let g = Source.Source();
 
@@ -25,6 +24,11 @@ actor class Main() = this {
 
   public type FileDownloadResult = {
     #ok : Blob;
+    #err : Text;
+  };
+
+  public type FileListResult = {
+    #ok : [Text];
     #err : Text;
   };
 
@@ -46,6 +50,26 @@ actor class Main() = this {
       };
       case null {
         #err("File not found");
+      };
+    };
+  };
+
+  public shared (msg) func listFiles(limit : Nat) : async FileListResult {
+    let owner = Principal.toText(msg.caller);
+    let options = {
+      pk = owner;
+      skLowerBound = "00000000-0000-0000-0000-000000000000.000";
+      skUpperBound = "ffffffff-ffff-ffff-ffff-ffffffffffff.ZZZ";
+      limit = limit;
+      ascending = ?true;
+    };
+    let results = await scan(options);
+    switch (results) {
+      case (?res) {
+        #ok(res);
+      };
+      case null {
+        #err("No files found");
       };
     };
   };
@@ -86,7 +110,6 @@ actor class Main() = this {
       attributesToUpdate : [(Entity.AttributeKey, Entity.AttributeValue)];
     }
   ) : async ?File {
-
     func updateAttributes(attributeMap : ?Entity.AttributeMap) : Entity.AttributeMap {
       switch (attributeMap) {
         case null { Entity.createAttributeMapFromKVPairs(attributesToUpdate) };
@@ -118,19 +141,26 @@ actor class Main() = this {
     };
   };
 
-  private func scan(options : CanDB.ScanOptions) : async [?File] {
-
+  private func scan(options : CanDB.ScanOptions) : async ?[Text] {
     let { entities; nextKey } = CanDB.scan(db, options);
-    Array.map<Entity.Entity, ?File>(
+    let mappedEntities = Array.map<Entity.Entity, Text>(
       entities,
-      func(entity) : ?File {
-        unwrapFile(entity);
+      func(entity) : Text {
+        switch (unwrapFileMetadata(entity)) {
+          case null { "" };
+          case (?res) { res };
+        };
       },
     );
+
+    if (Array.size(mappedEntities) == 0) {
+      return null;
+    } else {
+      return ?mappedEntities;
+    };
   };
 
   private func unwrapFile(entity : Entity.Entity) : ?File {
-
     let { sk; pk; attributes } = entity;
     let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
     let nameValue = Entity.getAttributeMapValueForKey(attributes, "name");
@@ -142,6 +172,20 @@ actor class Main() = this {
         ?(#text(name)),
         ?(#blob(content)),
       ) { ?{ owner; name; content } };
+      case _ { null };
+    };
+  };
+
+  private func unwrapFileMetadata(entity : Entity.Entity) : ?Text {
+    let { sk; pk; attributes } = entity;
+    let nameValue = Entity.getAttributeMapValueForKey(attributes, "name");
+    let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
+
+    switch (ownerValue, nameValue) {
+      case (
+        ?(#text(owner)),
+        ?(#text(name)),
+      ) { ?(owner # "/" # name) };
       case _ { null };
     };
   };

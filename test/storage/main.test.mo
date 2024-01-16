@@ -1,6 +1,7 @@
 import { test; suite } "mo:test/async";
 import Blob "mo:base/Blob";
 import CanDB "../../src/storage/main";
+import Debug "mo:base/Debug";
 
 var storage = await CanDB.Main();
 
@@ -36,6 +37,26 @@ await suite(
         switch (result) {
           case (#ok(u)) {
             assert u == Blob.fromArray([1, 2, 3]);
+          };
+          case (#err(_)) {
+            assert false;
+          };
+        };
+      },
+    );
+  },
+);
+
+await suite(
+  "[storage/main] get file list",
+  func() : async () {
+    await test(
+      "get function - Get list of files",
+      func() : async () {
+        let result = await storage.listFiles(10);
+        switch (result) {
+          case (#ok(u)) {
+            assert u == ["wo5qg-ysjiq-5da/c09d5619-d72c-48ec-91e2-d145cd769f5c.jpg"];
           };
           case (#err(_)) {
             assert false;
