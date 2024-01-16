@@ -6,10 +6,14 @@ import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 import UUID "mo:uuid/UUID";
 import Source "mo:uuid/async/SourceV4";
+import HttpUtils "utils/HttpUtils";
 
 actor class Main() = this {
   stable let db = CanDB.init();
   let g = Source.Source();
+
+  type Request = HttpUtils.Request;
+  type Response = HttpUtils.Response;
 
   type File = {
     owner : Text;
@@ -39,19 +43,17 @@ actor class Main() = this {
     #ok(owner # "/" # filename);
   };
 
-  public func download(filePath : Text) : async FileDownloadResult {
-    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
-    let owner = filePathSplit[0];
-    let name = filePathSplit[1];
-    let result = await get(owner, name);
+  public func download(request : Request) : async Response {
+    var result = await downloadFile(request.url);
     switch (result) {
-      case (?file) {
-        #ok(file.content);
+      case (null) {
+        return HttpUtils.httpNotFoundResponse(?"no picture available");
       };
-      case null {
-        #err("File not found");
+      case (?picture) {
+        return HttpUtils.httpImgResponse(picture);
       };
     };
+    return HttpUtils.httpNotFoundResponse(?"Path not found.");
   };
 
   public shared (msg) func listFiles(limit : Nat) : async FileListResult {
@@ -73,6 +75,21 @@ actor class Main() = this {
       };
     };
   };
+
+  private func downloadFile(filePath : Text) : async ?Blob {
+      let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
+      let owner = filePathSplit[0];
+      let name = filePathSplit[1];
+      let result = await get(owner, name);
+      switch (result) {
+        case (?file) {
+          ?file.content;
+        };
+        case (null) {
+          null;
+        };
+      };
+    };
 
   private func create(file : File) : async () {
     CanDB.put(
