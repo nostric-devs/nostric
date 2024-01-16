@@ -16,6 +16,7 @@
   import Hero from "$lib/components/homepage/Hero.svelte";
   import Features from "$lib/components/homepage/Features.svelte";
   import Comparison from "$lib/components/homepage/Comparison.svelte";
+  import Footer from "$lib/components/homepage/Footer.svelte";
 
   const toastStore: ToastStore = getToastStore();
 
@@ -229,3 +230,4 @@
     </div>
   </div>
 </div>
+<Footer />

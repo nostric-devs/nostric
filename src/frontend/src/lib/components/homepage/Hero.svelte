@@ -3,12 +3,12 @@
   import { scrollTo } from "./ScrollTo";
 </script>
 
-<section class="text-gray-600 body-font" id="home">
+<section class="" id="home">
   <div
     class="container mx-auto flex px-5 py-24 items-center justify-center flex-col"
   >
     <img
-      class="lg:w-4/6 md:w-4/6 w-5/6 mb-10 object-cover object-center rounded"
+      class="lg:w-4/6 md:w-4/6 w-5/6 object-cover object-center rounded"
       alt="hero"
       src="/img/nostricscreen.png"
     />
@@ -31,6 +31,28 @@
           <ArrowDown class="m-1" size="18" />
         </button>
         <!-- <button class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg">Button</button> -->
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="container px-5 py-4 mx-auto">
+    <div class="flex flex-wrap -m-4 text-center">
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl">2.7K</h2>
+        <p class="leading-relaxed">Users</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl">189K</h2>
+        <p class="leading-relaxed">Posts</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl">35</h2>
+        <p class="leading-relaxed">Subscribers</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl">40</h2>
+        <p class="leading-relaxed">GB of data</p>
       </div>
     </div>
   </div>

@@ -35,6 +35,7 @@
         >Blog</a
       >
       <a
+        on:click|preventDefault={() => scrollTo("#contact")}
         href="#"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
         >Contact</a
