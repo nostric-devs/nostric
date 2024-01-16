@@ -19,21 +19,20 @@ shared (msg) actor class Main() = this {
   };
 
   public type FileUploadResult = {
-    #ok: Text;
-    #err: Text;
+    #ok : Text;
+    #err : Text;
   };
 
   public type FileDownloadResult = {
-      #ok: Blob;
-      #err: Text;
-   };
-
+    #ok : Blob;
+    #err : Text;
+  };
 
   public func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
     let filename = UUID.toText(await g.new()) # fileExtension;
     let owner = Principal.toText(msg.caller);
     await create({ owner = owner; name = filename; content = content });
-    #ok(owner # "/" # filename)
+    #ok(owner # "/" # filename);
   };
 
   public func download(filePath : Text) : async FileDownloadResult {
@@ -43,15 +42,13 @@ shared (msg) actor class Main() = this {
     let result = await get(owner, name);
     switch (result) {
       case (?file) {
-        #ok(file.content)
+        #ok(file.content);
       };
       case null {
-        #err("File not found")
+        #err("File not found");
       };
     };
   };
-
-
 
   private func create(file : File) : async () {
     CanDB.put(
@@ -69,7 +66,7 @@ shared (msg) actor class Main() = this {
     ();
   };
 
-  private query func get(owner: Text, name : Text) : async ?File {
+  private query func get(owner : Text, name : Text) : async ?File {
     let fileData = switch (CanDB.get(db, { pk = owner; sk = name })) {
       case null { null };
       case (?fileEntity) { unwrapFile(fileEntity) };
