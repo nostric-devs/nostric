@@ -28,10 +28,10 @@
       img: "https://fiatjaf.com/static/favicon.jpg"
     },
     {
-      username: "PrestonPysh",
-      npub: "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
-      pubkey: "85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204",
-      img: "https://i.imgur.com/Xf8iV9G.gif"
+      username: "Snowden",
+      npub: "npub1sn0wdenkukak0d9dfczzeacvhkrgz92ak56egt7vdgzn8pv2wfqqhrjdv9",
+      pubkey: "84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240",
+      img: "https://nostr.build/i/p/6838p.jpeg"
     },
     {
       username: "LynAldenContact",
