@@ -35,7 +35,7 @@ actor class Main() = this {
     #ok(owner # "/" # filename);
   };
 
-  public shared (msg) func download(filePath : Text) : async FileDownloadResult {
+  public func download(filePath : Text) : async FileDownloadResult {
     let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
     let owner = filePathSplit[0];
     let name = filePathSplit[1];
