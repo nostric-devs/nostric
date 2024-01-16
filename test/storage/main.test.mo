@@ -38,7 +38,7 @@ await suite(
           body = Blob.fromArray([1, 2, 3]);
           headers = [
             ("Content-Type", "image/jpg"),
-            ("Access-Control-Allow-Origin", "*")
+            ("Access-Control-Allow-Origin", "*"),
           ];
           method = "GET";
           url = "wo5qg-ysjiq-5da/c09d5619-d72c-48ec-91e2-d145cd769f5c.jpg";
@@ -48,7 +48,7 @@ await suite(
           body = Blob.fromArray([1, 2, 3]);
           headers = [
             ("Content-Type", "image/jpg"),
-            ("Access-Control-Allow-Origin", "*")
+            ("Access-Control-Allow-Origin", "*"),
           ];
           statusCode = 200;
         };

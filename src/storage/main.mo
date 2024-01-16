@@ -77,19 +77,19 @@ actor class Main() = this {
   };
 
   private func downloadFile(filePath : Text) : async ?Blob {
-      let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
-      let owner = filePathSplit[0];
-      let name = filePathSplit[1];
-      let result = await get(owner, name);
-      switch (result) {
-        case (?file) {
-          ?file.content;
-        };
-        case (null) {
-          null;
-        };
+    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
+    let owner = filePathSplit[0];
+    let name = filePathSplit[1];
+    let result = await get(owner, name);
+    switch (result) {
+      case (?file) {
+        ?file.content;
+      };
+      case (null) {
+        null;
       };
     };
+  };
 
   private func create(file : File) : async () {
     CanDB.put(
