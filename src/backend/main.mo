@@ -8,7 +8,7 @@ import Account "./utils/Account";
 import Map "mo:base/HashMap";
 import Result "mo:base/Result";
 
-shared ({ caller = parent }) actor class Main() = this {
+actor class Main() = this {
   public func greet(name : Text) : async Text {
     return "Hello, " # name # "!";
   };
