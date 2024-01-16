@@ -10,8 +10,17 @@ await suite(
     await test(
       "create function - Create a file",
       func() : async () {
-        let file = { name = "test.txt"; content = Blob.fromArray([1, 2, 3]) };
-        await candb_file_upload.create(file);
+        let fileExtension = ".jpg";
+        let content = Blob.fromArray([1, 2, 3]);
+        let result = await candb_file_upload.upload(fileExtension, content);
+        switch (result) {
+          case (#ok(filePath)) {
+            assert true;
+          };
+          case (#err(_)) {
+            assert false;
+          };
+        };
       },
     );
   },
@@ -23,13 +32,12 @@ await suite(
     await test(
       "get function - Get a file",
       func() : async () {
-        let file = await candb_file_upload.get("test.txt");
-        switch (file) {
-          case (?u) {
-            assert u.name == "test.txt";
-            assert u.content == Blob.fromArray([1, 2, 3]);
+        let result = await candb_file_upload.download("wo5qg-ysjiq-5da/c09d5619-d72c-48ec-91e2-d145cd769f5c.jpg");
+        switch (result) {
+          case (#ok(u)) {
+            assert u == Blob.fromArray([1, 2, 3]);
           };
-          case null {
+          case (#err(_)) {
             assert false;
           };
         };
