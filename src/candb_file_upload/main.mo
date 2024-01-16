@@ -7,7 +7,7 @@ import Entity "mo:candb/Entity";
 import UUID "mo:uuid/UUID";
 import Source "mo:uuid/async/SourceV4";
 
-shared (msg) actor class Main() = this {
+actor class Main() = this {
   // initializes an instance of CanDB - yes, that's all you need!
   stable let db = CanDB.init();
   let g = Source.Source();
@@ -28,14 +28,14 @@ shared (msg) actor class Main() = this {
     #err : Text;
   };
 
-  public func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
+  public shared (msg) func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
     let filename = UUID.toText(await g.new()) # fileExtension;
     let owner = Principal.toText(msg.caller);
     await create({ owner = owner; name = filename; content = content });
     #ok(owner # "/" # filename);
   };
 
-  public func download(filePath : Text) : async FileDownloadResult {
+  public shared (msg) func download(filePath : Text) : async FileDownloadResult {
     let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
     let owner = filePathSplit[0];
     let name = filePathSplit[1];
@@ -66,7 +66,7 @@ shared (msg) actor class Main() = this {
     ();
   };
 
-  private query func get(owner : Text, name : Text) : async ?File {
+  private func get(owner : Text, name : Text) : async ?File {
     let fileData = switch (CanDB.get(db, { pk = owner; sk = name })) {
       case null { null };
       case (?fileEntity) { unwrapFile(fileEntity) };
@@ -118,7 +118,7 @@ shared (msg) actor class Main() = this {
     };
   };
 
-  private query func scan(options : CanDB.ScanOptions) : async [?File] {
+  private func scan(options : CanDB.ScanOptions) : async [?File] {
 
     let { entities; nextKey } = CanDB.scan(db, options);
     Array.map<Entity.Entity, ?File>(
@@ -129,7 +129,7 @@ shared (msg) actor class Main() = this {
     );
   };
 
-  func unwrapFile(entity : Entity.Entity) : ?File {
+  private func unwrapFile(entity : Entity.Entity) : ?File {
 
     let { sk; pk; attributes } = entity;
     let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
