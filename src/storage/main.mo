@@ -7,6 +7,7 @@ import Entity "mo:candb/Entity";
 import UUID "mo:uuid/UUID";
 import Source "mo:uuid/async/SourceV4";
 import HttpUtils "utils/HttpUtils";
+import Debug "mo:base/Debug";
 
 actor class Main() = this {
   stable let db = CanDB.init();
@@ -36,15 +37,9 @@ actor class Main() = this {
     #err : Text;
   };
 
-  public shared (msg) func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
-    let filename = UUID.toText(await g.new()) # fileExtension;
-    let owner = Principal.toText(msg.caller);
-    await create({ owner = owner; name = filename; content = content });
-    #ok(owner # "/" # filename);
-  };
-
-  public func download(request : Request) : async Response {
-    var result = await downloadFile(request.url);
+  public query func http_request(request : Request) : async Response {
+    Debug.print("request: " # request.url);
+    var result = handleDownload(request.url);
     switch (result) {
       case (null) {
         return HttpUtils.httpNotFoundResponse(?"no picture available");
@@ -54,6 +49,13 @@ actor class Main() = this {
       };
     };
     return HttpUtils.httpNotFoundResponse(?"Path not found.");
+  };
+
+  public shared (msg) func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
+    let filename = UUID.toText(await g.new()) # fileExtension;
+    let owner = Principal.toText(msg.caller);
+    await create({ owner = owner; name = filename; content = content });
+    #ok("&userId=" # owner # "&fileName=" # filename);
   };
 
   public shared (msg) func listFiles(limit : Nat) : async FileListResult {
@@ -76,11 +78,20 @@ actor class Main() = this {
     };
   };
 
-  private func downloadFile(filePath : Text) : async ?Blob {
-    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
-    let owner = filePathSplit[0];
-    let name = filePathSplit[1];
-    let result = await get(owner, name);
+  public func download(filePath : Text) : async FileDownloadResult {
+    switch (handleDownload(filePath)) {
+      case (?file) {
+        #ok(file);
+      };
+      case (null) {
+        #err("File not found");
+      };
+    };
+  };
+
+  private func handleDownload(filePath : Text) : ?Blob {
+    let (owner, name) = extractAddress(filePath);
+    let result = get(owner, name);
     switch (result) {
       case (?file) {
         ?file.content;
@@ -107,7 +118,7 @@ actor class Main() = this {
     ();
   };
 
-  private func get(owner : Text, name : Text) : async ?File {
+  private func get(owner : Text, name : Text) : ?File {
     let fileData = switch (CanDB.get(db, { pk = owner; sk = name })) {
       case null { null };
       case (?fileEntity) { unwrapFile(fileEntity) };
@@ -177,6 +188,22 @@ actor class Main() = this {
     };
   };
 
+  private func extractAddress(address : Text) : (Text, Text) {
+    let params = Text.split(address, #char('&'));
+    var userId = "";
+    var fileName = "";
+
+    for (param in params) {
+      let keyValue = Iter.toArray(Text.split(param, #char('=')));
+      if (Text.startsWith(param, #text "userId=")) {
+        userId := keyValue[1];
+      } else if (Text.startsWith(param, #text "fileName=")) {
+        fileName := keyValue[1];
+      };
+    };
+    (userId, fileName);
+  };
+
   private func unwrapFile(entity : Entity.Entity) : ?File {
     let { sk; pk; attributes } = entity;
     let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
@@ -202,7 +229,7 @@ actor class Main() = this {
       case (
         ?(#text(owner)),
         ?(#text(name)),
-      ) { ?(owner # "/" # name) };
+      ) { ?("&userId=" # owner # "&fileName=" # name) };
       case _ { null };
     };
   };
