@@ -1,7 +1,6 @@
 import { test; suite } "mo:test/async";
 import Blob "mo:base/Blob";
 import Storage "../../src/storage/main";
-import Debug "mo:base/Debug";
 import HttpUtils "../../src/storage/utils/HttpUtils";
 
 var storage = await Storage.Main();

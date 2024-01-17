@@ -8,7 +8,6 @@ import Principal "mo:base/Principal";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 import HttpUtils "utils/HttpUtils";
-import Debug "mo:base/Debug";
 
 actor class Main() = this {
   stable let db = CanDB.init();
@@ -42,7 +41,6 @@ actor class Main() = this {
   let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_.!*'(),$";
 
   public query func http_request(request : Request) : async Response {
-    Debug.print("request: " # request.url);
     var result = handleDownload(request.url);
     switch (result) {
       case (null) {
