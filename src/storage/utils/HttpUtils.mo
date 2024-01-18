@@ -48,8 +48,7 @@ module {
       body = pic;
       headers = [
         ("Content-Type", "image/jpg"),
-        ("Access-Control-Allow-Origin", "*")
-        //("Expires", "Wed, 9 Jan 2099 09:09:09 GMT")
+        ("Access-Control-Allow-Origin", "*"),
       ];
       status_code = 200;
       streaming_strategy = null;
