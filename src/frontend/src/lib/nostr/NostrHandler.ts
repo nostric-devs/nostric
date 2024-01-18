@@ -318,6 +318,25 @@ export class NostrHandler {
   }
 
   /**
+   * Fetch profiles of users by their public keys.
+   *
+   * @param publicKeys - Array of public keys of the users
+   * @returns An array of NDKUser profiles for the given public keys.
+   */
+  public async fetchProfilesByPublicKey(
+    publicKeys: string[],
+  ): Promise<NDKUser[]> {
+    const users: NDKUser[] = [];
+
+    for (const publicKey of publicKeys) {
+      const user = await this.fetchUserProfileByPublicKey(publicKey);
+      users.push(user);
+    }
+
+    return users;
+  }
+
+  /**
    * @param query - A string containing a query to search for.
    * @returns UsersObject of users matching the query.
    */
