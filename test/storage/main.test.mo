@@ -1,9 +1,9 @@
 import { test; suite } "mo:test/async";
 import Blob "mo:base/Blob";
-import CanDB "../../src/storage/main";
-import Debug "mo:base/Debug";
+import Storage "../../src/storage/main";
+import HttpUtils "../../src/storage/utils/HttpUtils";
 
-var storage = await CanDB.Main();
+var storage = await Storage.Main();
 
 await suite(
   "[storage/main] create file",
@@ -33,7 +33,7 @@ await suite(
     await test(
       "get function - Get a file",
       func() : async () {
-        let result = await storage.download("wo5qg-ysjiq-5da/c09d5619-d72c-48ec-91e2-d145cd769f5c.jpg");
+        let result = await storage.download("&id=q3gij!vB-7-5l*iaj.jpg");
         switch (result) {
           case (#ok(u)) {
             assert u == Blob.fromArray([1, 2, 3]);
@@ -56,9 +56,46 @@ await suite(
         let result = await storage.listFiles(10);
         switch (result) {
           case (#ok(u)) {
-            assert u == ["wo5qg-ysjiq-5da/c09d5619-d72c-48ec-91e2-d145cd769f5c.jpg"];
+            assert u == ["&id=q3gij!vB-7-5l*iaj.jpg"];
           };
           case (#err(_)) {
+            assert false;
+          };
+        };
+      },
+    );
+  },
+);
+
+await suite(
+  "[storage/main] HTTP GET file",
+  func() : async () {
+    await test(
+      "get function - Download a file via HTTP",
+      func() : async () {
+        let request = {
+          body = Blob.fromArray([1, 2, 3]);
+          headers = [
+            ("Content-Type", "image/jpg"),
+            ("Access-Control-Allow-Origin", "*"),
+          ];
+          method = "GET";
+          url = "&id=q3gij!vB-7-5l*iaj.jpg";
+        };
+        let result = await storage.http_request(request);
+        let expectedResponse = {
+          body = Blob.fromArray([1, 2, 3]);
+          headers = [
+            ("Content-Type", "image/jpg"),
+            ("Access-Control-Allow-Origin", "*"),
+          ];
+          statusCode = 200;
+        };
+        switch (result) {
+          case (u) {
+            assert u == expectedResponse;
+          };
+          case (_) {
             assert false;
           };
         };
