@@ -42,7 +42,7 @@ actor class Main() = this {
   let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_.!*'(),$";
 
   let filenameCharacterSet = "0123456789";
-  let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-"; //"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
 
   public query func http_request(request : Request) : async Response {
     var result = handleDownload(request.url);
