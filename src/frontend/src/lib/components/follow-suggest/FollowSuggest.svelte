@@ -9,7 +9,6 @@
 
   onMount(async () => {
     profilesPromise = nostrHandler.fetchProfilesByPublicKey(profilesPubkeys);
-    console.log(profilesPromise);
   });
 
   let disabled: boolean = false;
