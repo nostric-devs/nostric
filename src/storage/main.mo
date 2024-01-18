@@ -40,9 +40,6 @@ actor class Main() = this {
   let principalCharacterSet = "0123456789abcdefghijklmnopqrstuvwxyz/-";
   let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_.!*'(),$";
 
-  let filenameCharacterSet = "0123456789";
-  let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-"; //"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-
   public query func http_request(request : Request) : async Response {
     var result = handleDownload(request.url);
     switch (result) {
@@ -59,7 +56,7 @@ actor class Main() = this {
   public shared (msg) func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
     let owner = Principal.toText(msg.caller);
     let fileCount = await currentFileCount(owner);
-    let filename = generateFilename(fileCount +1);
+    let filename = Nat.toText(fileCount + 1);
     await create({
       owner = owner;
       name = filename;
@@ -73,10 +70,10 @@ actor class Main() = this {
     let owner = Principal.toText(msg.caller);
     let options = {
       pk = owner;
-      skLowerBound = "0000";
-      skUpperBound = "~~~~";
+      skLowerBound = "00000000-0000-0000-0000-000000000000";
+      skUpperBound = "ffffffff-ffff-ffff-ffff-ffffffffffff";
       limit = limit;
-      ascending = ?false;
+      ascending = ?true;
     };
     let results = await scan(options);
     switch (results) {
@@ -103,17 +100,15 @@ actor class Main() = this {
   private func currentFileCount(owner : Text) : async Nat {
     let options = {
       pk = owner;
-      skLowerBound = "0000";
-      skUpperBound = "~~~~";
-      limit = 1;
-      ascending = ?false;
+      skLowerBound = "00000000-0000-0000-0000-000000000000";
+      skUpperBound = "ffffffff-ffff-ffff-ffff-ffffffffffff";
+      limit = 100000;
+      ascending = ?true;
     };
     let results = await scan(options);
     switch (results) {
       case (?res) {
-        let decodedAddress = extractAddress(res[0]);
-        let fileCount = Iter.toArray(Text.split(decodedAddress, #char '/'))[1];
-        getFilenameIndex(fileCount);
+        res.size();
       };
       case null {
         0;
@@ -285,14 +280,6 @@ actor class Main() = this {
     return convBase(input, urlCharacterSet, principalCharacterSet);
   };
 
-  func encodeFilename(input : Text) : Text {
-    return convBase(input, filenameCharacterSet, encodingFilenameSet);
-  };
-
-  func decodeFilename(input : Text) : Text {
-    return convBase(input, encodingFilenameSet, filenameCharacterSet);
-  };
-
   func convBase(numberInput : Text, fromBaseInput : Text, toBaseInput : Text) : Text {
     if (fromBaseInput == toBaseInput) return numberInput;
     let fromBase = Text.toArray(fromBaseInput);
@@ -344,41 +331,5 @@ actor class Main() = this {
       };
     };
     return null;
-  };
-
-  func repeatString(count : Nat) : Text {
-    var result = "";
-    for (i in Iter.range(0, count)) {
-      result := "0" # result;
-    };
-    return result;
-  };
-
-  func generateFilename(index : Nat) : Text {
-    // Calculate the number of digits needed
-    let numDigits = 3; // 1000 * 37 chars = 37000 possible filenames
-
-    // Convert the index to text
-    let indexText = encodeFilename(Nat.toText(index));
-
-    // Add leading zeros
-    let zerosNeeded = numDigits - Text.size(indexText);
-    let leadingZeros = repeatString(zerosNeeded);
-
-    // Return the formatted filename
-    return leadingZeros # indexText;
-  };
-
-  func getFilenameIndex(numericString : Text) : Nat {
-    let strippedText = Text.trimStart(numericString, #char '0');
-    let decodedFileName = decodeFilename(strippedText);
-    switch (Nat.fromText(decodedFileName)) {
-      case (?count) {
-        count;
-      };
-      case null {
-        0;
-      };
-    };
   };
 };
