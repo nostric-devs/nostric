@@ -8,7 +8,6 @@ repository = "https://github.com/nostric-devs/nostric"
 base = "0.10.3"
 candb = "1.0.2"
 candy = "0.3.0"
-uuid = "1.0.0"
 
 [dev-dependencies]
 test = "1.2.0"
