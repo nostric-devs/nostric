@@ -3,6 +3,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Blob "mo:base/Blob";
 import Nat "mo:base/Nat";
+import Int "mo:base/Int";
 import Char "mo:base/Char";
 import Principal "mo:base/Principal";
 import CanDB "mo:candb/SingleCanisterCanDB";
@@ -356,13 +357,15 @@ actor class Main() = this {
 
   func generateFilename(index : Nat) : Text {
     // Calculate the number of digits needed
-    let numDigits = 3; // 1000 * 37 chars = 37000 possible filenames
+    let numZeros = 3; // 1000 * 37 chars = 37000 possible filenames
+    let numDigits = numZeros + 1;
 
     // Convert the index to text
     let indexText = encodeFilename(Nat.toText(index));
 
     // Add leading zeros
-    let zerosNeeded = numDigits - Text.size(indexText);
+    let countedDigits : Int = numZeros - Text.size(indexText);
+    let zerosNeeded = Int.abs((countedDigits + numDigits) % numDigits);
     let leadingZeros = repeatString(zerosNeeded);
 
     // Return the formatted filename
