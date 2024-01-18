@@ -8,50 +8,45 @@
     type ToastStore,
   } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
-  import type { Result } from "$declarations/backend/backend.did";
   import { onMount } from "svelte";
 
   let loading: boolean = false;
   let processing: boolean = false;
   let disabled: boolean = false;
   let fileInput: HTMLInputElement | undefined;
-  let files: string[];
+  let files: string[] = [];
 
   const toastStore: ToastStore = getToastStore();
 
-  // let images = [
-  //   "https://images.unsplash.com/photo-1617296538902-887900d9b592?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzExMDB8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1553184570-557b84a3a308?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NTF8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1620005839871-7ac4aed5ddbc?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NzN8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1597077962467-be16edcc6a43?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2MzZ8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1597531072931-8fceba101e4e?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2OTB8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1597077917598-97ca3922a317?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MjF8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1510111652602-195fc654aa83?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY0Nzl8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  //   "https://images.unsplash.com/photo-1612145342709-eadb6e22acca?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MDh8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  // ];
-
   const onFileLand = async () => {
-    if (fileInput && fileInput.files) {
-      processing = true;
-      disabled = true;
-      try {
-        const url: string = await $authUser.identity.uploadFile(
-          fileInput.files[0],
-        );
-        files = [...files, url];
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      if (fileInput.files[0].size > 2097152) {
         toastStore.trigger({
-          message: "Image successfully uploaded to storage.",
-          background: "variant-filled-success",
+          message: "You cannot upload an image with size exceeding 2 MB.",
+          background: "variant-filled-warning",
         });
-      } catch (error) {
-        console.error(error);
-        toastStore.trigger({
-          message: "Unable to upload image.",
-          background: "variant-filled-error",
-        });
-      } finally {
-        processing = false;
-        disabled = false;
+      } else {
+        processing = true;
+        disabled = true;
+        try {
+          const url: string = await $authUser.identity.uploadFile(
+            fileInput.files[0],
+          );
+          files = [...files, url];
+          toastStore.trigger({
+            message: "Image successfully uploaded to storage.",
+            background: "variant-filled-success",
+          });
+        } catch (error) {
+          console.error(error);
+          toastStore.trigger({
+            message: "Unable to upload image.",
+            background: "variant-filled-error",
+          });
+        } finally {
+          processing = false;
+          disabled = false;
+        }
       }
     }
   };
@@ -80,7 +75,7 @@
   onMount(async () => {
     try {
       loading = true;
-      files = await $authUser.identity.getFiles(10);
+      files = await $authUser.identity.getFiles();
     } catch (error) {
       console.error(error);
       toastStore.trigger({
@@ -115,7 +110,9 @@
         <Upload />
       {/if}
     </div>
-    <svelte:fragment slot="meta">PNG, JPG, and GIF allowed.</svelte:fragment>
+    <svelte:fragment slot="meta">
+      PNG, JPG, and GIF allowed. Max allowed file size is 2 MB.
+    </svelte:fragment>
   </FileDropzone>
 </div>
 
@@ -131,7 +128,11 @@
   <div class="grid my-8 mx-4 grid-cols-2 md:grid-cols-3 gap-2">
     {#each files as imageUrl}
       <div class="image-container">
-        <img class="h-auto max-w-full rounded-md" src={imageUrl} alt="" />
+        <img
+          class="h-auto max-w-full max-h-full rounded-md"
+          src={imageUrl}
+          alt=""
+        />
         <div class="overlay"></div>
         <div class="image-icons">
           <button

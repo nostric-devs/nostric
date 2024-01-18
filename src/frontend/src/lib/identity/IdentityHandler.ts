@@ -15,10 +15,14 @@ export class IdentityHandler {
   public backendActor: ActorSubclass<_SERVICE> | undefined;
   public storageActor: ActorSubclass<_STORAGE_SERVICE> | undefined;
   public identity: Identity | undefined;
-  private host: string =
-    process.env.DFX_NETWORK === "ic"
-      ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
-      : "http://localhost:8000";
+  private host: string;
+
+  constructor() {
+    this.host =
+      process.env.DFX_NETWORK === "ic"
+        ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
+        : "http://localhost:8000";
+  }
 
   public async init(): Promise<void> {
     this.authClient = await AuthClient.create();
@@ -100,15 +104,12 @@ export class IdentityHandler {
     const blob: Uint8Array | number[] = [
       ...new Uint8Array(await file.arrayBuffer()),
     ];
-    const fileExtension: string | undefined = file.name.split(".").at(-1);
+    const fileExtension: string | undefined = `.${file.name.split(".").at(-1)}`;
 
-    if (
-      fileExtension === undefined ||
-      !["jpg", "png", "gif"].includes(fileExtension)
-    ) {
+    if (![".jpg", ".png", ".gif"].includes(fileExtension)) {
       throw Error("Invalid file extension, must be one of jpg, png or gif.");
     } else {
-      const result: FileUploadResult = await this.storageActor?.upload(
+      const result: FileUploadResult = await this.storageActor.upload(
         fileExtension,
         blob,
       );
@@ -127,15 +128,16 @@ export class IdentityHandler {
     }
   }
 
-  public async getFiles(limit?: number): Promise<string[]> {
-    const result: FileListResult = await this.storageActor?.listFiles(limit);
+  public async getFiles(limit?: bigint): Promise<string[]> {
+    const result: FileListResult = await this.storageActor.listFiles(
+      limit || BigInt(Number.MAX_SAFE_INTEGER),
+    );
     if ("ok" in result) {
       return result.ok.map((path: string): string => {
-        const pathWithExtension: string = `${path.slice(0, path.length - 3)}`;
-        return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${pathWithExtension}`;
+        return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
       });
     } else {
-      throw Error("Unable to load user images.");
+      throw Error(result.err);
     }
   }
 }
