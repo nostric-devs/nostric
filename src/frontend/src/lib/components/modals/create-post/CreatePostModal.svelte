@@ -30,7 +30,6 @@
   }
 
   export let parent: SvelteComponent;
-  export let parent: SvelteComponent;
 
   // Images will be later loaded from store
   // Only display last 6 images

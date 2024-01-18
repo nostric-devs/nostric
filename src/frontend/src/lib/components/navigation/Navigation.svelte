@@ -83,9 +83,9 @@
       >
         <Image size="20" class="lg:mx-auto xl:mx-0"></Image>
         <span class="lg:hidden xl:block ml-3">{ROUTES.IMAGES}</span>
-        <span class="badge variant-filled ">PRO</span>
+        <span class="badge variant-filled">PRO</span>
       </a>
-    </li>    
+    </li>
     <li>
       <a
         href={getPath(ROUTES.SETTINGS)}

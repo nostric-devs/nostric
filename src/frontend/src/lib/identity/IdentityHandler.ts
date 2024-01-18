@@ -1,58 +1,64 @@
 import { AuthClient } from "@dfinity/auth-client";
+import { createActor } from "$declarations/backend";
+import { createActor as createStorageActor } from "$declarations/storage";
+import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
 import type { ActorSubclass, HttpAgentOptions, Identity } from "@dfinity/agent";
 import type { _SERVICE, Result } from "$declarations/backend/backend.did";
-import { createActor } from "$declarations/backend";
-import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
-import { authUser } from "$lib/stores/Auth";
+import type {
+  _SERVICE as _STORAGE_SERVICE,
+  FileUploadResult,
+  FileListResult,
+} from "$declarations/storage/storage.did";
 
 export class IdentityHandler {
   public authClient: AuthClient | undefined;
   public backendActor: ActorSubclass<_SERVICE> | undefined;
+  public storageActor: ActorSubclass<_STORAGE_SERVICE> | undefined;
   public identity: Identity | undefined;
+  private host: string =
+    process.env.DFX_NETWORK === "ic"
+      ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
+      : "http://localhost:8000";
 
   public async init(): Promise<void> {
     this.authClient = await AuthClient.create();
     try {
-      await this.initBackendActor();
+      await this.initActors();
     } catch {
       const identityProvider: string =
         process.env.DFX_NETWORK === "ic"
           ? "https://identity.ic0.app/#authorize"
           : `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:8000/#authorize`;
 
-      await this.authClient.login({
-        identityProvider,
-        onSuccess: async (): Promise<void> => {
-          await this.initBackendActor();
-        },
-        onError: (): void => {
-          authUser.setLoading(false);
-          throw Error("Unable to login with identity");
-        },
+      return new Promise((resolve, reject): void => {
+        this.authClient?.login({
+          identityProvider,
+          onSuccess: () =>
+            this.initActors()
+              .then(() => resolve())
+              .catch(() => reject("Unable to initialize Actors")),
+          onError: () => reject("Unable to authorize to Internet Identity."),
+        });
       });
     }
   }
 
-  public async initBackendActor(): Promise<void> {
+  public async initActors(): Promise<void> {
     if (this.authClient && (await this.authClient.isAuthenticated())) {
-      const host: string =
-        process.env.DFX_NETWORK === "ic"
-          ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
-          : "http://localhost:8000";
-
       this.identity = this.authClient.getIdentity();
       const options: HttpAgentOptions = {
         identity: this.identity,
-        host,
+        host: this.host,
       };
 
       this.backendActor = createActor(process.env.BACKEND_CANISTER_ID, {
         agentOptions: options,
       });
+      this.storageActor = createStorageActor(process.env.STORAGE_CANISTER_ID, {
+        agentOptions: options,
+      });
     } else {
-      throw Error(
-        "Unable to create backend actor, auth client not authenticated",
-      );
+      throw Error("Unable to create actors, auth client not authenticated");
     }
   }
 
@@ -88,5 +94,48 @@ export class IdentityHandler {
 
   public async getAssociatedUser(): Promise<Result | undefined> {
     return this.backendActor?.getProfile();
+  }
+
+  public async uploadFile(file: File): Promise<string> {
+    const blob: Uint8Array | number[] = [
+      ...new Uint8Array(await file.arrayBuffer()),
+    ];
+    const fileExtension: string | undefined = file.name.split(".").at(-1);
+
+    if (
+      fileExtension === undefined ||
+      !["jpg", "png", "gif"].includes(fileExtension)
+    ) {
+      throw Error("Invalid file extension, must be one of jpg, png or gif.");
+    } else {
+      const result: FileUploadResult = await this.storageActor?.upload(
+        fileExtension,
+        blob,
+      );
+      if ("ok" in result) {
+        return result.ok;
+      } else {
+        throw Error(`Unable to upload image, ${result.err}`);
+      }
+    }
+  }
+
+  public async deleteFile(fileURL: string): Promise<void> {
+    const result: Result = await this.storageActor?.delete(fileURL);
+    if ("err" in result) {
+      throw Error("Unable to delete file");
+    }
+  }
+
+  public async getFiles(limit?: number): Promise<string[]> {
+    const result: FileListResult = await this.storageActor?.listFiles(limit);
+    if ("ok" in result) {
+      return result.ok.map((path: string): string => {
+        const pathWithExtension: string = `${path.slice(0, path.length - 3)}`;
+        return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${pathWithExtension}`;
+      });
+    } else {
+      throw Error("Unable to load user images.");
+    }
   }
 }

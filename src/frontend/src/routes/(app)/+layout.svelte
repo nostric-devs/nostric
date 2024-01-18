@@ -42,7 +42,7 @@
   let user: NDKUser | undefined;
 
   $: isAuthenticated =
-    !$authUser.loading && authUser.authState !== AuthStates.ANONYMOUS;
+    !$authUser.loading && $authUser.authState !== AuthStates.ANONYMOUS;
 
   function drawerOpen(): void {
     drawerStore.open({});
