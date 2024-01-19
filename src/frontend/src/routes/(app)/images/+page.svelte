@@ -32,7 +32,7 @@
           const url: string = await $authUser.identity.uploadFile(
             fileInput.files[0],
           );
-          files = [...files, url];
+          files = [...files, $authUser.identity?.imgPathToURL(url)];
           toastStore.trigger({
             message: "Image successfully uploaded to storage.",
             background: "variant-filled-success",

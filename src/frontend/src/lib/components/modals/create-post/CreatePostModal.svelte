@@ -42,14 +42,8 @@
     "https://images.unsplash.com/photo-1597077917598-97ca3922a317?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MjF8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
   ];
 
-  let copied: Boolean = false;
+  let copied: boolean = false;
 
-  function onClickHandler() {
-    copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 1000);
-  }
 </script>
 
 {#if $modalStore[0]}
@@ -77,16 +71,16 @@
           >
         </div>
         <div class="padding-2 flex items-center">
-          {#each images as image, index}
+          {#each images as imageUrl}
             <div class="relative h-16 w-16 mr-2">
-              <img class="h-16 w-16 rounded-md" src={image} alt="" />
+              <img class="h-16 w-16 rounded-md" src={imageUrl} alt="" />
               <div
                 class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
               >
                 <button
-                  use:clipboard={image}
+                  use:clipboard={imageUrl}
                   class="btn h-16 w-16 variant-filled-primary font-normal"
-                  on:click={onClickHandler}
+                  on:click={() => {copied = true; setTimeout(() => copied = false, 1000);}}
                 >
                   <span>
                     {#if copied}

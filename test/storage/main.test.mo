@@ -2,6 +2,7 @@ import { test; suite } "mo:test/async";
 import Blob "mo:base/Blob";
 import Storage "../../src/storage/main";
 import HttpUtils "../../src/storage/utils/HttpUtils";
+import Debug "mo:base/Debug";
 
 var storage = await Storage.Main();
 
@@ -38,7 +39,8 @@ await suite(
           case (#ok(u)) {
             assert u == Blob.fromArray([1, 2, 3]);
           };
-          case (#err(_)) {
+          case (#err(msg)) {
+            Debug.print(msg);
             assert false;
           };
         };
@@ -97,6 +99,62 @@ await suite(
           };
           case (_) {
             assert false;
+          };
+        };
+      },
+    );
+  },
+);
+
+await suite(
+  "[storage/main] delete file",
+  func() : async () {
+    await test(
+      "delete function - Delete an existing file",
+      func() : async () {
+        // Assuming you have a file with the path "&id=q3gij!vB-7-5l*iaj.jpg" that can be deleted
+        let filePath = "&id=q3gij!vB-7-5l*iaj.jpg";
+        let result = await storage.delete(filePath);
+        switch (result) {
+          case (#ok(_)) {
+            assert true; // File deleted successfully
+          };
+          case (#err(_)) {
+            assert false; // There was an error deleting the file
+          };
+        };
+      },
+    );
+
+    await test(
+      "delete function - Attempt to delete a non-existent file",
+      func() : async () {
+        // Use a file path that does not exist
+        let filePath = "&id=q3gij!vB-7-5l*iaj.png";
+        let result = await storage.delete(filePath);
+        switch (result) {
+          case (#ok(_)) {
+            assert false; // File should not exist, so deletion should fail
+          };
+          case (#err(errorMessage)) {
+            assert errorMessage == "File not found"; // Expected error message
+          };
+        };
+      },
+    );
+
+    await test(
+      "delete function - Attempt to delete file from invalid url",
+      func() : async () {
+        // Use a file path that does not exist
+        let filePath = "&id=not-valid-url.jpg";
+        let result = await storage.delete(filePath);
+        switch (result) {
+          case (#ok(_)) {
+            assert false; // File should not exist, so deletion should fail
+          };
+          case (#err(errorMessage)) {
+            assert errorMessage == "Invalid file path";
           };
         };
       },

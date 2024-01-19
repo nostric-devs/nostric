@@ -54,7 +54,6 @@ export class IdentityHandler {
         identity: this.identity,
         host: this.host,
       };
-
       this.backendActor = createActor(process.env.BACKEND_CANISTER_ID, {
         agentOptions: options,
       });
@@ -72,7 +71,8 @@ export class IdentityHandler {
 
   public async isIdentityAssociated(): Promise<boolean> {
     if (this.isIdentityAuthenticated()) {
-      const result: Result | undefined = await this.backendActor?.getProfile();
+      console.log(await this.backendActor?.greet("hello"));
+      const result: Result | undefined = await this.backendActor.getProfile();
       return result !== undefined && "ok" in result;
     } else {
       return false;
@@ -122,11 +122,16 @@ export class IdentityHandler {
   }
 
   public async deleteFile(fileURL: string): Promise<void> {
-    const result: Result = await this.storageActor?.delete(fileURL);
+    const result: Result = await this.storageActor.delete(fileURL);
     if ("err" in result) {
       throw Error("Unable to delete file");
     }
   }
+  
+  public imgPathToURL(path: string): string {
+    return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
+  }
+  
 
   public async getFiles(limit?: bigint): Promise<string[]> {
     const result: FileListResult = await this.storageActor.listFiles(
@@ -134,7 +139,7 @@ export class IdentityHandler {
     );
     if ("ok" in result) {
       return result.ok.map((path: string): string => {
-        return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
+        return this.imgPathToURL(path);
       });
     } else {
       throw Error(result.err);
