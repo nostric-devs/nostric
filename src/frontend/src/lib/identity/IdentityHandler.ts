@@ -9,13 +9,14 @@ import type {
   FileUploadResult,
   FileListResult,
 } from "$declarations/storage/storage.did";
+import { files } from "$lib/stores/Files";
 
 export class IdentityHandler {
   public authClient: AuthClient | undefined;
   public backendActor: ActorSubclass<_SERVICE> | undefined;
   public storageActor: ActorSubclass<_STORAGE_SERVICE> | undefined;
   public identity: Identity | undefined;
-  private host: string;
+  private readonly host: string;
 
   constructor() {
     this.host =
@@ -71,7 +72,6 @@ export class IdentityHandler {
 
   public async isIdentityAssociated(): Promise<boolean> {
     if (this.isIdentityAuthenticated()) {
-      console.log(await this.backendActor?.greet("hello"));
       const result: Result | undefined = await this.backendActor.getProfile();
       return result !== undefined && "ok" in result;
     } else {
@@ -113,34 +113,29 @@ export class IdentityHandler {
         fileExtension,
         blob,
       );
-      if ("ok" in result) {
-        return result.ok;
+      if (result !== undefined && "ok" in result) {
+        files.add(result.ok, this.host);
       } else {
         throw Error(`Unable to upload image, ${result.err}`);
       }
     }
   }
 
-  public async deleteFile(fileURL: string): Promise<void> {
-    const result: Result = await this.storageActor.delete(fileURL);
-    if ("err" in result) {
+  public async deleteFile(url: string): Promise<void> {
+    const result: Result = await this.storageActor.delete(url);
+    if (result !== undefined && "err" in result) {
       throw Error("Unable to delete file");
+    } else {
+      files.remove(url);
     }
   }
-  
-  public imgPathToURL(path: string): string {
-    return `${this.host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
-  }
-  
 
-  public async getFiles(limit?: bigint): Promise<string[]> {
+  public async getFiles(limit?: bigint): Promise<void> {
     const result: FileListResult = await this.storageActor.listFiles(
       limit || BigInt(Number.MAX_SAFE_INTEGER),
     );
-    if ("ok" in result) {
-      return result.ok.map((path: string): string => {
-        return this.imgPathToURL(path);
-      });
+    if (result !== undefined && "ok" in result) {
+      files.fill(result.ok, this.host);
     } else {
       throw Error(result.err);
     }

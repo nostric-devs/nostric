@@ -5,45 +5,65 @@
     clipboard,
     getModalStore,
     getToastStore,
+    ProgressRadial,
   } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
   import { NDKKind } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
   import { CheckSquare, Copy, Plus } from "svelte-feathers";
   import { ROUTES } from "$lib/utils/routes";
+  import UploadImage from "$lib/components/images/UploadImage.svelte";
+  import { onMount } from "svelte";
+  import { files } from "$lib/stores/Files";
 
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
   let content: string = "";
+  let loading: boolean = false;
   let processing: boolean = false;
 
   async function onSubmit(): Promise<void> {
-    processing = true;
-    await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
-    processing = false;
-    modalStore.close();
-    toastStore.trigger({
-      message: "Post has been published",
-      background: "variant-filled-success",
-    });
+    try {
+      processing = true;
+      await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
+      modalStore.close();
+      toastStore.trigger({
+        message: "Post has been published.",
+        background: "variant-filled-success",
+        classes: "z-1000",
+      });
+    } catch (error) {
+      console.error(error);
+      toastStore.trigger({
+        message: "Unable to publish post.",
+        background: "variant-filled-error",
+      });
+    } finally {
+      processing = false;
+    }
   }
 
   export let parent: SvelteComponent;
 
-  // Images will be later loaded from store
-  // Only display last 6 images
-  let images = [
-    "https://images.unsplash.com/photo-1617296538902-887900d9b592?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzExMDB8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1553184570-557b84a3a308?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NTF8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1620005839871-7ac4aed5ddbc?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2NzN8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1597077962467-be16edcc6a43?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2MzZ8&ixlib=rb-4.0.3&w=512&h=512&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1597531072931-8fceba101e4e?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY2OTB8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1597077917598-97ca3922a317?ixid=M3w0Njc5ODF8MHwxfGFsbHx8fHx8fHx8fDE2ODc5NzY3MjF8&ixlib=rb-4.0.3&w=300&h=300&auto=format&fit=crop",
-  ];
-
   let copied: boolean = false;
 
+  onMount(async () => {
+    if ($files.length === 0) {
+      try {
+        loading = true;
+        await $authUser.identity.getFiles();
+      } catch (error) {
+        console.error(error);
+        toastStore.trigger({
+          message: "Unable to load user images from storage.",
+          background: "variant-filled-error",
+        });
+      } finally {
+        loading = false;
+      }
+    }
+  });
 </script>
 
 {#if $modalStore[0]}
@@ -64,36 +84,57 @@
     </form>
     <div class="pb-4">
       <div class="text-md mb-2 font-bold mr-4">Images</div>
-      <div class="padding-2 flex">
-        <div class="mr-2">
-          <FileButton name="files" width="h-16 w-16 variant-filled-surface"
-            ><Plus /></FileButton
+      <div class="pa-2 flex">
+        <UploadImage let:onFileLand let:processing>
+          <FileButton
+            name="files"
+            width="h-16 w-16 variant-filled-surface"
+            on:change={onFileLand}
+            disabled={processing}
           >
-        </div>
-        <div class="padding-2 flex items-center">
-          {#each images as imageUrl}
-            <div class="relative h-16 w-16 mr-2">
-              <img class="h-16 w-16 rounded-md" src={imageUrl} alt="" />
-              <div
-                class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
-              >
-                <button
-                  use:clipboard={imageUrl}
-                  class="btn h-16 w-16 variant-filled-primary font-normal"
-                  on:click={() => {copied = true; setTimeout(() => copied = false, 1000);}}
+            {#if processing}
+              <ProgressRadial value={undefined} width="w-6" />
+            {:else}
+              <Plus />
+            {/if}
+          </FileButton>
+        </UploadImage>
+
+        {#if loading}
+          <div class="grid grow grid-cols-8">
+            {#each { length: 5 } as _}
+              <div class="placeholder animate-pulse py-8 ml-1" />
+            {/each}
+          </div>
+        {:else if $files && $files.length > 0}
+          <div class="pa-2 flex items-center ml-1">
+            {#each $files as url}
+              <div class="relative h-16 w-16 mr-1">
+                <img class="h-16 w-16 rounded-md" src={url} alt="" />
+                <div
+                  class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
                 >
-                  <span>
-                    {#if copied}
-                      <CheckSquare size="24" class="lg:mx-auto xl:mx-0" />
-                    {:else}
-                      <Copy size="24" class="lg:mx-auto xl:mx-0" />
-                    {/if}
-                  </span>
-                </button>
+                  <button
+                    use:clipboard={url}
+                    class="btn h-16 w-16 variant-filled-primary font-normal"
+                    on:click={() => {
+                      copied = true;
+                      setTimeout(() => (copied = false), 1000);
+                    }}
+                  >
+                    <span>
+                      {#if copied}
+                        <CheckSquare size="24" class="lg:mx-auto xl:mx-0" />
+                      {:else}
+                        <Copy size="24" class="lg:mx-auto xl:mx-0" />
+                      {/if}
+                    </span>
+                  </button>
+                </div>
               </div>
-            </div>
-          {/each}
-        </div>
+            {/each}
+          </div>
+        {/if}
       </div>
       <div class="mt-2">
         You can manage your media uploads <a
@@ -130,10 +171,10 @@
 
 <style>
   .overlay {
-    background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent overlay */
+    background-color: rgba(255, 255, 255, 0.4);
     transition: opacity 0.3s ease;
   }
   .relative:hover .overlay {
-    opacity: 1; /* Show overlay on hover */
+    opacity: 1;
   }
 </style>
