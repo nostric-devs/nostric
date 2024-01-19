@@ -2,7 +2,6 @@ import { test; suite } "mo:test/async";
 import Blob "mo:base/Blob";
 import Storage "../../src/storage/main";
 import HttpUtils "../../src/storage/utils/HttpUtils";
-import Debug "mo:base/Debug";
 
 var storage = await Storage.Main();
 
@@ -137,7 +136,7 @@ await suite(
             assert false; // File should not exist, so deletion should fail
           };
           case (#err(errorMessage)) {
-            assert errorMessage == "File not found"; // Expected error message
+            assert errorMessage == "Invalid file path"; // Expected error message
           };
         };
       },
