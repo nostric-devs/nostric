@@ -39,7 +39,6 @@ await suite(
             assert u == Blob.fromArray([1, 2, 3]);
           };
           case (#err(msg)) {
-            Debug.print(msg);
             assert false;
           };
         };
