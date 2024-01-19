@@ -67,25 +67,31 @@ actor class Main() = this {
       extension = fileExtension;
       content = content;
     });
-    #ok("&id=" # encode(owner # "/" # filename) # fileExtension);
+    let expectedAddress = "&id=" # encode(owner # "/" # filename) # fileExtension;
+    let actualAddress = await searchFiles(owner, 1);
+    switch (actualAddress) {
+      case (?address) {
+        if (address[0] == expectedAddress) {
+          #ok(address[0]);
+        } else {
+          #err("File upload failed");
+        };
+      };
+      case (null) {
+        #err("File upload failed");
+      };
+    };
   };
 
   public shared (msg) func listFiles(limit : Nat) : async FileListResult {
     let owner = Principal.toText(msg.caller);
-    let options = {
-      pk = owner;
-      skLowerBound = "0000";
-      skUpperBound = "~~~~";
-      limit = limit;
-      ascending = ?false;
-    };
-    let results = await scan(options);
+    let results = await searchFiles(owner, limit);
     switch (results) {
       case (?res) {
         #ok(res);
       };
       case null {
-        #err("No files found");
+        #ok([]);
       };
     };
   };
@@ -101,19 +107,34 @@ actor class Main() = this {
     };
   };
 
-  private func currentFileCount(owner : Text) : async Nat {
-    let options = {
-      pk = owner;
-      skLowerBound = "0000";
-      skUpperBound = "~~~~";
-      limit = 1;
-      ascending = ?false;
+  public func delete(inputPath : Text) : async FileDownloadResult {
+    let filePath = extractAddress(inputPath);
+    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
+    if (Array.size(filePathSplit) != 2) {
+      return #err("Invalid file path");
     };
-    let results = await scan(options);
+    let owner = filePathSplit[0];
+    let name = filePathSplit[1];
+    switch (await remove({ pk = owner; sk = name })) {
+      case (?file) {
+        #ok(file.content);
+      };
+      case (null) {
+        #err("File not found");
+      };
+    };
+  };
+
+  private func currentFileCount(owner : Text) : async Nat {
+    let results = await searchFiles(owner, 1);
     switch (results) {
       case (?res) {
         let decodedAddress = extractAddress(res[0]);
-        let fileCount = Iter.toArray(Text.split(decodedAddress, #char '/'))[1];
+        let fileMetadata = Iter.toArray(Text.split(decodedAddress, #char '/'));
+        if (Array.size(fileMetadata) != 2) {
+          return 0;
+        };
+        let fileCount = fileMetadata[1];
         getFilenameIndex(fileCount);
       };
       case null {
@@ -129,16 +150,24 @@ actor class Main() = this {
     for (param in params) {
       let keyValue = Iter.toArray(Text.split(param, #char('=')));
       if (Text.startsWith(param, #text "id=")) {
-        fileId := keyValue[1];
+        if (Array.size(keyValue) == 2) {
+          fileId := keyValue[1];
+        };
       };
     };
     let filePathSplit = Iter.toArray(Text.split(fileId, #char '.'));
+    if (Array.size(filePathSplit) != 2) {
+      return "";
+    };
     return decode(filePathSplit[0]);
   };
 
   private func handleDownload(inputPath : Text) : ?Blob {
     let filePath = extractAddress(inputPath);
     let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
+    if (Array.size(filePathSplit) != 2) {
+      return null;
+    };
     let owner = filePathSplit[0];
     let name = filePathSplit[1];
     let result = get(owner, name);
@@ -223,6 +252,17 @@ actor class Main() = this {
       case null { null };
       case (?entity) { unwrapFile(entity) };
     };
+  };
+
+  private func searchFiles(owner : Text, limit : Nat) : async ?[Text] {
+    let options = {
+      pk = owner;
+      skLowerBound = "0000";
+      skUpperBound = "~~~~";
+      limit = limit;
+      ascending = ?false;
+    };
+    return await scan(options);
   };
 
   private func scan(options : CanDB.ScanOptions) : async ?[Text] {
