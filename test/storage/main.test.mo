@@ -34,7 +34,7 @@ await suite(
     await test(
       "get function - Get a file",
       func() : async () {
-        let result = await storage.download("&id=q3gij!vB-7-5l*iaj.jpg");
+        let result = await storage.download("&id=1xF!S9j)1tBuI!gJLV.jpg");
         switch (result) {
           case (#ok(u)) {
             assert u == Blob.fromArray([1, 2, 3]);
@@ -58,7 +58,7 @@ await suite(
         let result = await storage.listFiles(10);
         switch (result) {
           case (#ok(u)) {
-            assert u == ["&id=q3gij!vB-7-5l*iaj.jpg"];
+            assert u == ["&id=1xF!S9j)1tBuI!gJLV.jpg"];
           };
           case (#err(_)) {
             assert false;
@@ -82,7 +82,7 @@ await suite(
             ("Access-Control-Allow-Origin", "*"),
           ];
           method = "GET";
-          url = "&id=q3gij!vB-7-5l*iaj.jpg";
+          url = "&id=1xF!S9j)1tBuI!gJLV.jpg";
         };
         let result = await storage.http_request(request);
         let expectedResponse = {

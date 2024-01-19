@@ -9,6 +9,7 @@ import Principal "mo:base/Principal";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 import HttpUtils "utils/HttpUtils";
+import Debug "mo:base/Debug";
 
 actor class Main() = this {
   stable let db = CanDB.init();
@@ -39,7 +40,7 @@ actor class Main() = this {
   };
 
   let principalCharacterSet = "0123456789abcdefghijklmnopqrstuvwxyz/-";
-  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_.!*'(),$";
+  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_!*()";
 
   let filenameCharacterSet = "0123456789";
   let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
