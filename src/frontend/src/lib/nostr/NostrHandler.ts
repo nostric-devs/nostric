@@ -329,7 +329,7 @@ export class NostrHandler {
     const users: NDKUser[] = [];
 
     for (const publicKey of publicKeys) {
-      const user = await this.fetchUserProfileByPublicKey(publicKey);
+      const user: NDKUser = await this.fetchUserProfileByPublicKey(publicKey);
       users.push(user);
     }
 

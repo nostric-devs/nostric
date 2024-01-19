@@ -34,7 +34,7 @@
     <div class="placeholder animate-pulse" />
   </div>
   <hr class="!border-t-2 mx-4" />
-  <div class="px-4 mt-3">
+  <div class="mt-3">
     {#each { length: 10 } as _}
       <UserFollowLoadingSkeleton />
     {/each}

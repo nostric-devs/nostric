@@ -55,13 +55,3 @@
     </div>
   {/if}
 {/await}
-
-<style>
-  .truncate {
-    display: inline-block;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-</style>
