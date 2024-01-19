@@ -112,8 +112,8 @@ await suite(
     await test(
       "delete function - Delete an existing file",
       func() : async () {
-        // Assuming you have a file with the path "&id=q3gij!vB-7-5l*iaj.jpg" that can be deleted
-        let filePath = "&id=q3gij!vB-7-5l*iaj.jpg";
+        // Assuming you have a file with the path "&id=1xF!S9j)1tBuI!gJLV.jpg" that can be deleted
+        let filePath = "&id=1xF!S9j)1tBuI!gJLV.jpg";
         let result = await storage.delete(filePath);
         switch (result) {
           case (#ok(_)) {
