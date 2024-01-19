@@ -9,6 +9,7 @@ import Principal "mo:base/Principal";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 import HttpUtils "utils/HttpUtils";
+import Debug "mo:base/Debug";
 
 actor class Main() = this {
   stable let db = CanDB.init();
@@ -33,13 +34,18 @@ actor class Main() = this {
     #err : Text;
   };
 
+  public type FileDeleteResult = {
+    #ok;
+    #err : Text;
+  };
+
   public type FileListResult = {
     #ok : [Text];
     #err : Text;
   };
 
   let principalCharacterSet = "0123456789abcdefghijklmnopqrstuvwxyz/-";
-  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_.!*'(),$";
+  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_!*()";
 
   let filenameCharacterSet = "0123456789";
   let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
@@ -107,7 +113,7 @@ actor class Main() = this {
     };
   };
 
-  public func delete(inputPath : Text) : async FileDownloadResult {
+  public func delete(inputPath : Text) : async FileDeleteResult {
     let filePath = extractAddress(inputPath);
     let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
     if (Array.size(filePathSplit) != 2) {
@@ -117,7 +123,7 @@ actor class Main() = this {
     let name = filePathSplit[1];
     switch (await remove({ pk = owner; sk = name })) {
       case (?file) {
-        #ok(file.content);
+        #ok();
       };
       case (null) {
         #err("File not found");
