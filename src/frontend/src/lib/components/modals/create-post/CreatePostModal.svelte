@@ -113,14 +113,16 @@
           {:else if $files && $files.length > 0}
             <div class="pa-2 flex items-center ml-1">
               {#each $files as url}
-                <div class="relative h-16 w-16 mr-1 overflow-hidden rounded-md">
+                <div
+                  class="relative h-16 w-16 mr-1 overflow-hidden rounded-md group"
+                >
                   <img
                     class="absolute inset-0 h-full w-full object-cover"
                     src={url}
                     alt=""
                   />
                   <div
-                    class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
+                    class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                   >
                     <button
                       use:clipboard={url}
@@ -177,13 +179,3 @@
     </footer>
   </div>
 {/if}
-
-<style>
-  .overlay {
-    background-color: rgba(255, 255, 255, 0.4);
-    transition: opacity 0.3s ease;
-  }
-  .relative:hover .overlay {
-    opacity: 1;
-  }
-</style>
