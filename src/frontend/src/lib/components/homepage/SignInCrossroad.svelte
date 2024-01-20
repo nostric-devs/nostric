@@ -1,15 +1,16 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { getPath, ROUTES } from "$lib/utils/routes.js";
   import DfinityLogo from "$lib/assets/images/dfinity-logo.svg";
   import Alert from "$lib/components/alerts/Alert.svelte";
-  import { Circle } from "svelte-loading-spinners";
-  import { getToastStore, type ToastStore } from "@skeletonlabs/skeleton";
   import {
     AssociatedFetchError,
     authUser,
     NotYetAssociatedError,
-  } from "$lib/stores/Auth.js";
+  } from "$lib/stores/Auth";
+  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { goto } from "$app/navigation";
+  import { getPath, ROUTES } from "$lib/utils/routes";
+  import { Circle } from "svelte-loading-spinners";
+  import type { ToastStore } from "@skeletonlabs/skeleton";
   import { enhance } from "$app/forms";
 
   const toastStore: ToastStore = getToastStore();
@@ -22,7 +23,7 @@
   }
   type IdentitySubmit = IdentitySubmits.LOG_IN | IdentitySubmits.SIGN_UP;
 
-  const onSubmit = async (submitType: IdentitySubmit, cancel: Function) => {
+  const onSubmit = async (submitType: IdentitySubmit, cancel: unknown) => {
     loading = submitType;
     disabled = true;
     return async () => {
@@ -34,7 +35,6 @@
             message:
               "This Internet Identity is already associated with a user. Logged in.",
             background: "variant-filled-warning",
-            classes: "rounded-2xl, font-semibold",
           });
         }
       } catch (error) {
@@ -45,7 +45,6 @@
               message:
                 "This Internet Identity is not yet associated with a user. Register.",
               background: "variant-filled-warning",
-              classes: "rounded-2xl, font-semibold",
             });
           }
         } else if (error instanceof AssociatedFetchError) {
@@ -53,13 +52,12 @@
             message:
               "Unable to fetch user associated with the Identity. Check your connection.",
             background: "variant-filled-warning",
-            classes: "rounded-2xl, font-semibold",
           });
         } else {
+          console.error(error);
           toastStore.trigger({
             message: "Unable to verify Internet Identity.",
             background: "variant-filled-error",
-            classes: "rounded-2xl, font-semibold",
           });
         }
         // prevent the submission and creation of auth server side cookie
