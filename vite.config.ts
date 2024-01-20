@@ -88,7 +88,7 @@ const config: UserConfig = {
   // proxy /api to port 8000 during development
   server: {
     proxy: {
-      "/api": "http://127.0.0.1:8000",
+      "/api": "http://localhost:8000",
     },
     watch: {
       ignored: ["**/.dfx/**", "**/.github/**"],

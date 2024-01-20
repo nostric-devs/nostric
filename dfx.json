@@ -10,8 +10,8 @@
       "type": "motoko",
       "dependencies": ["vetkd_system_api"]
     },
-    "candb_file_upload": {
-      "main": "src/candb_file_upload/main.mo",
+    "storage": {
+      "main": "src/storage/main.mo",
       "type": "motoko"
     },
     "frontend": {
@@ -30,8 +30,7 @@
         "id": {
           "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
-      },
-      "frontend": {}
+      }
     }
   },
   "defaults": {
@@ -40,7 +39,7 @@
       "packtool": "mops sources"
     }
   },
-  "dfx": "0.15.2",
+  "dfx": "0.15.3",
   "networks": {
     "local": {
       "bind": "localhost:8000",

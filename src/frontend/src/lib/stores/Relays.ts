@@ -43,7 +43,7 @@ function getRelays() {
   ): void => {
     update((relays: RelayObject[]): RelayObject[] => {
       const index: number = relays.findIndex(
-        (relay: RelayObject) => relay.url === url,
+        (relay: RelayObject): boolean => relay.url === url,
       );
       if (index !== -1) {
         relays[index].status = status;

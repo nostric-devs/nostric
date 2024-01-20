@@ -7,6 +7,7 @@
   import UserFollowLoadingSkeleton from "$lib/components/user/follow/UserFollowLoadingSkeleton.svelte";
   import { followedUsers } from "$lib/stores/FollowedUsers";
   import FollowCard from "$lib/components/user/follow/FollowCard.svelte";
+  import InfiniteScrollContainer from "$lib/components/infinite-scroll/InfiniteScrollContainer.svelte";
 
   let followedUsersPromise: Promise<NDKUser[]>;
   let disabled: boolean = false;
@@ -21,23 +22,34 @@
     }
     followedUsersPromise = nostrHandler.fetchUserFollowingByPublicKey(
       $page.params.slug,
+      true,
     );
   });
 </script>
 
-<h1 class="h1 m-4">Following</h1>
-<div class="px-4">
-  {#await followedUsersPromise}
+<h1 class="h1 px-4 mt-4 mb-6">Following</h1>
+{#await followedUsersPromise}
+  <div class="px-4 mb-4">
+    <div class="placeholder animate-pulse" />
+  </div>
+  <hr class="!border-t-2 mx-4" />
+  <div class="pl-4 pr-6 mt-3">
     {#each { length: 10 } as _}
       <UserFollowLoadingSkeleton />
     {/each}
-  {:then followedUsers}
-    {#if followedUsers && followedUsers.length > 0}
-      {#each followedUsers as user}
-        <FollowCard bind:disabled {user} />
-      {/each}
-    {:else}
-      <div class="mt-2">This user does not yet follow anyone.</div>
-    {/if}
-  {/await}
-</div>
+  </div>
+{:then followedUsers}
+  {#if followedUsers && followedUsers.length > 0}
+    <div class="px-4 mb-4">
+      This user has total of {followedUsers.length} followers
+    </div>
+    <hr class="!border-t-2 mx-4" />
+    <InfiniteScrollContainer allItems={followedUsers}>
+      <svelte:fragment slot="listItem" let:item>
+        <FollowCard user={item} {disabled} />
+      </svelte:fragment>
+    </InfiniteScrollContainer>
+  {:else}
+    <div class="mt-2">This user does not yet follow anyone.</div>
+  {/if}
+{/await}

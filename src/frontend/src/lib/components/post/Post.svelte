@@ -3,7 +3,7 @@
   import { getPath, ROUTES } from "$lib/utils/routes";
   import type { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
   import { events } from "$lib/stores/Events";
-  import { nostrHandler, NostrUserHandler, Reactions } from "$lib/nostr";
+  import { nostrHandler, Reactions } from "$lib/nostr";
   import Avatar from "$lib/components/user/Avatar.svelte";
   import { onMount } from "svelte";
   import dayjs from "dayjs";

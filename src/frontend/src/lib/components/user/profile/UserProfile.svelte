@@ -11,14 +11,18 @@
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import { followedUsers } from "$lib/stores/FollowedUsers";
   import { Circle } from "svelte-loading-spinners";
-  import { Share, UserPlus } from "svelte-feathers";
+  import { Share } from "svelte-feathers";
   import { clipboard } from "@skeletonlabs/skeleton";
   import { page } from "$app/stores";
+  import FollowButton from "$lib/components/user/follow/FollowButton.svelte";
+  import { getToastStore } from "@skeletonlabs/skeleton";
 
   let profile: NDKUserProfile | undefined;
   let userEvents: Promise<NDKEvent[]>;
   let userFollowersPromise: Promise<NDKUser[]>;
   let userFollowingPromise: Promise<NDKUser[]>;
+
+  const toastStore = getToastStore();
 
   onMount(async () => {
     profile = user?.profile;
@@ -27,6 +31,7 @@
     }
     userFollowersPromise = nostrHandler.fetchUserFollowersByPublicKey(
       user.pubkey,
+      true,
     );
     if (
       $authUser.authState !== AuthStates.ANONYMOUS &&
@@ -37,6 +42,7 @@
     } else {
       userFollowingPromise = nostrHandler.fetchUserFollowingByPublicKey(
         user.pubkey,
+        true,
       );
     }
   });
@@ -44,43 +50,36 @@
   export let user: NDKUser;
   export let events: NDKEvent[] | undefined = undefined;
 
-  let copied = false;
-
-  function onClickHandler() {
-    copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 1000);
-  }
-
   $: if (events) {
     userEvents = Promise.resolve(events);
   }
 </script>
 
 {#if user}
-  <div class="flex justify-between items-center">
+  <div class="flex items-center">
     <h1 class="h1 m-4">User profile</h1>
-    <!-- Follow Button, if I already follow the profile, there should be unfollow button -->
-    <!-- Shouldn't be visible if I am looking at my profile -->
-    <button type="button" class="btn variant-filled-primary font-medium btn-lg">
-      <span>
-        <UserPlus size="20" class="lg:mx-auto xl:mx-0"></UserPlus>
-      </span>
-      <span class="text-sm"> Follow </span>
-    </button>
-    <!-- Button for cpying profile's URL -->
-    <button
-      type="button"
-      use:clipboard={$page.url}
-      on:click={onClickHandler}
-      class="btn variant-filled-primary mr-4 font-medium btn-lg"
-    >
-      <span>
-        <Share size="20" class="lg:mx-auto xl:mx-0"></Share>
-      </span>
-      <span class="text-sm"> {copied ? "Copied" : "Share"} </span>
-    </button>
+    <div class="flex ml-auto mr-3">
+      {#if $authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr.getPublicKey() !== $page.params.slug && $page.url.pathname !== getPath(ROUTES.PROFILE)}
+        <FollowButton {user} />
+      {/if}
+      <div class="w-[130px] ml-2">
+        <button
+          type="button"
+          use:clipboard={$page.url.pathname}
+          on:click={() =>
+            toastStore.trigger({
+              message: "User URL copied to clipboard",
+              background: "variant-filled-success",
+            })}
+          class="btn variant-filled-primary mr-4 font-medium w-full"
+        >
+          <span>
+            <Share size="15" class="lg:mx-auto xl:mx-0" />
+          </span>
+          <span class="text-sm">Share</span>
+        </button>
+      </div>
+    </div>
   </div>
   <div class="mx-auto flex md:flex-row flex-col ml-4 my-8">
     <div class="w-1/5">
@@ -101,9 +100,9 @@
           {#await userFollowersPromise}
             <div class="mt-2"><Circle size="25" color="black" unit="px" /></div>
           {:then userFollowers}
-            <span class="text-4xl font-bold"
-              >{userFollowers ? userFollowers.length : 0}</span
-            >
+            <span class="text-4xl font-bold">
+              {userFollowers ? userFollowers.length : 0}
+            </span>
           {/await}
         </a>
         <a
@@ -114,9 +113,9 @@
           {#await userFollowingPromise}
             <div class="mt-2"><Circle size="25" color="black" unit="px" /></div>
           {:then userFollowing}
-            <span class="text-4xl font-bold"
-              >{userFollowing ? userFollowing.length : 0}</span
-            >
+            <span class="text-4xl font-bold">
+              {userFollowing ? userFollowing.length : 0}
+            </span>
           {/await}
         </a>
       </div>
