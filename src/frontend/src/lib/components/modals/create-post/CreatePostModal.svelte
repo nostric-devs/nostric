@@ -109,8 +109,12 @@
         {:else if $files && $files.length > 0}
           <div class="pa-2 flex items-center ml-1">
             {#each $files as url}
-              <div class="relative h-16 w-16 mr-1">
-                <img class="h-16 w-16 rounded-md" src={url} alt="" />
+              <div class="image-square relative h-16 w-16 mr-1">
+                <img
+                  class="absolute inset-0 h-full w-full rounded-md object-cover"
+                  src={url}
+                  alt=""
+                />
                 <div
                   class="overlay absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300"
                 >
@@ -170,6 +174,22 @@
 {/if}
 
 <style>
+  .image-square {
+    position: relative;
+    width: 4rem; /* 16 width */
+    height: 4rem; /* 16 height, making it square */
+    overflow: hidden;
+  }
+
+  .image-square img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the area */
+    border-radius: 0.375rem; /* Adjust as needed */
+  }
   .overlay {
     background-color: rgba(255, 255, 255, 0.4);
     transition: opacity 0.3s ease;

@@ -35,7 +35,7 @@
   export let url: string;
 </script>
 
-<div class="image-container">
+<div class="image-container square">
   <img class="h-auto max-w-full max-h-full rounded-md" src={url} alt="" />
   <div class="overlay rounded-md {deleting ? 'deleting' : ''}"></div>
   <div class="image-icons {deleting ? 'deleting' : ''}">
@@ -120,5 +120,22 @@
   }
   .btn {
     transition: background-color 0.3s ease;
+  }
+
+  .square {
+    position: relative;
+    width: 100%; /* Adjust as necessary */
+    padding-top: 100%; /* This gives the square aspect ratio */
+    overflow: hidden; /* Hides the overflowing parts of the image */
+  }
+
+  .square img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the area, may crop it */
+    border-radius: 0.375rem; /* Adjust to match your design, this is an example */
   }
 </style>
