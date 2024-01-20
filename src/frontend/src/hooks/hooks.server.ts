@@ -1,9 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
-import {
-  getPath,
-  isPathAccessible,
-  ROUTES,
-} from "$lib/utils/routes";
+import { getPath, isPathAccessible, ROUTES } from "$lib/utils/routes";
 import { redirect } from "@sveltejs/kit";
 import { building } from "$app/environment";
 
