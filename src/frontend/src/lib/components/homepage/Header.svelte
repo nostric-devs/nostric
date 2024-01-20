@@ -1,7 +1,7 @@
 <script>
   import Logo from "$lib/components/logo/Logo.svelte";
   import { ArrowDown } from "svelte-feathers";
-  import { scrollTo } from "./ScrollTo";
+  import { scroll } from "$lib/utils/scroll";
 </script>
 
 <header class="text-gray-600 body-font">
@@ -21,28 +21,32 @@
       <a
         href="/"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
-        >Home</a
       >
+        Home
+      </a>
       <a
-        on:click|preventDefault={() => scrollTo("#features")}
+        on:click|preventDefault={() => scroll("#features")}
         href="#"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
-        >Features</a
       >
+        Features
+      </a>
       <a
         href="#"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
-        >Blog</a
       >
+        Blog
+      </a>
       <a
-        on:click|preventDefault={() => scrollTo("#contact")}
+        on:click|preventDefault={() => scroll("#contact")}
         href="#"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
-        >Contact</a
       >
+        Contact
+      </a>
     </nav>
     <button
-      on:click|preventDefault={() => scrollTo("#signup")}
+      on:click|preventDefault={() => scroll("#signup")}
       class="btn variant-filled-primary inline-flex items-center focus:outline-none rounded mt-4 md:mt-0 font-medium text-md"
       >Open App
       <ArrowDown class="m-1" size="18" />

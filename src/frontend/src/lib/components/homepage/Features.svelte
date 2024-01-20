@@ -7,7 +7,7 @@
     <h1
       class="sm:text-3xl text-2xl font-medium title-font text-center text-white mb-20"
     >
-      Explore our feauters
+      Explore our features
     </h1>
     <div
       class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6"
@@ -30,7 +30,8 @@
           <a
             href="#"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
-            >Learn More
+          >
+            Learn More
             <ArrowRight size="16" class="m-2" />
           </a>
         </div>
@@ -53,7 +54,8 @@
           <a
             href="#"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
-            >Learn More
+          >
+            Learn More
             <ArrowRight size="16" class="m-2" />
           </a>
         </div>
@@ -76,7 +78,8 @@
           <a
             href="#"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
-            >Learn More
+          >
+            Learn More
             <ArrowRight size="16" class="m-2" />
           </a>
         </div>

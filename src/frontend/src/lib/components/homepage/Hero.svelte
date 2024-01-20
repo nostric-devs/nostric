@@ -1,9 +1,9 @@
 <script>
   import { ArrowDown } from "svelte-feathers";
-  import { scrollTo } from "./ScrollTo";
+  import { scroll } from "$lib/utils/scroll";
 </script>
 
-<section class="" id="home">
+<section id="home">
   <div
     class="container mx-auto flex px-5 py-24 items-center justify-center flex-col"
   >
@@ -25,12 +25,12 @@
       </p>
       <div class="flex justify-center">
         <button
-          on:click|preventDefault={() => scrollTo("#signup")}
+          on:click|preventDefault={() => scroll("#signup")}
           class="btn btn-lg variant-filled-primary inline-flex items-center focus:outline-none rounded mt-4 md:mt-0 font-medium text-md"
-          >Try Nostric
+        >
+          Try Nostric
           <ArrowDown class="m-1" size="18" />
         </button>
-        <!-- <button class="ml-4 inline-flex text-gray-700 bg-gray-100 border-0 py-2 px-6 focus:outline-none hover:bg-gray-200 rounded text-lg">Button</button> -->
       </div>
     </div>
   </div>

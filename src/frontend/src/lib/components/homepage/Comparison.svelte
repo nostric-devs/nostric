@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowDown, Check, CheckCircle } from "svelte-feathers";
-  import { scrollTo } from "./ScrollTo";
+  import { scroll } from "$lib/utils/scroll";
 </script>
 
 <section class="body-font overflow-hidden">
@@ -48,7 +48,7 @@
             </span>Mixtape chillwave tumeric
           </p>
           <button
-            on:click|preventDefault={() => scrollTo("#signup")}
+            on:click|preventDefault={() => scroll("#signup")}
             class="btn variant-filled-tertiary flex items-center mt-auto border-0 py-2 px-4 w-full focus:outline-non rounded"
             >Create your account
             <ArrowDown class="w-4 h-4 ml-auto" />
@@ -64,16 +64,17 @@
         >
           <span
             class="variant-filled-tertiary text-white px-3 py-1 tracking-widest text-xs absolute right-0 top-0 rounded-bl"
-            >Recommended</span
           >
+            Recommended
+          </span>
           <h2 class="text-sm tracking-widest mb-1 font-medium">Standard</h2>
           <h1
             class="text-5xl text-white leading-none flex items-center pb-4 mb-4 border-b border-gray-200"
           >
             <span>Free</span>
-            <span class="text-lg ml-1 font-normal text-gray-500"
-              >*Requires invitation</span
-            >
+            <span class="text-lg ml-1 font-normal text-gray-500">
+              *Requires invitation
+            </span>
           </h1>
           <p class="flex items-center mb-2">
             <span
@@ -104,7 +105,7 @@
             </span>Mixtape chillwave tumeric
           </p>
           <button
-            on:click|preventDefault={() => scrollTo("#signup")}
+            on:click|preventDefault={() => scroll("#signup")}
             class="btn variant-filled-tertiary flex items-center mt-auto text-whit border-0 py-2 px-4 w-full focus:outline-none rounded"
             >Create your account
             <ArrowDown class="w-4 h-4 ml-auto" />
@@ -161,7 +162,7 @@
             </span>Mixtape chillwave tumeric
           </p>
           <button
-            on:click|preventDefault={() => scrollTo("#signup")}
+            on:click|preventDefault={() => scroll("#signup")}
             class="btn variant-filled-tertiary flex items-center mt-auto border-0 py-2 px-4 w-full focus:outline-non rounded"
             >Create your account
             <ArrowDown class="w-4 h-4 ml-auto" />
