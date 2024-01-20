@@ -10,10 +10,12 @@
     Bell,
     Image,
   } from "svelte-feathers";
+  import { authUser, AuthStates } from "$lib/stores/Auth";
 
   $: isActive = (pageName: string) => {
     return $page.url.pathname === pageName;
   };
+  $: isAuthenticated = $authUser.authState < AuthStates.IDENTITY_AUTHENTICATED;
 </script>
 
 <nav class="list-nav xl:px-4 py-4">
@@ -69,17 +71,22 @@
       <a
         href={getPath(ROUTES.BOOKMARKS)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.BOOKMARKS))}
-        class="capitalize"
+        class="capitalize {isAuthenticated
+          ? 'pointer-events-none opacity-50 cursor-not-allowed'
+          : ''}"
       >
         <Bookmark size="20" class="lg:mx-auto xl:mx-0"></Bookmark>
         <span class="lg:hidden xl:block ml-3">{ROUTES.BOOKMARKS}</span>
+        <span class="badge variant-filled">PRO</span>
       </a>
     </li>
     <li>
       <a
         href={getPath(ROUTES.IMAGES)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.IMAGES))}
-        class="capitalize"
+        class="capitalize {isAuthenticated
+          ? 'pointer-events-none opacity-50 cursor-not-allowed'
+          : ''}"
       >
         <Image size="20" class="lg:mx-auto xl:mx-0"></Image>
         <span class="lg:hidden xl:block ml-3">{ROUTES.IMAGES}</span>
