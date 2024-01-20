@@ -28,7 +28,7 @@
             pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
           </p>
           <a
-            href="#"
+            href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More
@@ -52,7 +52,7 @@
             pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
           </p>
           <a
-            href="#"
+            href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More
@@ -76,7 +76,7 @@
             pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
           </p>
           <a
-            href="#"
+            href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More

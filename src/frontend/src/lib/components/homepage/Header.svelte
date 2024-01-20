@@ -26,20 +26,20 @@
       </a>
       <a
         on:click|preventDefault={() => scroll("#features")}
-        href="#"
+        href="/"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
       >
         Features
       </a>
       <a
-        href="#"
+        href="/"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
       >
         Blog
       </a>
       <a
         on:click|preventDefault={() => scroll("#contact")}
-        href="#"
+        href="/"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
       >
         Contact
