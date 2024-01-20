@@ -26,24 +26,31 @@
   <UserFollowLoadingSkeleton />
 {:then user}
   {#if user}
-    <div class="post-head mx-auto my-5 flex md:flex-row flex-col items-center">
-      <div class="grow">
-        <a href={getPath(ROUTES.USER, user.pubkey)} class="flex items-center">
-          <div class="w-[65px]">
+    <div
+      class="post-head mx-auto my-5 flex md:flex-row flex-col items-center w-full"
+    >
+      <div class="flex-grow flex items-center overflow-hidden">
+        <a
+          href={getPath(ROUTES.USER, user.pubkey)}
+          class="flex items-center w-full"
+        >
+          <div class="w-[50px] shrink-0">
             <Avatar profile={user?.profile} />
           </div>
-          <div class="max-w-[350px] mx-4">
-            <div class="text-sm font-bold">
+          <div class="flex flex-col mx-4 flex-grow min-w-0 overflow-hidden">
+            <div class="text-md font-bold truncate">
               {user.profile?.displayName || user.profile?.name || "Anonymous"}
             </div>
-            <div class="text-sm break-words">
+            <div class="text-sm truncate">
               {user.npub}
             </div>
           </div>
         </a>
       </div>
       {#if $authUser.authState !== AuthStates.ANONYMOUS}
-        <FollowButton {user} bind:disabled />
+        <div class="flex-none ml-2">
+          <FollowButton {user} bind:disabled />
+        </div>
       {/if}
     </div>
   {/if}

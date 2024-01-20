@@ -67,7 +67,7 @@
 </script>
 
 {#if followedList.includes(user.pubkey)}
-  <div class="w-[130px]">
+  <div class="w-[110px]">
     <button
       type="button"
       class="btn variant-filled-warning font-normal w-full"
@@ -87,7 +87,7 @@
     </button>
   </div>
 {:else}
-  <div class="w-[130px]">
+  <div class="w-[110px]">
     <button
       type="button"
       class="btn variant-filled-primary font-normal w-full"
