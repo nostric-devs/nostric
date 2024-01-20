@@ -35,15 +35,19 @@
   export let url: string;
 </script>
 
-<div class="group relative w-full overflow-hidden rounded-md before:block before:pt-[100%]">
+<div
+  class="group relative w-full overflow-hidden rounded-md before:block before:pt-[100%]"
+>
   <img
     class="absolute inset-0 w-full h-full object-cover rounded-md transition-all duration-300"
     src={url}
     alt=""
   />
-  <div class={`absolute inset-0 bg-white bg-opacity-80 transition-opacity duration-300 ${deleting ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}></div>
   <div
-    class={`absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-300 ${deleting ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto'}`}
+    class={`absolute inset-0 bg-white bg-opacity-80 transition-opacity duration-300 ${deleting ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+  ></div>
+  <div
+    class={`absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-300 ${deleting ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"}`}
   >
     <button
       use:clipboard={url}
