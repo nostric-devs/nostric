@@ -36,7 +36,7 @@
 </script>
 
 <div
-  class="image-container relative w-full overflow-hidden rounded-md before:block before:pt-[100%] hover:opacity-100 transition-opacity duration-300"
+  class="group relative w-full overflow-hidden rounded-md before:block before:pt-[100%]"
 >
   <img
     class="absolute inset-0 w-full h-full object-cover rounded-md transition-all duration-300"
@@ -44,17 +44,15 @@
     alt=""
   />
   <div
-    class={`overlay absolute inset-0 bg-white bg-opacity-80 transition-opacity duration-300 pointer-events-none ${deleting ? "opacity-100" : "opacity-0"}`}
+    class={`absolute inset-0 bg-white bg-opacity-80 transition-opacity duration-300 ${deleting ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
   ></div>
   <div
-    class={`image-icons absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-300 opacity-0 pointer-events-none ${
-      deleting ? "opacity-100 pointer-events-auto" : ""
-    }`}
+    class={`absolute inset-0 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-300 ${deleting ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto"}`}
   >
     <button
       use:clipboard={url}
       type="button"
-      class="btn variant-filled-primary font-normal transition duration-300"
+      class="btn variant-filled-primary font-normal transition-colors duration-300"
       disabled={deleting}
       on:click={() => {
         copied = true;
@@ -72,7 +70,7 @@
     <button
       on:click={() => deleteFile(url)}
       type="button"
-      class="btn variant-filled-warning font-normal transition duration-300"
+      class="btn variant-filled-warning font-normal transition-colors duration-300"
       disabled={deleting}
     >
       {#if deleting}

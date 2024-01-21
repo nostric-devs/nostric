@@ -1,3 +1,6 @@
+import type { AuthState } from "$lib/stores/Auth";
+import { AuthStates } from "$lib/stores/Auth";
+
 export const ROUTES = {
   HOMEPAGE: "",
   FEED: "feed",
@@ -24,12 +27,25 @@ export const getPath = (...names: string[]): string => {
   return `/${names.join("/")}`;
 };
 
-export const isPathProtected = (url: string): boolean => {
-  return (
-    url !== getPath(ROUTES.HOMEPAGE) &&
-    !url.startsWith(getPath(ROUTES.EXPLORE)) &&
-    !url.startsWith(getPath(ROUTES.POST)) &&
-    !url.startsWith(getPath(ROUTES.USER)) &&
-    !url.startsWith(getPath(ROUTES.SIGN_IN))
+export const isPathAccessible = (url: string, status: AuthState): boolean => {
+  const freelyAccessible: string[] = [
+    ROUTES.EXPLORE,
+    ROUTES.POST,
+    ROUTES.USER,
+    ROUTES.SIGN_IN,
+  ];
+  const identityAccessible: string[] = [ROUTES.IMAGES, ROUTES.BOOKMARKS];
+
+  if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
+    return true;
+  }
+  if (status >= AuthStates.NOSTR_AUTHENTICATED) {
+    return !identityAccessible.find((path: string) =>
+      url.startsWith(getPath(path)),
+    );
+  }
+
+  return !!freelyAccessible.find((path: string) =>
+    url.startsWith(getPath(path)),
   );
 };

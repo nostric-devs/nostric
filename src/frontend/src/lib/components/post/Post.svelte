@@ -14,6 +14,7 @@
   let eventReactions: NDKEvent[] = [];
   let authorPromise: Promise<NDKUser | undefined>;
   let dateCreated: string = "";
+  let images: string[] = [];
 
   $: $events && event, (eventReactions = events.getEventReactions(event));
   $: isLiked =
@@ -21,20 +22,41 @@
   $: if (event && event.created_at) {
     dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
   }
+  $: content = imagifyContent();
+  $: images;
 
-  function reactToEvent() {
+  const imagifyContent = (): string => {
+    if (event && event.content) {
+      let splitContent: string[] = event?.content.split(/(\s+)/);
+      splitContent = splitContent.map((chunk: string) => {
+        if (chunk.startsWith("http://") || chunk.startsWith("https://")) {
+          const splitChunk = chunk.split(".").at(-1);
+          if (splitChunk && ["png", "jpg", "gif"].includes(splitChunk)) {
+            images = [chunk, ...images];
+            return "";
+          }
+        }
+        return chunk;
+      });
+      return splitContent.join(" ");
+    } else {
+      return "";
+    }
+  };
+
+  const reactToEvent = async (): Promise<void> => {
     if (
       $authUser.nostr &&
       event &&
       $authUser.authState !== AuthStates.ANONYMOUS
     ) {
       if (isLiked) {
-        $authUser.nostr.dislikeEvent(event);
+        await $authUser.nostr.dislikeEvent(event);
       } else {
-        $authUser.nostr.likeEvent(event);
+        await $authUser.nostr.likeEvent(event);
       }
     }
-  }
+  };
 
   onMount(async () => {
     if (event && author === undefined) {
@@ -80,7 +102,14 @@
 
       <a href={getPath(ROUTES.POST, event?.id)}>
         <div class="my-4 text-sm text-pretty max-w-full break-words">
-          {event?.content}
+          {content}
+        </div>
+        <div class="flex">
+          {#each images as url}
+            <div class="max-h-48">
+              <img src={url} alt="img" class="object-fill w-auto h-full" />
+            </div>
+          {/each}
         </div>
       </a>
 
