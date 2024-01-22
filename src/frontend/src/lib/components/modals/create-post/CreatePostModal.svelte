@@ -6,12 +6,13 @@
     getModalStore,
     getToastStore,
     ProgressRadial,
+    Avatar,
   } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
-  import { NDKKind } from "@nostr-dev-kit/ndk";
+  import { NDKEvent, NDKKind, NDKUser } from "@nostr-dev-kit/ndk";
   import { Circle } from "svelte-loading-spinners";
   import { CheckSquare, Copy, Plus } from "svelte-feathers";
-  import { ROUTES } from "$lib/utils/routes";
+  import { ROUTES, getPath } from "$lib/utils/routes";
   import UploadImage from "$lib/components/images/UploadImage.svelte";
   import { onMount } from "svelte";
   import { files } from "$lib/stores/Files";
@@ -22,6 +23,8 @@
   let content: string = "";
   let loading: boolean = false;
   let processing: boolean = false;
+  export let event: NDKEvent | undefined = undefined;
+  export let author: NDKUser | undefined = undefined;
 
   async function onSubmit(): Promise<void> {
     try {
@@ -64,12 +67,49 @@
       }
     }
   });
+
+  $: if ($modalStore && $modalStore.length > 0 && $modalStore[0].meta) {
+    event = $modalStore[0].meta.event;
+    author = $modalStore[0].meta.author;
+  }
 </script>
 
 {#if $modalStore[0]}
   <div class="card p-4 w-modal shadow-xl space-y-4">
     <header class="text-2xl font-bold">{$modalStore[0].title}</header>
     <article>{$modalStore[0].body}</article>
+
+    {#if author && event}
+      <div class="card p-5">
+        <div
+          class="post-head mx-auto flex md:flex-row flex-col justify-between items-start"
+        >
+          <a
+            on:click={() => modalStore.close()}
+            href={getPath(ROUTES.USER, author?.pubkey || "")}
+            class="flex items-start"
+          >
+            <div class="w-18 mr-3">
+              <Avatar src={author.profile?.image} />
+            </div>
+            <div>
+              <div class="font-bold">
+                {author?.profile?.displayName || author?.profile?.name || ""}
+              </div>
+              <span class="text-sm">@{author?.profile?.name || ""}</span>
+            </div>
+          </a>
+        </div>
+        <a
+          on:click={() => modalStore.close()}
+          href={getPath(ROUTES.POST, event?.id)}
+        >
+          <div class="my-4 text-sm text-pretty max-w-full break-words">
+            {event?.content}
+          </div>
+        </a>
+      </div>
+    {/if}
 
     <form class="modal-form">
       <label class="label">

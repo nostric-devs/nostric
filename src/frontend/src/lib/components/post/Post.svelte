@@ -10,6 +10,7 @@
   import dayjs from "dayjs";
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
+  import CreatePostReplyTrigger from "../modals/create-post/CreatePostReplyTrigger.svelte";
 
   let isLiked: boolean = false;
   let eventReactions: NDKEvent[] = [];
@@ -94,7 +95,7 @@
               ? 'fill-red-500 stroke-red-500'
               : ''}"
           />
-          <MessageCircle size="20" class="cursor-pointer" />
+          <CreatePostReplyTrigger {event} {author} />
           <Share size="20" class="cursor-pointer" />
           <Bookmark size="20" class="cursor-pointer" />
         </div>
