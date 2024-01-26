@@ -41,6 +41,6 @@
       </svelte:fragment>
     </InfiniteScrollContainer>
   {:else}
-    <div class="mt-2">This user has not followers yet.</div>
+    <div class="mt-2 px-4">This user has not followers yet.</div>
   {/if}
 {/await}

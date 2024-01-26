@@ -15,8 +15,7 @@
 
 <Avatar
   src={profile?.image}
-  class="mr-4 mt-1"
   {initials}
-  width="w-full"
+  width="100%"
   background="bg-primary-500"
 />

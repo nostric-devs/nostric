@@ -1,6 +1,6 @@
 import type { NDKUser } from "@nostr-dev-kit/ndk";
 
-export { nostrHandler, NostrHandler } from "$lib/nostr/NostrHandler";
+export { nostrHandler, NostrHandler, NDKMarker } from "$lib/nostr/NostrHandler";
 export { NostrUserHandler } from "$lib/nostr/NostrUserHandler";
 
 export interface UsersObject {

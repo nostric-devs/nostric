@@ -1,4 +1,4 @@
-<section class="card p-4 m-5">
+<section class="card p-4 my-5">
   <div class="grid grid-cols-10 gap-1">
     <div class="col-span-6 grid grid-cols-4 items-center">
       <div class="placeholder-circle w-12 animate-pulse" />

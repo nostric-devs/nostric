@@ -41,15 +41,15 @@
 {:then followedUsers}
   {#if followedUsers && followedUsers.length > 0}
     <div class="px-4 mb-4">
-      This user has total of {followedUsers.length} followers
+      This user follows {followedUsers.length} users.
     </div>
     <hr class="!border-t-2 mx-4" />
-    <InfiniteScrollContainer allItems={followedUsers}>
+    <InfiniteScrollContainer allItems={followedUsers} initialNumberOfItems={15}>
       <svelte:fragment slot="listItem" let:item>
         <FollowCard user={item} {disabled} />
       </svelte:fragment>
     </InfiniteScrollContainer>
   {:else}
-    <div class="mt-2">This user does not yet follow anyone.</div>
+    <div class="mt-2 px-4">This user does not yet follow anyone.</div>
   {/if}
 {/await}

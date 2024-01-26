@@ -15,11 +15,17 @@ import NDK, {
   NDKUser,
 } from "@nostr-dev-kit/ndk";
 
-import { events } from "$lib/stores/Events";
+import { feed } from "$lib/stores/Feed";
 import type { UsersObject } from "$lib/nostr";
 import { relays } from "$lib/stores/Relays";
 
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
+
+export enum NDKMarker {
+  ROOT = "root",
+  REPLY = "reply",
+  MENTION = "mention",
+}
 
 export class NostrHandler {
   public nostrKit: NDK;
@@ -30,6 +36,12 @@ export class NostrHandler {
     "wss://nostr.girino.org",
     "wss://nostr-pub.wellorder.net",
   ];
+
+  private subscriptionOptions: NDKSubscriptionOptions = {
+    closeOnEose: true,
+    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    groupable: true,
+  };
 
   constructor() {
     const dexieAdapter: NDKCacheAdapter = new NDKCacheAdapterDexie({
@@ -127,10 +139,12 @@ export class NostrHandler {
 
     subscription.on("event", (event: NDKEvent): void => {
       // if the message is encrypted, decrypt it right away
-      if (event.kind === NDKKind.EncryptedDirectMessage) {
-        event.decrypt();
+      // if (event.kind === NDKKind.EncryptedDirectMessage) {
+      //   event.decrypt();
+      // }
+      if (event.kind === NDKKind.Text) {
+        feed.addRecursively(event);
       }
-      events.add(event);
     });
 
     this.subscriptions.push(subscription);
@@ -147,7 +161,19 @@ export class NostrHandler {
         console.error(error);
       }
     }
-    events.clear();
+    feed.clear();
+  }
+
+  /**
+   * @param filter - Filter by which to fetch the events.
+   * @returns Events fetched through the filter.
+   */
+  public async fetchEventsByFilter(filter: NDKFilter): Promise<NDKEvent[]> {
+    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(
+      filter,
+      this.subscriptionOptions,
+    );
+    return [...events];
   }
 
   /**
@@ -156,9 +182,9 @@ export class NostrHandler {
   public async fetchRandomEvents(): Promise<NDKEvent[]> {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
-      limit: 5,
+      limit: 10,
     };
-    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
+    const events: NDKEvent[] = await this.fetchEventsByFilter(filters);
     return [...events];
   }
 
@@ -176,16 +202,23 @@ export class NostrHandler {
    * NIP-10: https://github.com/nostr-protocol/nips/blob/master/10.md
    *
    * @param event - The event which we want to find the replies to.
+   * @param marker - Marker for the reply
+   * @param limit - Limit for the number of replies
    * @returns An array of NDKEvents who reply to the event.
    */
-  public async fetchEventReplies(event: NDKEvent): Promise<NDKEvent[]> {
+  public async fetchEventReplies(
+    event: NDKEvent,
+    marker: NDKMarker,
+    limit?: number,
+  ): Promise<NDKEvent[]> {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
-      "#e": [event.id, "", "root"],
-      limit: 5,
+      "#e": [event.id, event.relay.url, marker],
     };
-    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
-    return [...events];
+    if (limit) {
+      filters["limit"] = limit;
+    }
+    return await this.fetchEventsByFilter(filters);
   }
 
   /**
@@ -200,8 +233,7 @@ export class NostrHandler {
       authors: [publicKey],
       limit: 5,
     };
-    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(filters);
-    return [...events];
+    return await this.fetchEventsByFilter(filters);
   }
 
   /**
@@ -258,12 +290,9 @@ export class NostrHandler {
     const user: NDKUser = new NDKUser({ pubkey: publicKey });
     user.ndk = this.nostrKit;
 
-    const options: NDKSubscriptionOptions = {
-      closeOnEose: true,
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-    };
-
-    const followedUsers: NDKUser[] = [...(await user.follows(options))];
+    const followedUsers: NDKUser[] = [
+      ...(await user.follows(this.subscriptionOptions)),
+    ];
 
     if (omitProfiles == undefined || !omitProfiles) {
       for (const followedUser of followedUsers) {
@@ -292,14 +321,8 @@ export class NostrHandler {
       kinds: [NDKKind.Contacts],
       "#p": [publicKey],
     };
-    const options: NDKSubscriptionOptions = {
-      closeOnEose: true,
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
-    };
 
-    const events: NDKEvent[] = [
-      ...(await this.nostrKit.fetchEvents(filter, options)),
-    ];
+    const events: NDKEvent[] = [...(await this.fetchEventsByFilter(filter))];
 
     const authors: NDKUser[] = [];
     if (omitProfiles !== undefined && omitProfiles) {
@@ -313,7 +336,6 @@ export class NostrHandler {
         );
       }
     }
-
     return authors;
   }
 
@@ -341,12 +363,12 @@ export class NostrHandler {
    * @returns UsersObject of users matching the query.
    */
   public async searchByQuery(query: string): Promise<UsersObject> {
-    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents({
+    const filter: NDKFilter = {
       search: query,
       limit: 15,
       kinds: [NDKKind.Metadata],
-    });
-
+    };
+    const events: NDKEvent[] = await this.fetchEventsByFilter(filter);
     const users: UsersObject = {};
 
     for (const event of events) {

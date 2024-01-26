@@ -23,13 +23,19 @@
   let content: string = "";
   let loading: boolean = false;
   let processing: boolean = false;
+  let isReply: boolean = false;
+
   export let event: NDKEvent | undefined = undefined;
   export let author: NDKUser | undefined = undefined;
 
   async function onSubmit(): Promise<void> {
     try {
       processing = true;
-      await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
+      if (isReply) {
+        await $authUser.nostr.replyToEvent(event, content, NDKKind.Text, []);
+      } else {
+        await $authUser.nostr.createAndPublishEvent(content, NDKKind.Text, []);
+      }
       modalStore.close();
       toastStore.trigger({
         message: "Post has been published.",
@@ -70,9 +76,16 @@
     }
   });
 
-  $: if ($modalStore && $modalStore.length > 0 && $modalStore[0].meta) {
+  $: if (
+    $modalStore &&
+    $modalStore.length > 0 &&
+    $modalStore[0].meta &&
+    "event" in $modalStore[0].meta &&
+    "author" in $modalStore[0].meta
+  ) {
     event = $modalStore[0].meta.event;
     author = $modalStore[0].meta.author;
+    isReply = true;
   }
 </script>
 
@@ -206,7 +219,7 @@
       </button>
       <button
         class="btn {parent.buttonPositive}"
-        on:click={onSubmit}
+        on:click|self={onSubmit}
         disabled={processing}
       >
         {#if processing}
@@ -214,7 +227,11 @@
             <Circle size="15" color="white" unit="px"></Circle>
           </span>
         {/if}
-        Post event
+        {#if isReply}
+          Reply
+        {:else}
+          Publish
+        {/if}
       </button>
     </footer>
   </div>

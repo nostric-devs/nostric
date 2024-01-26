@@ -6,10 +6,9 @@
 
   const modalStore = getModalStore();
 
-  const component: ModalComponent = { ref: CreatePostModal };
   const modal: ModalSettings = {
     type: "component",
-    component,
+    component: { ref: CreatePostModal },
     title: "New post",
     body: "Complete the form below and then press submit.",
   };

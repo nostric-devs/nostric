@@ -17,6 +17,7 @@ import { nostrHandler, Reactions } from "$lib/nostr";
 import type { NostrHandler } from "$lib/nostr";
 import { followedUsers } from "$lib/stores/FollowedUsers";
 import { get } from "svelte/store";
+import { NDKMarker } from "$lib/nostr/NostrHandler";
 
 export class NostrUserHandler {
   private nostrUser: NDKUser;
@@ -228,6 +229,54 @@ export class NostrUserHandler {
   }
 
   /**
+   * Creates and publishes a reply to an event thread.
+   * NIP-10: https://github.com/nostr-protocol/nips/blob/master/10.md
+   *
+   * @param eventToReplyTo - The parent event to reply to. Not necessarily a root.
+   * @param content - The content to be encrypted.
+   * @param kind - The kind of the message, Text by default.
+   * @param tags - The list of NDKTags to include in the event.
+   */
+  public async replyToEvent(
+    eventToReplyTo: NDKEvent,
+    content: string,
+    kind: NDKKind,
+    tags: NDKTag[],
+  ): Promise<void> {
+    const finalTags: NDKTag[] = [...tags];
+    const rootEventTag: NDKTag | undefined = eventToReplyTo.tags.find(
+      (tag: NDKTag): boolean => tag.at(4) === NDKMarker.ROOT,
+    );
+    const publicKeyTagIndex: number | undefined = eventToReplyTo.tags.findIndex(
+      (tag: NDKTag): boolean => tag.at(0) === "#p",
+    );
+
+    if (publicKeyTagIndex && publicKeyTagIndex > -1) {
+      finalTags[publicKeyTagIndex].push(eventToReplyTo.author.pubkey);
+    } else {
+      finalTags.push(["#p", eventToReplyTo.author.pubkey]);
+    }
+
+    if (rootEventTag) {
+      finalTags.push(rootEventTag);
+      finalTags.push([
+        "#e",
+        eventToReplyTo.id,
+        eventToReplyTo.relay.url,
+        NDKMarker.REPLY,
+      ]);
+    } else {
+      finalTags.push([
+        "#e",
+        eventToReplyTo.id,
+        eventToReplyTo.relay.url,
+        NDKMarker.ROOT,
+      ]);
+    }
+    await this.createAndPublishEvent(content, kind, finalTags);
+  }
+
+  /**
    * Reposts an event, based on
    * https://github.com/nostr-dev-kit/ndk/blob/master/ndk/src/events/repost.ts
    * NIP-18: https://github.com/nostr-protocol/nips/blob/master/18.md
@@ -268,6 +317,25 @@ export class NostrUserHandler {
    */
   public async likeEvent(eventToReactTo: NDKEvent): Promise<void> {
     await this.reactToEvent(eventToReactTo, Reactions.LIKE);
+  }
+
+  public async isEventLiked(event: NDKEvent): Promise<boolean> {
+    const filters: NDKFilter = {
+      kinds: [NDKKind.Reaction],
+      "#e": [event.id],
+      authors: [this.nostrUser.pubkey],
+    };
+    let reactions: NDKEvent[] =
+      await this.nostrHandler.fetchEventsByFilter(filters);
+    if (reactions !== undefined && reactions.length > 0) {
+      reactions = reactions.sort(
+        (x: NDKEvent, y: NDKEvent) => y.created_at - x.created_at,
+      );
+      if (reactions[0].content === Reactions.LIKE) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

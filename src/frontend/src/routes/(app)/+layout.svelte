@@ -162,10 +162,3 @@
     </TabGroup>
   </svelte:fragment>
 </AppShell>
-
-<style>
-  body {
-    height: 100%;
-    overflow: hidden;
-  }
-</style>
