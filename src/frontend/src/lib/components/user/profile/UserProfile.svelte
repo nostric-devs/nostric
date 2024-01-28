@@ -25,9 +25,7 @@
   onMount(async () => {
     profile = user?.profile;
     if (events === undefined) {
-      events = await nostrHandler.fetchEventsByAuthorPublicKey(
-        user.pubkey,
-      );
+      events = await nostrHandler.fetchEventsByAuthorPublicKey(user.pubkey);
     }
     userFollowersPromise = nostrHandler.fetchUserFollowersByPublicKey(
       user.pubkey,

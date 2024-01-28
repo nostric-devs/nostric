@@ -34,9 +34,7 @@
   onDestroy(() => {
     try {
       itemsWrapper.removeEventListener("scroll", loadMore);
-    } catch {
-      ;
-    }
+    } catch {}
   });
 
   export let allItems: unknown[] = [];

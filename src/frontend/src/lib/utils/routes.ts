@@ -27,7 +27,10 @@ export const getPath = (...names: string[]): string => {
   return `/${names.join("/")}`;
 };
 
-export const isPathAccessible = (url: string, status: AuthState | number): boolean => {
+export const isPathAccessible = (
+  url: string,
+  status: AuthState | number,
+): boolean => {
   const freelyAccessible: string[] = [
     ROUTES.HOMEPAGE,
     ROUTES.EXPLORE,
@@ -39,7 +42,7 @@ export const isPathAccessible = (url: string, status: AuthState | number): boole
 
   if (isNaN(status)) {
     return !!freelyAccessible.find((path: string) =>
-        url.startsWith(getPath(path)),
+      url.startsWith(getPath(path)),
     );
   } else if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
     return true;

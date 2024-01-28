@@ -220,10 +220,14 @@ export class NostrHandler {
     }
     const eventsWithRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
     filters["#e"] = [event.id, "", marker];
-    const eventsWithoutRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
+    const eventsWithoutRelay: NDKEvent[] =
+      await this.fetchEventsByFilter(filters);
     const finalEvents: NDKEvent[] = eventsWithRelay;
     for (const event of eventsWithoutRelay) {
-      if (finalEvents.find((e: NDKEvent): boolean => e.id === event.id) === undefined) {
+      if (
+        finalEvents.find((e: NDKEvent): boolean => e.id === event.id) ===
+        undefined
+      ) {
         finalEvents.push(event);
       }
     }

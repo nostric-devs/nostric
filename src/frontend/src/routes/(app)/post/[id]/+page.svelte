@@ -25,18 +25,22 @@
     } else {
       // the event is itself a reply, therefore we are only fetching events replying
       // to this event further down the tree
-      eventsPromise = nostrHandler.fetchEventReplies(event, NDKMarker.REPLY, 20);
+      eventsPromise = nostrHandler.fetchEventReplies(
+        event,
+        NDKMarker.REPLY,
+        20,
+      );
     }
   });
 </script>
 
 <h1 class="h1 m-4">Post detail</h1>
 <div class="mx-4">
-{#await eventPromise then event}
-  {#if event}
-    <Post {event} />
-  {/if}
-{/await}
+  {#await eventPromise then event}
+    {#if event}
+      <Post {event} />
+    {/if}
+  {/await}
 </div>
 
 <div
@@ -77,5 +81,4 @@
       <div class="px-4 mt-5">No replies found for the given post so far.</div>
     {/if}
   {/await}
-
 </div>

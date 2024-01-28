@@ -13,11 +13,11 @@ const tree: TreeModel = new TreeModel({
 });
 
 export const isMarkerInTags = (
-    tags: NDKTag[],
-    marker: NDKMarker,
+  tags: NDKTag[],
+  marker: NDKMarker,
 ): string | undefined => {
   const tag: NDKTag | undefined = tags.find(
-      (tag: NDKTag): boolean => tag.at(3) === marker,
+    (tag: NDKTag): boolean => tag.at(3) === marker,
   );
   return tag?.at(1);
 };
