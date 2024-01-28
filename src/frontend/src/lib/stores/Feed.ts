@@ -12,22 +12,22 @@ const tree: TreeModel = new TreeModel({
     y.created_at > x.created_at,
 });
 
+export const isMarkerInTags = (
+    tags: NDKTag[],
+    marker: NDKMarker,
+): string | undefined => {
+  const tag: NDKTag | undefined = tags.find(
+      (tag: NDKTag): boolean => tag.at(3) === marker,
+  );
+  return tag?.at(1);
+};
+
 function getFeed() {
   const feed: Writable<NodeEvents> = writable<NodeEvents>({});
   const { subscribe, update, set } = feed;
 
   const countFeedEvents = (): number => Object.keys(get(feed)).length;
   const isFeedEmpty = (): boolean => countFeedEvents() === 0;
-
-  const isMarkerInTags = (
-    tags: NDKTag[],
-    marker: NDKMarker,
-  ): string | undefined => {
-    const tag: NDKTag | undefined = tags.find(
-      (tag: NDKTag): boolean => tag.at(3) === marker,
-    );
-    return tag?.at(1);
-  };
 
   const addRecursively = async (event: NDKEvent): Promise<void> => {
     const localFeed: NodeEvents = get(feed);
@@ -36,7 +36,7 @@ function getFeed() {
       // which is determined by the presence of an "#e" tag with "root" marker
       // if it is a reply, it might be a reply to a reply, which is
       // determined by the presence of an "#e" tag with "reply" marker
-      const tags: NDKTag[] = event.getMatchingTags("#e");
+      const tags: NDKTag[] = event.getMatchingTags("e");
       const parentEventId: string | undefined =
         isMarkerInTags(tags, NDKMarker.REPLY) ||
         isMarkerInTags(tags, NDKMarker.ROOT);

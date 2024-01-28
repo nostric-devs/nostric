@@ -248,26 +248,26 @@ export class NostrUserHandler {
       (tag: NDKTag): boolean => tag.at(4) === NDKMarker.ROOT,
     );
     const publicKeyTagIndex: number | undefined = eventToReplyTo.tags.findIndex(
-      (tag: NDKTag): boolean => tag.at(0) === "#p",
+      (tag: NDKTag): boolean => tag.at(0) === "p",
     );
 
     if (publicKeyTagIndex && publicKeyTagIndex > -1) {
       finalTags[publicKeyTagIndex].push(eventToReplyTo.author.pubkey);
     } else {
-      finalTags.push(["#p", eventToReplyTo.author.pubkey]);
+      finalTags.push(["p", eventToReplyTo.author.pubkey]);
     }
 
     if (rootEventTag) {
       finalTags.push(rootEventTag);
       finalTags.push([
-        "#e",
+        "e",
         eventToReplyTo.id,
         eventToReplyTo.relay.url,
         NDKMarker.REPLY,
       ]);
     } else {
       finalTags.push([
-        "#e",
+        "e",
         eventToReplyTo.id,
         eventToReplyTo.relay.url,
         NDKMarker.ROOT,

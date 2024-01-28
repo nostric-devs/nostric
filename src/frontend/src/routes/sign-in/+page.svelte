@@ -22,7 +22,7 @@
     return async () => {
       try {
         await authUser.logInAnonymously(undefined, privateKey);
-        await goto(getPath(ROUTES.FEED));
+        await goto(getPath(ROUTES.EXPLORE));
       } catch (error) {
         toastStore.trigger({
           message: error as string,

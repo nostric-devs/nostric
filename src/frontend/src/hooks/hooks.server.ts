@@ -14,9 +14,9 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies } = event;
   const userStatus: string | undefined = cookies.get("auth");
 
-  if (userStatus) {
+  if (isPathAccessible(currentPath, Number(userStatus))) {
     event.locals.user = userStatus;
-  } else if (!isPathAccessible(currentPath, Number(userStatus))) {
+  } else {
     throw redirect(303, getPath(ROUTES.HOMEPAGE));
   }
 

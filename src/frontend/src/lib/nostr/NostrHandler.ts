@@ -39,7 +39,7 @@ export class NostrHandler {
 
   private subscriptionOptions: NDKSubscriptionOptions = {
     closeOnEose: true,
-    cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+    cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
     groupable: true,
   };
 
@@ -129,7 +129,7 @@ export class NostrHandler {
   public async addSubscription(filter: NDKFilter): Promise<void> {
     const options: NDKSubscriptionOptions = {
       closeOnEose: false,
-      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
       groupable: true,
     };
     const subscription: NDKSubscription = this.nostrKit.subscribe(
@@ -218,7 +218,16 @@ export class NostrHandler {
     if (limit) {
       filters["limit"] = limit;
     }
-    return await this.fetchEventsByFilter(filters);
+    const eventsWithRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
+    filters["#e"] = [event.id, "", marker];
+    const eventsWithoutRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
+    const finalEvents: NDKEvent[] = eventsWithRelay;
+    for (const event of eventsWithoutRelay) {
+      if (finalEvents.find((e: NDKEvent): boolean => e.id === event.id) === undefined) {
+        finalEvents.push(event);
+      }
+    }
+    return finalEvents;
   }
 
   /**
@@ -231,7 +240,7 @@ export class NostrHandler {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
       authors: [publicKey],
-      limit: 5,
+      limit: 10,
     };
     return await this.fetchEventsByFilter(filters);
   }

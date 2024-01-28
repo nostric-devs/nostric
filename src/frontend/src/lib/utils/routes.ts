@@ -27,8 +27,9 @@ export const getPath = (...names: string[]): string => {
   return `/${names.join("/")}`;
 };
 
-export const isPathAccessible = (url: string, status: AuthState): boolean => {
+export const isPathAccessible = (url: string, status: AuthState | number): boolean => {
   const freelyAccessible: string[] = [
+    ROUTES.HOMEPAGE,
     ROUTES.EXPLORE,
     ROUTES.POST,
     ROUTES.USER,
@@ -36,16 +37,17 @@ export const isPathAccessible = (url: string, status: AuthState): boolean => {
   ];
   const identityAccessible: string[] = [ROUTES.IMAGES, ROUTES.BOOKMARKS];
 
-  if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
+  if (isNaN(status)) {
+    return !!freelyAccessible.find((path: string) =>
+        url.startsWith(getPath(path)),
+    );
+  } else if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
     return true;
-  }
-  if (status >= AuthStates.NOSTR_AUTHENTICATED) {
+  } else if (status >= AuthStates.NOSTR_AUTHENTICATED) {
     return !identityAccessible.find((path: string) =>
       url.startsWith(getPath(path)),
     );
+  } else {
+    return false;
   }
-
-  return !!freelyAccessible.find((path: string) =>
-    url.startsWith(getPath(path)),
-  );
 };

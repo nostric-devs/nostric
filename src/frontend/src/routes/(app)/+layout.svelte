@@ -113,7 +113,9 @@
     </div>
   </svelte:fragment>
 
-  <slot />
+  {#key $page.url}
+    <slot />
+  {/key}
 
   <svelte:fragment slot="sidebarRight">
     {#if isAuthenticated}

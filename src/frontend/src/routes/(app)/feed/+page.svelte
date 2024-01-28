@@ -17,17 +17,22 @@
   $: feedEvents = orderByDate($feed);
 </script>
 
-<h1 class="h1 m-4">Feed</h1>
-<hr class="!border-t-2 mx-4" />
+<div
+  class="overflow-hidden flex flex-col"
+  style="min-height: calc(100% - 50px)"
+>
+  <h1 class="h1 m-4">Feed</h1>
+  <hr class="!border-t-2 mx-4" />
 
-{#if feedEvents.length === 0}
-  <div class="px-4 mt-2">No posts to display.</div>
-{:else}
-  {#key feedEvents}
-    <InfiniteScrollContainer allItems={feedEvents} initialNumberOfItems={6}>
-      <svelte:fragment slot="listItem" let:item>
-        <PostThread eventNode={item} />
-      </svelte:fragment>
-    </InfiniteScrollContainer>
-  {/key}
-{/if}
+  {#if feedEvents.length === 0}
+    <div class="px-4 mt-2">No posts to display.</div>
+  {:else}
+    {#key feedEvents}
+      <InfiniteScrollContainer allItems={feedEvents} initialNumberOfItems={10}>
+        <svelte:fragment slot="listItem" let:item>
+          <PostThread eventNode={item} />
+        </svelte:fragment>
+      </InfiniteScrollContainer>
+    {/key}
+  {/if}
+</div>
