@@ -362,6 +362,12 @@ export class NostrUserHandler {
   public async addUserToFollowedUsers(user: NDKUser): Promise<void> {
     if (await this.nostrUser.follow(user)) {
       followedUsers.add(user);
+      const filters: NDKFilter = {
+        kinds: [NDKKind.Text, NDKKind.Repost, NDKKind.EncryptedDirectMessage],
+        authors: [user.pubkey],
+        limit: 10,
+      };
+      await this.nostrHandler.addSubscription(filters);
     } else {
       throw Error(
         "Something went wrong, unable to add the user to the follow list.",

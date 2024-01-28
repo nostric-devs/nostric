@@ -14,7 +14,7 @@
       {#key childNode.model.id}
         <svelte:self
           eventNode={childNode}
-          indent={treeLevelIndex > 2 ? indent + 55 : indent}
+          indent={treeLevelIndex > 1 ? indent + 55 : indent}
           treeLevelIndex={treeLevelIndex + 1}
         />
       {/key}
