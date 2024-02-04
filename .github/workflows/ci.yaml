@@ -138,6 +138,7 @@ jobs:
 
       - name: Local deployment
         run: |
-          dfx wallet balance --network ic
           dfx deploy
+          dfx identity use action
+          dfx wallet balance --network ic
         continue-on-error: false
