@@ -65,19 +65,26 @@ jobs:
           npm install -g ic-mops
         continue-on-error: false
 
-      - name: Install DFX
+      - name: Read DFX Version
         run: |
           # Define the path to your JSON file
           json_file="dfx.json"
           # Extract the dfx value using jq
           dfx_version=$(jq -r '.dfx' "$json_file")
           if [ -n "$dfx_version" ]; then
-            echo "Downloading DFX version: $dfx_version"
-            DFX_VERSION=$dfx_version sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+            echo "Using DFX version: $dfx_version"
+            run: echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
           else
-            echo "Failed to extract DFX version from JSON using the latest version"
-            sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+            echo "Failed to extract DFX version from JSON, using the latest version"
+            run: echo "DFX_VERSION=latest" >> $GITHUB_ENV
           fi
+
+      - uses: aviate-labs/setup-dfx@v0.2.6
+        with:
+          dfx-version: ${{ env.DFX_VERSION }}
+        env:
+          DFX_IDENTITY_PEM: ${{ secrets.DFX_IDENTITY_PEM }}
+      - run: |
           dfx start --clean --background
         continue-on-error: false
 
@@ -106,19 +113,27 @@ jobs:
           npm install -g ic-mops
         continue-on-error: false
 
-      - name: Install DFX
+
+      - name: Read DFX Version
         run: |
           # Define the path to your JSON file
           json_file="dfx.json"
           # Extract the dfx value using jq
           dfx_version=$(jq -r '.dfx' "$json_file")
           if [ -n "$dfx_version" ]; then
-            echo "Downloading DFX version: $dfx_version"
-            DFX_VERSION=$dfx_version sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+            echo "Using the DFX version: $dfx_version"
+            run: echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
           else
-            echo "Failed to extract DFX version from JSON using the latest version"
-            sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+            echo "Failed to extract DFX version from JSON, using the latest version"
+            run: echo "DFX_VERSION=latest" >> $GITHUB_ENV
           fi
+
+      - uses: aviate-labs/setup-dfx@v0.2.6
+        with:
+          dfx-version: ${{ env.DFX_VERSION }}
+        env:
+          DFX_IDENTITY_PEM: ${{ secrets.DFX_IDENTITY_PEM }}
+      - run: |
           dfx start --clean --background
         continue-on-error: false
 
