@@ -139,7 +139,4 @@ jobs:
       - name: Local deployment
         run: |
           dfx deploy
-          dfx identity use action
-          dfx identity set-wallet ${{ secrets.WALLET_CANISTER_ID }} --network ic
-          dfx wallet balance --network ic
         continue-on-error: false
