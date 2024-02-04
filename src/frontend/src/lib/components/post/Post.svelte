@@ -15,7 +15,10 @@
 
   export let event: NDKEvent | undefined = undefined;
   export let author: NDKUser | undefined = undefined;
+  // controls whether the post is to have the avatar inside or outside
+  // root posts have it inside, replies outside
   export let displayAsReply: boolean = false;
+  // level of indent in the reply tree
   export let indent: number = 0;
 
   const modalStore = getModalStore();
@@ -23,12 +26,8 @@
   let authorPromise: Promise<NDKUser | undefined>;
   let dateCreated: string = "";
   let images: string[] = [];
+  let content: string = "";
 
-  $: if (event && event.created_at) {
-    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
-  }
-  $: content = imagifyContent();
-  $: images;
   $: isAuthenticated = $authUser.authState !== AuthStates.ANONYMOUS;
 
   const imagifyContent = (): string => {
@@ -75,20 +74,29 @@
   };
 
   onMount(async () => {
-    if (event && author === undefined) {
-      author = await nostrHandler.fetchUserProfileByPublicKey(
-        event.author.pubkey,
-      );
+    if (event !== undefined) {
+      if (author === undefined) {
+        // fetch the event profile if it was not specified
+        author = await nostrHandler.fetchUserProfileByPublicKey(
+          event.author.pubkey,
+        );
+      }
+
+      if ($authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+        // if we have a logged-in user, we need to see whether they liked the post or not
+        $authUser.nostr
+          .isEventLiked(event)
+          .then((result: boolean) => (isLiked = result));
+      }
+
+      if (event.created_at) {
+        // parse the created date
+        dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
+      }
+
+      content = imagifyContent();
     }
-    if (
-      $authUser.authState !== AuthStates.ANONYMOUS &&
-      $authUser.nostr &&
-      event
-    ) {
-      $authUser.nostr
-        .isEventLiked(event)
-        .then((result: boolean) => (isLiked = result));
-    }
+
     authorPromise = Promise.resolve(author);
   });
 </script>
@@ -97,43 +105,43 @@
   <PostLoadingSkeleton />
 {:then author}
   {#if author && event}
-    <div class="flex my-5" style="margin-left: {indent}px!important">
+    <div
+      class="flex my-5"
+      style="margin-left: {indent}px!important"
+      id={event?.id}
+    >
       {#if displayAsReply}
         <div class="min-w-[45px] w-[45px] mr-2">
           <Avatar profile={author.profile} />
         </div>
       {/if}
-      <div
-        class="card card-hover p-4 grow {displayAsReply
-          ? 'variant-soft'
-          : 'w-full'}"
-      >
-        <div
-          class="mx-auto flex md:flex-row flex-col justify-between items-start"
-        >
-          <a
-            href={getPath(ROUTES.USER, author?.pubkey || "")}
-            class="flex items-start"
+      <div class="card p-4 grow {displayAsReply ? 'variant-soft' : 'w-full'}">
+        <a href={`${getPath(ROUTES.POST, event.id)}/#${event.id}`}>
+          <div
+            class="mx-auto flex md:flex-row flex-col justify-between items-start"
           >
-            {#if !displayAsReply}
-              <div class="w-11 mr-2">
-                <Avatar profile={author.profile} />
+            <a
+              href={getPath(ROUTES.USER, author?.pubkey || "")}
+              class="flex items-start"
+            >
+              {#if !displayAsReply}
+                <div class="w-11 mr-2">
+                  <Avatar profile={author.profile} />
+                </div>
+              {/if}
+              <div>
+                <div class="font-bold">
+                  {author?.profile?.displayName || author?.profile?.name || ""}
+                </div>
+                <span class="text-xs">@{author?.profile?.name || ""}</span>
               </div>
-            {/if}
+            </a>
+
             <div>
-              <div class="font-bold">
-                {author?.profile?.displayName || author?.profile?.name || ""}
-              </div>
-              <span class="text-xs">@{author?.profile?.name || ""}</span>
+              <span class="text-xs opacity-50">{dateCreated}</span>
             </div>
-          </a>
-
-          <div>
-            <span class="text-xs opacity-50">{dateCreated}</span>
           </div>
-        </div>
 
-        <a href={getPath(ROUTES.POST, event?.id)}>
           <div class="my-4 text-sm text-pretty break-all">
             {content}
           </div>

@@ -33,7 +33,7 @@
     });
   };
 
-  const onSubmit = async () => {
+  const onRegisterAnonymouslySubmit = async () => {
     loading = true;
     disabled = true;
     return async () => {
@@ -60,7 +60,11 @@
 
 <div class="w-screen h-screen flex justify-center items-center">
   <div class="w-1/2 mx-auto">
-    <form method="POST" class="w-full" use:enhance={onSubmit}>
+    <form
+      method="POST"
+      class="w-full"
+      use:enhance={onRegisterAnonymouslySubmit}
+    >
       <h2 class="mb-3 pl-1 h2 text-3xl text-center">
         <span
           class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"

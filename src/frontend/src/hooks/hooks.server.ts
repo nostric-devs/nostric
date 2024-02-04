@@ -1,5 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
-import { getPath, isPathAccessible, ROUTES } from "$lib/utils/routes";
+import { isPathAccessible } from "$lib/utils/routes";
 import { redirect } from "@sveltejs/kit";
 import { building } from "$app/environment";
 
@@ -17,7 +17,7 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   if (isPathAccessible(currentPath, Number(userStatus))) {
     event.locals.user = userStatus;
   } else {
-    throw redirect(303, getPath(ROUTES.HOMEPAGE));
+    throw redirect(303, "/#signup");
   }
 
   return resolve(event);

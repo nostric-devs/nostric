@@ -32,7 +32,6 @@ export const isPathAccessible = (
   status: AuthState | number,
 ): boolean => {
   const freelyAccessible: string[] = [
-    ROUTES.HOMEPAGE,
     ROUTES.EXPLORE,
     ROUTES.POST,
     ROUTES.USER,
@@ -40,15 +39,22 @@ export const isPathAccessible = (
   ];
   const identityAccessible: string[] = [ROUTES.IMAGES, ROUTES.BOOKMARKS];
 
-  if (isNaN(status)) {
-    return !!freelyAccessible.find((path: string) =>
-      url.startsWith(getPath(path)),
+  if (url === getPath(ROUTES.HOMEPAGE)) {
+    // ROUTES.HOMEPAGE is empty string, would match anything
+    return true;
+  } else if (isNaN(status)) {
+    return (
+      freelyAccessible.find((path: string): boolean =>
+        url.startsWith(getPath(path)),
+      ) !== undefined
     );
   } else if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
     return true;
   } else if (status >= AuthStates.NOSTR_AUTHENTICATED) {
-    return !identityAccessible.find((path: string) =>
-      url.startsWith(getPath(path)),
+    return (
+      identityAccessible.find((path: string) =>
+        url.startsWith(getPath(path)),
+      ) === undefined
     );
   } else {
     return false;

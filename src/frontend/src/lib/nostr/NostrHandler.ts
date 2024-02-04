@@ -208,20 +208,23 @@ export class NostrHandler {
    */
   public async fetchEventReplies(
     event: NDKEvent,
-    marker: NDKMarker,
-    limit?: number,
+    limit: number,
+    marker?: NDKMarker,
   ): Promise<NDKEvent[]> {
+    // fetch events with specified relay
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
-      "#e": [event.id, event.relay.url, marker],
+      "#e": [event.id, event.relay.url, ...(marker ? [marker] : [])],
+      limit,
     };
-    if (limit) {
-      filters["limit"] = limit;
-    }
     const eventsWithRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
-    filters["#e"] = [event.id, "", marker];
+
+    // now fetch events without specified relay
+    filters["#e"] = [event.id, "", ...(marker ? [marker] : [])];
     const eventsWithoutRelay: NDKEvent[] =
       await this.fetchEventsByFilter(filters);
+
+    // now merge these two
     const finalEvents: NDKEvent[] = eventsWithRelay;
     for (const event of eventsWithoutRelay) {
       if (

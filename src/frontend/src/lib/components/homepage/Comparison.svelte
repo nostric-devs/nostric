@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowDown, Check, CheckCircle } from "svelte-feathers";
+  import { ArrowDown, CheckCircle } from "svelte-feathers";
   import { scroll } from "$lib/utils/scroll";
 </script>
 

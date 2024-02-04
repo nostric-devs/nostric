@@ -3,7 +3,6 @@
 
   let itemsWrapper: HTMLDivElement;
   let displayedItems: unknown[] = [];
-  let maxHeight: number;
   let endOfRopeFlag: boolean = false;
 
   const loadMore = () => {
@@ -24,7 +23,6 @@
   };
 
   onMount(() => {
-    maxHeight = document.body.scrollHeight;
     displayedItems = allItems.slice(0, initialNumberOfItems);
     if (itemsWrapper) {
       itemsWrapper.addEventListener("scroll", loadMore);
@@ -42,11 +40,7 @@
   export let initialNumberOfItems: number = 15;
 </script>
 
-<div
-  bind:this={itemsWrapper}
-  class="overflow-y-auto px-4 grow"
-  style="max-height: {maxHeight - 50}px"
->
+<div bind:this={itemsWrapper} class="overflow-y-auto px-4 grow max-h-screen">
   {#each displayedItems as item}
     <slot name="listItem" {item} {disabled} />
   {/each}

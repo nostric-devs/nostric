@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getModalStore } from "@skeletonlabs/skeleton";
-  import type { ModalSettings, ModalComponent } from "@skeletonlabs/skeleton";
+  import type { ModalSettings } from "@skeletonlabs/skeleton";
   import { Plus } from "svelte-feathers";
   import CreatePostModal from "$lib/components/modals/create-post/CreatePostModal.svelte";
 
