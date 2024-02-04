@@ -1,8 +1,14 @@
 {
   "backend": {
-    "ic": "wd4do-oyaaa-aaaah-qdcaq-cai"
+    "ic": "7tz5e-nyaaa-aaaal-qdfjq-cai"
   },
   "frontend": {
-    "ic": "wk7is-yqaaa-aaaah-qdcba-cai"
+    "ic": "7g6mj-mqaaa-aaaal-qdfka-cai"
+  },
+  "storage": {
+    "ic": "7b7k5-biaaa-aaaal-qdfkq-cai"
+  },
+  "vetkd_system_api": {
+    "ic": "7p5hv-2yaaa-aaaal-qdflq-cai"
   }
 }
