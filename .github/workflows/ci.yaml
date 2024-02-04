@@ -73,10 +73,10 @@ jobs:
           dfx_version=$(jq -r '.dfx' "$json_file")
           if [ -n "$dfx_version" ]; then
             echo "Using DFX version: $dfx_version"
-            run: echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
+            echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
           else
             echo "Failed to extract DFX version from JSON, using the latest version"
-            run: echo "DFX_VERSION=latest" >> $GITHUB_ENV
+            echo "DFX_VERSION=latest" >> $GITHUB_ENV
           fi
 
       - uses: aviate-labs/setup-dfx@v0.2.6
@@ -122,10 +122,10 @@ jobs:
           dfx_version=$(jq -r '.dfx' "$json_file")
           if [ -n "$dfx_version" ]; then
             echo "Using the DFX version: $dfx_version"
-            run: echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
+            echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
           else
             echo "Failed to extract DFX version from JSON, using the latest version"
-            run: echo "DFX_VERSION=latest" >> $GITHUB_ENV
+            echo "DFX_VERSION=latest" >> $GITHUB_ENV
           fi
 
       - uses: aviate-labs/setup-dfx@v0.2.6
