@@ -113,7 +113,6 @@ jobs:
           npm install -g ic-mops
         continue-on-error: false
 
-
       - name: Read DFX Version
         run: |
           # Define the path to your JSON file

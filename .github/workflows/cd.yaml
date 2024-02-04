@@ -1,0 +1,56 @@
+name: CD
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    name: deploy-dev
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Nostric
+        run: |
+          npm install
+        continue-on-error: false
+
+      - name: Install Mops
+        run: |
+          npm install -g ic-mops
+        continue-on-error: false
+
+      - name: Read DFX Version
+        run: |
+          # Define the path to your JSON file
+          json_file="dfx.json"
+          # Extract the dfx value using jq
+          dfx_version=$(jq -r '.dfx' "$json_file")
+          if [ -n "$dfx_version" ]; then
+            echo "Using the DFX version: $dfx_version"
+            echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
+          else
+            echo "Failed to extract DFX version from JSON, using the latest version"
+            echo "DFX_VERSION=latest" >> $GITHUB_ENV
+          fi
+
+      - uses: aviate-labs/setup-dfx@v0.2.6
+        with:
+          dfx-version: ${{ env.DFX_VERSION }}
+        env:
+          DFX_IDENTITY_PEM: ${{ secrets.DFX_IDENTITY_PEM }}
+      - run: |
+          dfx start --clean --background
+        continue-on-error: false
+
+      - name: Dev environment deployment
+        run: |
+          cp canister_ids-dev.json canister_ids.json
+          dfx identity use action
+          dfx deploy --network ic
+        continue-on-error: false
