@@ -67,9 +67,9 @@
   "type": "module",
   "dependencies": {
     "@dfinity/agent": "^0.21.4",
-    "@dfinity/auth-client": "^0.19.3",
-    "@dfinity/identity": "^0.19.3",
-    "@dfinity/principal": "^0.19.3",
+    "@dfinity/auth-client": "^0.21.4",
+    "@dfinity/identity": "^0.21.4",
+    "@dfinity/principal": "^0.21.4",
     "@dfinity/utils": "next",
     "@floating-ui/dom": "^1.5.3",
     "@nostr-dev-kit/ndk": "^2.2.0",
