@@ -123,7 +123,6 @@ jobs:
           if [ -n "$dfx_version" ]; then
             echo "Using the DFX version: $dfx_version"
             echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
-            echo "Using this secret value: ${{ secrets.DFX_IDENTITY_PEM }}"
           else
             echo "Failed to extract DFX version from JSON, using the latest version"
             echo "DFX_VERSION=latest" >> $GITHUB_ENV
