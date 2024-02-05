@@ -2,28 +2,33 @@
   import { Bookmark, Heart, MessageCircle, Share } from "svelte-feathers";
   import { getPath, ROUTES } from "$lib/utils/routes";
   import type { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
-  import { events } from "$lib/stores/Events";
-  import { nostrHandler, Reactions } from "$lib/nostr";
+  import { nostrHandler } from "$lib/nostr";
   import Avatar from "$lib/components/user/Avatar.svelte";
   import { onMount } from "svelte";
   import dayjs from "dayjs";
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
+  import PostReactionButton from "$lib/components/post/PostReactionButton.svelte";
+  import { getModalStore, type ModalSettings } from "@skeletonlabs/skeleton";
+  import CreatePostModal from "$lib/components/modals/create-post/CreatePostModal.svelte";
+  import { Circle } from "svelte-loading-spinners";
 
-  let isLiked: boolean = false;
-  let eventReactions: NDKEvent[] = [];
+  export let event: NDKEvent | undefined = undefined;
+  export let author: NDKUser | undefined = undefined;
+  // controls whether the post is to have the avatar inside or outside
+  // root posts have it inside, replies outside
+  export let displayAsReply: boolean = false;
+  // level of indent in the reply tree
+  export let indent: number = 0;
+
+  const modalStore = getModalStore();
+  let isLiked: boolean | null = null;
   let authorPromise: Promise<NDKUser | undefined>;
   let dateCreated: string = "";
   let images: string[] = [];
+  let content: string = "";
 
-  $: $events && event, (eventReactions = events.getEventReactions(event));
-  $: isLiked =
-    eventReactions.length > 0 && eventReactions[0].content === Reactions.LIKE;
-  $: if (event && event.created_at) {
-    dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
-  }
-  $: content = imagifyContent();
-  $: images;
+  $: isAuthenticated = $authUser.authState !== AuthStates.ANONYMOUS;
 
   const imagifyContent = (): string => {
     if (event && event.content) {
@@ -45,88 +50,156 @@
   };
 
   const reactToEvent = async (): Promise<void> => {
-    if (
-      $authUser.nostr &&
-      event &&
-      $authUser.authState !== AuthStates.ANONYMOUS
-    ) {
+    if ($authUser.nostr && event && isAuthenticated) {
       if (isLiked) {
         await $authUser.nostr.dislikeEvent(event);
+        isLiked = false;
       } else {
         await $authUser.nostr.likeEvent(event);
+        isLiked = true;
       }
     }
   };
 
-  onMount(async () => {
-    if (event && author === undefined) {
-      authorPromise = nostrHandler.fetchUserProfileByPublicKey(
-        event.author.pubkey,
-      );
-    } else {
-      authorPromise = Promise.resolve(author);
+  const replyToEvent = async (): Promise<void> => {
+    if ($authUser.nostr && event && isAuthenticated) {
+      const modal: ModalSettings = {
+        type: "component",
+        component: { ref: CreatePostModal },
+        title: "Reply to post",
+        meta: { event, author },
+      };
+      modalStore.trigger(modal);
     }
-  });
+  };
 
-  export let event: NDKEvent | undefined = undefined;
-  export let author: NDKUser | undefined = undefined;
+  onMount(async () => {
+    if (event !== undefined) {
+      if (author === undefined) {
+        // fetch the event profile if it was not specified
+        author = await nostrHandler.fetchUserProfileByPublicKey(
+          event.author.pubkey,
+        );
+      }
+
+      if ($authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr) {
+        // if we have a logged-in user, we need to see whether they liked the post or not
+        $authUser.nostr
+          .isEventLiked(event)
+          .then((result: boolean) => (isLiked = result));
+      }
+
+      if (event.created_at) {
+        // parse the created date
+        dateCreated = dayjs(event.created_at * 1000).format("YYYY-MM-DD HH:MM");
+      }
+
+      content = imagifyContent();
+    }
+
+    authorPromise = Promise.resolve(author);
+  });
 </script>
 
 {#await authorPromise}
   <PostLoadingSkeleton />
 {:then author}
   {#if author && event}
-    <div class="card card-hover p-5 m-5">
-      <div
-        class="post-head mx-auto flex md:flex-row flex-col justify-between items-start"
-      >
-        <a
-          href={getPath(ROUTES.USER, author?.pubkey || "")}
-          class="flex items-start"
-        >
-          <div class="w-11 mr-2">
-            <Avatar profile={author.profile} />
-          </div>
-          <div>
-            <div class="font-bold">
-              {author?.profile?.displayName || author?.profile?.name || ""}
+    <div
+      class="flex my-5"
+      style="margin-left: {indent}px!important"
+      id={event?.id}
+    >
+      {#if displayAsReply}
+        <div class="min-w-[45px] w-[45px] mr-2">
+          <Avatar profile={author.profile} />
+        </div>
+      {/if}
+      <div class="card p-4 grow {displayAsReply ? 'variant-soft' : 'w-full'}">
+        <a href={`${getPath(ROUTES.POST, event.id)}/#${event.id}`}>
+          <div
+            class="mx-auto flex md:flex-row flex-col justify-between items-start"
+          >
+            <a
+              href={getPath(ROUTES.USER, author?.pubkey || "")}
+              class="flex items-start"
+            >
+              {#if !displayAsReply}
+                <div class="w-11 mr-2">
+                  <Avatar profile={author.profile} />
+                </div>
+              {/if}
+              <div>
+                <div class="font-bold">
+                  {author?.profile?.displayName || author?.profile?.name || ""}
+                </div>
+                <span class="text-xs">@{author?.profile?.name || ""}</span>
+              </div>
+            </a>
+
+            <div>
+              <span class="text-xs opacity-50">{dateCreated}</span>
             </div>
-            <span class="text-sm">@{author?.profile?.name || ""}</span>
+          </div>
+
+          <div class="my-4 text-sm text-pretty break-all">
+            {content}
+          </div>
+          <div class="flex">
+            {#each images as url}
+              <div class="max-h-48">
+                <img src={url} alt="img" class="object-fill w-auto h-full" />
+              </div>
+            {/each}
           </div>
         </a>
 
-        <div>
-          <span class="text-sm">{dateCreated}</span>
+        <div class="grid grid-cols-4 gap-10 pt-2">
+          <div class="flex justify-start">
+            <PostReactionButton
+              on:click={reactToEvent}
+              disabled={!isAuthenticated || isLiked === null}
+              popupMessage={isLiked ? "dislike" : "like"}
+            >
+              {#if isLiked === null}
+                <Circle size="15" color="black" unit="px" />
+              {:else}
+                <Heart size="15" color={isLiked ? "red" : "black"} />
+              {/if}
+            </PostReactionButton>
+          </div>
+
+          <div class="flex justify-center pr-6">
+            <PostReactionButton
+              on:click={replyToEvent}
+              disabled={!isAuthenticated || !author || !event}
+              popupMessage={"reply"}
+            >
+              <MessageCircle size="15" />
+            </PostReactionButton>
+          </div>
+
+          <div class="flex justify-center pl-6">
+            <PostReactionButton
+              disabled={!isAuthenticated}
+              popupMessage={"share"}
+            >
+              <Share size="15" />
+            </PostReactionButton>
+          </div>
+
+          <div class="flex justify-end">
+            <PostReactionButton
+              disabled={!isAuthenticated}
+              popupMessage={"bookmark"}
+            >
+              <Bookmark size="15" />
+            </PostReactionButton>
+          </div>
         </div>
       </div>
-
-      <a href={getPath(ROUTES.POST, event?.id)}>
-        <div class="my-4 text-sm text-pretty max-w-full break-words">
-          {content}
-        </div>
-        <div class="flex">
-          {#each images as url}
-            <div class="max-h-48">
-              <img src={url} alt="img" class="object-fill w-auto h-full" />
-            </div>
-          {/each}
-        </div>
-      </a>
-
-      {#if $authUser.authState !== AuthStates.ANONYMOUS}
-        <div class="flex justify-between mt-4">
-          <Heart
-            size="20"
-            on:click={reactToEvent}
-            class="cursor-pointer {isLiked
-              ? 'fill-red-500 stroke-red-500'
-              : ''}"
-          />
-          <MessageCircle size="20" class="cursor-pointer" />
-          <Share size="20" class="cursor-pointer" />
-          <Bookmark size="20" class="cursor-pointer" />
-        </div>
-      {/if}
     </div>
+  {:else}
+    <PostLoadingSkeleton />
   {/if}
 {/await}

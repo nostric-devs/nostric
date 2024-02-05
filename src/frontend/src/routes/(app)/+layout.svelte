@@ -113,7 +113,9 @@
     </div>
   </svelte:fragment>
 
-  <slot />
+  {#key $page.url}
+    <slot />
+  {/key}
 
   <svelte:fragment slot="sidebarRight">
     {#if isAuthenticated}
@@ -162,10 +164,3 @@
     </TabGroup>
   </svelte:fragment>
 </AppShell>
-
-<style>
-  body {
-    height: 100%;
-    overflow: hidden;
-  }
-</style>

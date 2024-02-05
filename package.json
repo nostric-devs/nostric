@@ -71,13 +71,14 @@
     "@dfinity/identity": "^0.19.3",
     "@dfinity/principal": "^0.19.3",
     "@dfinity/utils": "next",
-    "@floating-ui/dom": "^1.5.3",
+    "@floating-ui/dom": "^1.5.4",
     "@nostr-dev-kit/ndk": "^2.2.0",
     "@nostr-dev-kit/ndk-cache-dexie": "^2.2.3",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
     "novel-svelte": "^0.1.6",
     "svelte-feathers": "^0.8.4",
-    "svelte-loading-spinners": "^0.3.4"
+    "svelte-loading-spinners": "^0.3.4",
+    "tree-model": "^1.0.7"
   }
 }

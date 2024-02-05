@@ -1,5 +1,5 @@
 import type { Handle } from "@sveltejs/kit";
-import { getPath, isPathAccessible, ROUTES } from "$lib/utils/routes";
+import { isPathAccessible } from "$lib/utils/routes";
 import { redirect } from "@sveltejs/kit";
 import { building } from "$app/environment";
 
@@ -14,10 +14,10 @@ export const handle: Handle = async ({ event, resolve }): Promise<Response> => {
   const { cookies } = event;
   const userStatus: string | undefined = cookies.get("auth");
 
-  if (userStatus) {
+  if (isPathAccessible(currentPath, Number(userStatus))) {
     event.locals.user = userStatus;
-  } else if (!isPathAccessible(currentPath, Number(userStatus))) {
-    throw redirect(303, getPath(ROUTES.HOMEPAGE));
+  } else {
+    throw redirect(303, "/#signup");
   }
 
   return resolve(event);

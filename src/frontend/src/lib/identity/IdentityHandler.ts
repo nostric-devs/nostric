@@ -26,7 +26,11 @@ export class IdentityHandler {
   }
 
   public async init(): Promise<void> {
-    this.authClient = await AuthClient.create();
+    this.authClient = await AuthClient.create({
+      idleOptions: {
+        disableIdle: true,
+      },
+    });
     try {
       await this.initActors();
     } catch {

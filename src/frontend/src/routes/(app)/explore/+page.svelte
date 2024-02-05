@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import type { NDKEvent } from "@nostr-dev-kit/ndk";
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
+  import InfiniteScrollContainer from "$lib/components/infinite-scroll/InfiniteScrollContainer.svelte";
 
   let randomEvents: NDKEvent[] = [];
 
@@ -15,13 +16,18 @@
 </script>
 
 <h1 class="h1 m-4">Explore</h1>
+<hr class="!border-t-2 mx-4" />
 
 {#if randomEvents.length === 0}
-  {#each { length: 6 } as _}
-    <PostLoadingSkeleton />
-  {/each}
+  <div class="m-5">
+    {#each { length: 6 } as _}
+      <PostLoadingSkeleton />
+    {/each}
+  </div>
 {:else}
-  {#each randomEvents as event}
-    <Post {event} />
-  {/each}
+  <InfiniteScrollContainer allItems={randomEvents} initialNumberOfItems={5}>
+    <svelte:fragment slot="listItem" let:item>
+      <Post event={item} />
+    </svelte:fragment>
+  </InfiniteScrollContainer>
 {/if}
