@@ -47,17 +47,7 @@ dfx start --clean
 5. Now run in the new shell execute the deploy script:
 
 ```
-sh ./build.sh
-```
-
-Or you can execute these commands one by one:
-
-```
-cargo build --target wasm32-unknown-unknown --release --package relay
-wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
-
-dfx deploy backend
-dfx deploy frontend
+dfx deploy
 ```
 
 If your src/declarations folder does not create run:
@@ -71,25 +61,3 @@ dfx generate
 ```
 npm run dev
 ```
-
-Troubleshooting:
-
-- If you have missing `relay-opt.wasm` file, run:
-
-```
-wasm-opt target/wasm32-unknown-unknown/release/relay.wasm --strip-debug -Oz -o target/wasm32-unknown-unknown/release/relay-opt.wasm
-```
-
-- If you don't have `wasm-opt` installed, run:
-
-```
-brew install binaryen
-```
-
-- If you want to regenerate `dynamic-relays.did` and `relay.did` file then run:
-
-```
-cargo test
-```
-
-- If you are planning to run this project locally you have to also deploy local ledger canister. The `build.sh` script contains local `ckbtc_ledger`.
