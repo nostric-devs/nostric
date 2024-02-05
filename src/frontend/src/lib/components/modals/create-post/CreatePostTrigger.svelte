@@ -1,15 +1,14 @@
 <script lang="ts">
   import { getModalStore } from "@skeletonlabs/skeleton";
-  import type { ModalSettings, ModalComponent } from "@skeletonlabs/skeleton";
+  import type { ModalSettings } from "@skeletonlabs/skeleton";
   import { Plus } from "svelte-feathers";
   import CreatePostModal from "$lib/components/modals/create-post/CreatePostModal.svelte";
 
   const modalStore = getModalStore();
 
-  const component: ModalComponent = { ref: CreatePostModal };
   const modal: ModalSettings = {
     type: "component",
-    component,
+    component: { ref: CreatePostModal },
     title: "New post",
     body: "Complete the form below and then press submit.",
   };

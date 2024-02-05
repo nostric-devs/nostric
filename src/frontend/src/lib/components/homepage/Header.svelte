@@ -1,7 +1,12 @@
-<script>
+<script lang="ts">
   import Logo from "$lib/components/logo/Logo.svelte";
   import { ArrowDown } from "svelte-feathers";
   import { scroll } from "$lib/utils/scroll";
+  import { AuthStates, authUser } from "$lib/stores/Auth";
+  import { goto } from "$app/navigation";
+  import { ROUTES, getPath } from "$lib/utils/routes";
+
+  $: isAuthenticated = $authUser.authState !== AuthStates.ANONYMOUS;
 </script>
 
 <header class="text-gray-600 body-font">
@@ -46,9 +51,16 @@
       </a>
     </nav>
     <button
-      on:click|preventDefault={() => scroll("#signup")}
+      on:click|preventDefault={() => {
+        if (isAuthenticated) {
+          goto(getPath(ROUTES.EXPLORE));
+        } else {
+          scroll("#signup");
+        }
+      }}
       class="btn variant-filled-primary inline-flex items-center focus:outline-none rounded mt-4 md:mt-0 font-medium text-md"
-      >Open App
+    >
+      Open App
       <ArrowDown class="m-1" size="18" />
     </button>
   </div>

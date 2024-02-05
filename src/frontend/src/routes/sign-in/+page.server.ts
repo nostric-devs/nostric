@@ -8,7 +8,7 @@ export const actions: Actions = {
       httpOnly: true,
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60,
+      maxAge: 60 * 60 * 60,
     });
     return { success: true };
   },
@@ -18,7 +18,7 @@ export const actions: Actions = {
       httpOnly: true,
       sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60,
+      maxAge: 60 * 60 * 60,
     });
     return { success: true };
   },

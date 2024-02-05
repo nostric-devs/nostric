@@ -1,16 +1,27 @@
 <script lang="ts">
   import UserProfile from "$lib/components/user/profile/UserProfile.svelte";
   import { authUser } from "$lib/stores/Auth";
-  import type { NDKUser } from "@nostr-dev-kit/ndk";
-  import { events } from "$lib/stores/Events";
+  import { feed, type NodeEvent } from "$lib/stores/Feed";
+  import type { NDKEvent } from "@nostr-dev-kit/ndk";
 
-  let user: NDKUser | undefined;
-  $: if ($authUser.nostr) {
-    user = $authUser.nostr.getUser();
+  let events: NodeEvent[] = [];
+
+  $: {
+    let parsedEvents: NodeEvent[] = [];
+    for (const event of Object.values($feed) as NodeEvent[]) {
+      if (
+        event.isRoot() &&
+        event.model.author.pubkey === $authUser.nostr?.getPublicKey()
+      ) {
+        parsedEvents.push(event.model);
+      }
+      parsedEvents = parsedEvents.sort(
+        (x: NDKEvent, y: NDKEvent) => y.created_at - x.created_at,
+      );
+    }
+    events = parsedEvents;
   }
+  $: user = $authUser.nostr.getUser();
 </script>
 
-<UserProfile
-  {user}
-  events={$events.filter((event) => event.author.pubkey === user.pubkey)}
-/>
+<UserProfile {user} {events} />

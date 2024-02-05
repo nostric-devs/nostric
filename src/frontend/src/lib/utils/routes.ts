@@ -27,7 +27,10 @@ export const getPath = (...names: string[]): string => {
   return `/${names.join("/")}`;
 };
 
-export const isPathAccessible = (url: string, status: AuthState): boolean => {
+export const isPathAccessible = (
+  url: string,
+  status: AuthState | number,
+): boolean => {
   const freelyAccessible: string[] = [
     ROUTES.EXPLORE,
     ROUTES.POST,
@@ -36,16 +39,24 @@ export const isPathAccessible = (url: string, status: AuthState): boolean => {
   ];
   const identityAccessible: string[] = [ROUTES.IMAGES, ROUTES.BOOKMARKS];
 
-  if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
+  if (url === getPath(ROUTES.HOMEPAGE)) {
+    // ROUTES.HOMEPAGE is empty string, would match anything
     return true;
-  }
-  if (status >= AuthStates.NOSTR_AUTHENTICATED) {
-    return !identityAccessible.find((path: string) =>
-      url.startsWith(getPath(path)),
+  } else if (isNaN(status)) {
+    return (
+      freelyAccessible.find((path: string): boolean =>
+        url.startsWith(getPath(path)),
+      ) !== undefined
     );
+  } else if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
+    return true;
+  } else if (status >= AuthStates.NOSTR_AUTHENTICATED) {
+    return (
+      identityAccessible.find((path: string) =>
+        url.startsWith(getPath(path)),
+      ) === undefined
+    );
+  } else {
+    return false;
   }
-
-  return !!freelyAccessible.find((path: string) =>
-    url.startsWith(getPath(path)),
-  );
 };
