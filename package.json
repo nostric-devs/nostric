@@ -77,7 +77,7 @@
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
     "novel-svelte": "^0.1.6",
-    "svelte-feathers": "^0.8.4",
+    "svelte-feathers": "^1.0.1",
     "svelte-loading-spinners": "^0.3.4",
     "tree-model": "^1.0.7"
   }
