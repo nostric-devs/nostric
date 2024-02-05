@@ -5,7 +5,40 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      dfinity-dependencies:
+        patterns:
+          - "@dfinity/*"
+      svelte-dependencies:
+        patterns:
+          - "svelte*"
+          - "@sveltejs/*"
+      development-tools:
+        patterns:
+          - "eslint*"
+          - "prettier*"
+          - "typescript"
+          - "vite"
+      ui-tools:
+        patterns:
+          - "tailwindcss"
+          - "autoprefixer"
+          - "postcss*"
+      misc:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "@dfinity/*"
+          - "svelte*"
+          - "@sveltejs/*"
+          - "eslint*"
+          - "prettier*"
+          - "typescript"
+          - "vite"
+          - "tailwindcss"
+          - "autoprefixer"
+          - "postcss*"
