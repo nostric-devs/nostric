@@ -54,6 +54,5 @@ jobs:
           dfx identity use action
           dfx identity set-wallet ${{ secrets.WALLET_CANISTER_ID }} --network ic
           dfx wallet balance --network ic
-          dfx generate
           dfx deploy --network ic
         continue-on-error: false
