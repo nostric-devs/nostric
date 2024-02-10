@@ -15,6 +15,9 @@
   $: isActive = (pageName: string) => {
     return $page.url.pathname === pageName;
   };
+  $: includes = (pageName: string) => {
+    return $page.url.pathname.includes(pageName);
+  };  
   $: isAuthenticated = $authUser.authState < AuthStates.IDENTITY_AUTHENTICATED;
 </script>
 
@@ -96,7 +99,7 @@
     <li>
       <a
         href={getPath(ROUTES.SETTINGS)}
-        class:bg-primary-active-token={isActive(getPath(ROUTES.SETTINGS))}
+        class:bg-primary-active-token={includes(getPath(ROUTES.SETTINGS))}
         class="capitalize"
       >
         <Settings size="20" class="lg:mx-auto xl:mx-0"></Settings>
@@ -104,7 +107,7 @@
       </a>
     </li>
   </ul>
-  {#if $page.url.pathname.includes(ROUTES.SETTINGS)}
+  <!-- {#if $page.url.pathname.includes(ROUTES.SETTINGS)}
     <ul class="pl-8 pt-2">
       <a
         href={getPath(ROUTES.SETTINGS, ROUTES.PROFILE)}
@@ -134,7 +137,7 @@
         <span class="lg:hidden xl:block ml-3">{ROUTES.PRO}</span>
       </a>
     </ul>
-  {/if}
+  {/if} -->
 </nav>
 
 <style>

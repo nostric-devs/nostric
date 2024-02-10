@@ -51,10 +51,9 @@
 
   $: userProfile = $authUser.nostr.getUser()?.profile;
 </script>
-
-<h1 class="h1 m-4">Profile Settings</h1>
-<form class="w-full p-4">
-  <div class="mt-6">
+<div class="m-4">You can update your profile info here.</div>
+<form class="w-full px-4">
+  <div>
     <div class="font-semibold pl-1 mb-2">Username</div>
     <input
       type="text"

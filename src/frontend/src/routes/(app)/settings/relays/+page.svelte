@@ -27,9 +27,8 @@
   };
 </script>
 
-<h1 class="h1 m-4">Relays</h1>
-<div class="m-8">You can manage your relay servers here.</div>
-<div class="m-8">
+<div class="m-4">You can manage your relay servers here.</div>
+<div class="m-4">
   <input
     type="text"
     bind:value={newRelay}
@@ -51,7 +50,7 @@
   </button>
 </div>
 
-<div class="m-4 p-4">
+<div class="p-4">
   {#each $relays as relay}
     <RelayCard {relay} />
   {/each}
