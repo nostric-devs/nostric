@@ -10,7 +10,8 @@
         Nostric variants
       </h1>
       <p class="lg:w-2/3 mx-auto leading-relaxed text-base text-white">
-        Whatever cardigan tote bag tumblr hexagon brooklyn asymmetrical.
+        Here is the description of Nostric variants. Choose the variant that
+        fits you the best.
       </p>
     </div>
     <div class="flex flex-wrap -m-4">
@@ -31,21 +32,21 @@
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Vexillologist pitchfork
+            </span>Publish posts
           </p>
           <p class="flex items-center mb-2">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Tumeric plaid portland
+            </span>Update your profile
           </p>
           <p class="flex items-center mb-6">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Mixtape chillwave tumeric
+            </span>Like, comment, share
           </p>
           <button
             on:click|preventDefault={() => scroll("#signup")}
@@ -54,7 +55,7 @@
             <ArrowDown class="w-4 h-4 ml-auto" />
           </button>
           <p class="text-xs text-gray-500 mt-3">
-            Literally you probably haven't heard of them jean shorts.
+            Good choice if you have Nostr account and want to try Nostric.
           </p>
         </div>
       </div>
@@ -81,28 +82,21 @@
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Vexillologist pitchfork
+            </span>Everything from Anonymous
           </p>
           <p class="flex items-center mb-2">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Tumeric plaid portland
+            </span>Secure private key encryption
           </p>
           <p class="flex items-center mb-2">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Hexagon neutra unicorn
-          </p>
-          <p class="flex items-center mb-6">
-            <span
-              class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
-            >
-              <CheckCircle />
-            </span>Mixtape chillwave tumeric
+            </span>Internet identity login
           </p>
           <button
             on:click|preventDefault={() => scroll("#signup")}
@@ -111,7 +105,7 @@
             <ArrowDown class="w-4 h-4 ml-auto" />
           </button>
           <p class="text-xs text-gray-500 mt-3">
-            Literally you probably haven't heard of them jean shorts.
+            Great choice for best Nostric experience.
           </p>
         </div>
       </div>
@@ -131,35 +125,21 @@
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Vexillologist pitchfork
+            </span>Everything from Standard
           </p>
           <p class="flex items-center mb-2">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Tumeric plaid portland
+            </span>Media files upload
           </p>
           <p class="flex items-center mb-2">
             <span
               class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
             >
               <CheckCircle />
-            </span>Hexagon neutra unicorn
-          </p>
-          <p class="flex items-center mb-2">
-            <span
-              class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
-            >
-              <CheckCircle />
-            </span>Vexillologist pitchfork
-          </p>
-          <p class="flex items-center mb-6">
-            <span
-              class="w-4 h-4 mr-2 inline-flex items-center justify-center text-white rounded-full flex-shrink-0"
-            >
-              <CheckCircle />
-            </span>Mixtape chillwave tumeric
+            </span>Data backups
           </p>
           <button
             on:click|preventDefault={() => scroll("#signup")}
@@ -168,7 +148,7 @@
             <ArrowDown class="w-4 h-4 ml-auto" />
           </button>
           <p class="text-xs text-gray-500 mt-3">
-            Literally you probably haven't heard of them jean shorts.
+            Extra features for a small fee.
           </p>
         </div>
       </div>
