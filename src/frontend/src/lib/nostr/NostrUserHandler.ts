@@ -18,6 +18,7 @@ import type { NostrHandler } from "$lib/nostr";
 import { followedUsers } from "$lib/stores/FollowedUsers";
 import { get } from "svelte/store";
 import { NDKMarker } from "$lib/nostr/NostrHandler";
+import { NDKSubscriptionCacheUsage } from "@nostr-dev-kit/ndk";
 
 export class NostrUserHandler {
   private nostrUser: NDKUser;
@@ -73,11 +74,14 @@ export class NostrUserHandler {
       }
     }
 
-    await this.nostrUser.fetchProfile();
+    await this.nostrUser.fetchProfile({
+      cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
+    });
     followedUsers.init(await this.fetchFollowedUsersWithProfiles());
 
     const filters: NDKFilter = {
       kinds: [
+        NDKKind.Metadata,
         NDKKind.Text,
         NDKKind.Reaction,
         NDKKind.Repost,
@@ -108,6 +112,7 @@ export class NostrUserHandler {
 
     const filters: NDKFilter = {
       kinds: [
+        NDKKind.Metadata,
         NDKKind.Text,
         NDKKind.Reaction,
         NDKKind.Repost,
@@ -169,6 +174,9 @@ export class NostrUserHandler {
    * @param profile - The profile to use for updating.
    */
   public async updateProfile(profile: NDKUserProfile): Promise<void> {
+    if (!this.nostrUser.profile) {
+      await this.nostrUser.fetchProfile();
+    }
     this.nostrUser.profile = profile;
     await this.nostrUser.publish();
   }

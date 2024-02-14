@@ -4,16 +4,13 @@
   import { authUser } from "$lib/stores/Auth";
   import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
   import { Circle, Copy } from "svelte-feathers";
+  import { onMount } from "svelte";
 
   const toastStore: ToastStore = getToastStore();
   let disabled: boolean = false;
   let loading: boolean = false;
 
-  let userProfile: NDKUserProfile = {
-    name: "",
-    image: "",
-    bio: "",
-  };
+  let userProfile: NDKUserProfile = {};
 
   const triggerClipboardToast = (message: string): void => {
     toastStore.trigger({
@@ -29,10 +26,9 @@
     disabled = true;
     try {
       if ($authUser.nostr) {
-        console.log(userProfile);
         await $authUser.nostr.updateProfile(userProfile);
         toastStore.trigger({
-          message: `Your profile ${userProfile.name} was sucessfully updated.`,
+          message: `Your profile ${userProfile?.name} was successfully updated.`,
           background: "variant-filled-success",
           classes: "rounded-2xl, font-semibold",
         });
@@ -49,8 +45,13 @@
     }
   };
 
-  $: userProfile = $authUser.nostr.getUser()?.profile;
+  onMount(async () => {
+    userProfile = JSON.parse(
+      JSON.stringify($authUser.nostr?.getUser()?.profile),
+    );
+  });
 </script>
+
 <div class="m-4">You can update your profile info here.</div>
 <form class="w-full px-4">
   <div>

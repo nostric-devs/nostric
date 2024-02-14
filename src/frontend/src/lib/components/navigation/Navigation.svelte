@@ -17,7 +17,7 @@
   };
   $: includes = (pageName: string) => {
     return $page.url.pathname.includes(pageName);
-  };  
+  };
   $: isAuthenticated = $authUser.authState < AuthStates.IDENTITY_AUTHENTICATED;
 </script>
 

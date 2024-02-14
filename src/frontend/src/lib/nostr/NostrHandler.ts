@@ -34,7 +34,6 @@ export class NostrHandler {
   public explicitRelays: string[] = [
     "wss://relay.nostr.band",
     "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
   ];
 
   private subscriptionOptions: NDKSubscriptionOptions = {

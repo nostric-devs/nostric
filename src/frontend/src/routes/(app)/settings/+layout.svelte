@@ -17,7 +17,7 @@
         class="!p-2"
         href={getPath(ROUTES.SETTINGS, ROUTES.PROFILE)}
         class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.PROFILE)
+          getPath(ROUTES.SETTINGS, ROUTES.PROFILE),
         )}
       >
         <span class="badge"><User /></span>
@@ -29,7 +29,7 @@
         class="!p-2"
         href={getPath(ROUTES.SETTINGS, ROUTES.RELAYS)}
         class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.RELAYS)
+          getPath(ROUTES.SETTINGS, ROUTES.RELAYS),
         )}
       >
         <span class="badge"><Server /></span>
@@ -41,7 +41,7 @@
         class="!p-2"
         href={getPath(ROUTES.SETTINGS, ROUTES.PRO)}
         class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.PRO)
+          getPath(ROUTES.SETTINGS, ROUTES.PRO),
         )}
       >
         <span class="badge"><Star /></span>
