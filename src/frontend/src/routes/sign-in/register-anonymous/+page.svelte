@@ -28,7 +28,7 @@
     toastStore.trigger({
       message,
       background: "variant-filled-secondary",
-      classes: "rounded-2xl, font-semibold",
+      classes: "rounded-md, font-semibold",
       timeout: 1000,
     });
   };
@@ -44,7 +44,7 @@
         toastStore.trigger({
           message: error as string,
           background: "variant-filled-error",
-          classes: "rounded-2xl, font-semibold",
+          classes: "rounded-md, font-semibold",
         });
       } finally {
         loading = false;
@@ -65,12 +65,8 @@
       class="w-full"
       use:enhance={onRegisterAnonymouslySubmit}
     >
-      <h2 class="mb-3 pl-1 h2 text-3xl text-center">
-        <span
-          class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"
-        >
-          Create new Nostr account
-        </span>
+      <h2 class="mb-6 pl-1 h2 text-3xl text-center">
+        <span> Create new Nostr account </span>
       </h2>
       <div class="text-center mb-6">
         Your keys will not be stored in our backend, make a copy for any future
@@ -81,7 +77,7 @@
         <input
           type="text"
           name="userName"
-          class="input px-3 py-2 rounded-2xl mr-2 mb-4"
+          class="input px-3 py-2 rounded-md mr-2 mb-4"
           placeholder="type in your new Nostr user name"
           bind:value={userProfile.name}
           {disabled}
@@ -93,7 +89,7 @@
           <input
             type="text"
             name="privateKey"
-            class="input px-3 py-2 rounded-2xl mr-3"
+            class="input px-3 py-2 rounded-md mr-3"
             data-clipboard="privateKey"
             value={privateKey}
             readonly
@@ -101,7 +97,7 @@
           <button
             type="button"
             use:clipboard={{ input: "privateKey" }}
-            class="btn variant-filled rounded-2xl font-semibold"
+            class="btn variant-filled rounded-md font-semibold"
             on:click={() =>
               triggerClipboardToast("Private key copied to clipboard")}
           >
@@ -116,7 +112,7 @@
           <input
             type="text"
             name="publicKey"
-            class="input px-3 py-2 rounded-2xl mr-3"
+            class="input px-3 py-2 rounded-md mr-3"
             data-clipboard="publicKey"
             value={publicKey}
             readonly
@@ -124,7 +120,7 @@
           <button
             type="button"
             use:clipboard={{ input: "publicKey" }}
-            class="btn variant-filled rounded-2xl font-semibold"
+            class="btn variant-filled rounded-md font-semibold"
             on:click={() =>
               triggerClipboardToast("Public key copied to clipboard")}
           >
@@ -137,7 +133,7 @@
         <div class="font-semibold pl-1 mb-2">Your bio</div>
         <div>
           <textarea
-            class="textarea rounded-2xl"
+            class="textarea rounded-md"
             rows="3"
             name="bio"
             bind:value={userProfile.bio}
@@ -147,7 +143,7 @@
       <button
         type="submit"
         formaction="/sign-in?/login-anonymous"
-        class="btn bg-gradient-to-r from-blue-800 to-cyan-300 rounded-2xl w-full font-semibold mb-6"
+        class="btn variant-filled-secondary rounded-md w-full font-semibold mb-6"
         disabled={disabled || !userProfile.name}
       >
         {#if loading}
