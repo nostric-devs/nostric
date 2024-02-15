@@ -5,7 +5,9 @@ function getFiles() {
   const { subscribe, update, set } = files;
 
   const filePathToUrl = (path: string, host: string): string => {
-    return `${host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
+    return process.env.DFX_NETWORK === "ic"
+      ? `https://${process.env.STORAGE_CANISTER_ID}.raw.icp0.io/${path}`
+      : `${host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
   };
 
   const fill = (urls: string[], host?: string): void => {
