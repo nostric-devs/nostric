@@ -45,12 +45,13 @@ actor class Main() = this {
   };
 
   let principalCharacterSet = "0123456789abcdefghijklmnopqrstuvwxyz/-";
-  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_!*()";
+  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_";
 
   let filenameCharacterSet = "0123456789";
   let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
 
   public query func http_request(request : Request) : async Response {
+    Debug.print("Downloading file: " # request.url);
     var result = handleDownload(request.url);
     switch (result) {
       case (null) {
@@ -73,11 +74,12 @@ actor class Main() = this {
       extension = fileExtension;
       content = content;
     });
-    let expectedAddress = "&id=" # encode(owner # "/" # filename) # fileExtension;
+    let expectedAddress = encode(owner # "/" # filename) # fileExtension;
     let actualAddress = await searchFiles(owner, 1);
     switch (actualAddress) {
       case (?address) {
         if (address[0] == expectedAddress) {
+          Debug.print("Uploaded file: " # address[0]);
           #ok(address[0]);
         } else {
           #err("File upload failed");
@@ -149,19 +151,8 @@ actor class Main() = this {
     };
   };
 
-  private func extractAddress(address : Text) : Text {
-    let params = Text.split(address, #char('&'));
-    var fileId = "";
-
-    for (param in params) {
-      let keyValue = Iter.toArray(Text.split(param, #char('=')));
-      if (Text.startsWith(param, #text "id=")) {
-        if (Array.size(keyValue) == 2) {
-          fileId := keyValue[1];
-        };
-      };
-    };
-    let filePathSplit = Iter.toArray(Text.split(fileId, #char '.'));
+  private func extractAddress(fileName : Text) : Text {
+    let filePathSplit = Iter.toArray(Text.split(fileName, #char '.'));
     if (Array.size(filePathSplit) != 2) {
       return "";
     };
@@ -319,7 +310,7 @@ actor class Main() = this {
         ?(#text(owner)),
         ?(#text(name)),
         ?(#text(extension)),
-      ) { ?("&id=" # encode(owner # "/" # name) # extension) };
+      ) { ?(encode(owner # "/" # name) # extension) };
       case _ { null };
     };
   };
