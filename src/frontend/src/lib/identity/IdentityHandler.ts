@@ -21,7 +21,7 @@ export class IdentityHandler {
   constructor() {
     this.host =
       process.env.DFX_NETWORK === "ic"
-        ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
+        ? `https://${process.env.BACKEND_CANISTER_ID}.raw.icp0.io`
         : "http://localhost:8000";
   }
 
