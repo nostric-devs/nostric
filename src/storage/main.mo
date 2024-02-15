@@ -9,7 +9,6 @@ import Principal "mo:base/Principal";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
 import HttpUtils "utils/HttpUtils";
-import Debug "mo:base/Debug";
 
 actor class Main() = this {
   stable let db = CanDB.init();
@@ -51,7 +50,6 @@ actor class Main() = this {
   let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
 
   public query func http_request(request : Request) : async Response {
-    Debug.print("Downloading file: " # request.url);
     var result = handleDownload(request.url);
     switch (result) {
       case (null) {
@@ -79,7 +77,6 @@ actor class Main() = this {
     switch (actualAddress) {
       case (?address) {
         if (address[0] == expectedAddress) {
-          Debug.print("Uploaded file: " # address[0]);
           #ok(address[0]);
         } else {
           #err("File upload failed");
