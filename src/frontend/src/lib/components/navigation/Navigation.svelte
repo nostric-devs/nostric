@@ -47,16 +47,16 @@
       <a
         href={getPath(ROUTES.NOTIFICATIONS)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.NOTIFICATIONS))}
-        class="capitalize"
+        class="capitalize pointer-events-none opacity-50 cursor-not-allowed"
       >
-        <div class="relative inline-block">
-          <span
-            class="badge-icon variant-filled-tertiary absolute -top-3 -right-3 z-10"
-            >2</span
-          >
-          <Bell size="20" class="lg:mx-auto xl:mx-0"></Bell>
-        </div>
-        <!-- <Bell size="20" class="lg:mx-auto xl:mx-0"></Bell> -->
+        <!--        <div class="relative inline-block">-->
+        <!--          <span-->
+        <!--            class="badge-icon variant-filled-tertiary absolute -top-3 -right-3 z-10"-->
+        <!--            >2</span-->
+        <!--          >-->
+        <!--          <Bell size="20" class="lg:mx-auto xl:mx-0"></Bell>-->
+        <!--        </div>-->
+        <Bell size="20" class="lg:mx-auto xl:mx-0"></Bell>
         <span class="lg:hidden xl:block ml-3">{ROUTES.NOTIFICATIONS}</span>
       </a>
     </li>

@@ -23,8 +23,10 @@
     events = parsedEvents;
   }
   $: if ($authUser.nostr) {
-    user = $authUser.nostr?.getUser();
+    user = $authUser.nostr?.getUser({ pubkey: $authUser.nostr.getPublicKey() });
   }
 </script>
 
-<UserProfile {user} {events} />
+{#key user.pubkey}
+  <UserProfile {user} {events} />
+{/key}

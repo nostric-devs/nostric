@@ -26,7 +26,7 @@ export const recursiveParentLookUp = async (
   localFeed: NodeEvents,
   event: NDKEvent,
 ): Promise<void> => {
-  if (!(event.id in localFeed)) {
+  if (event?.id && !(event?.id in localFeed)) {
     // first we need to check whether this is event is a reply,
     // which is determined by the presence of an "#e" tag with "root" marker
     // if it is a reply, it might be a reply to a reply, which is
@@ -51,8 +51,10 @@ export const recursiveParentLookUp = async (
       // this event is a reply, and its parent is not yet processed,
       // thus we fetch the event from Nostr and recurse
       if (!(parentEventId in localFeed)) {
-        const parentEvent: NDKEvent =
-          await nostrHandler.fetchEventById(parentEventId);
+        const parentEvent: NDKEvent = (
+          await nostrHandler.fetchEventsByFilter({ ids: [parentEventId] })
+        ).at(0);
+
         await recursiveParentLookUp(localFeed, parentEvent);
       }
       // event.id could have been added by another event at this time, need to check

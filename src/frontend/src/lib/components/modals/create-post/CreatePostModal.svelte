@@ -10,7 +10,6 @@
   } from "@skeletonlabs/skeleton";
   import { AuthStates, authUser } from "$lib/stores/Auth";
   import { NDKKind, NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
-  import { Circle } from "svelte-loading-spinners";
   import { CheckSquare, Copy, Plus } from "svelte-feathers";
   import { ROUTES, getPath } from "$lib/utils/routes";
   import UploadImage from "$lib/components/images/UploadImage.svelte";
@@ -92,7 +91,7 @@
 {#if $modalStore[0]}
   <div class="card p-4 w-modal shadow-xl space-y-4">
     <header class="text-2xl font-bold">{$modalStore[0].title}</header>
-    <article>{$modalStore[0].body}</article>
+    <!--    <article>{$modalStore[0].body}</article>-->
 
     {#if author && event}
       <div class="card p-5">
@@ -150,7 +149,7 @@
               disabled={processing}
             >
               {#if processing}
-                <ProgressRadial value={undefined} width="w-6" />
+                <ProgressRadial width="w-6" />
               {:else}
                 <Plus />
               {/if}
@@ -224,7 +223,7 @@
       >
         {#if processing}
           <span class="mr-2">
-            <Circle size="15" color="white" unit="px"></Circle>
+            <ProgressRadial width="w-4" />
           </span>
         {/if}
         {#if isReply}

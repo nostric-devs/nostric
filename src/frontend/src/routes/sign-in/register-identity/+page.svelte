@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
-  import { Circle } from "svelte-loading-spinners";
   import { Copy } from "svelte-feathers";
-  import { getToastStore, clipboard } from "@skeletonlabs/skeleton";
-  import type { ToastStore } from "@skeletonlabs/skeleton";
+  import { clipboard, ProgressRadial } from "@skeletonlabs/skeleton";
   import { onMount } from "svelte";
   import { nostrHandler } from "$lib/nostr";
   import DfinityLogo from "$lib/assets/images/dfinity-logo.svg";
@@ -11,8 +9,10 @@
   import { goto } from "$app/navigation";
   import { getPath, ROUTES } from "$lib/utils/routes";
   import { authUser } from "$lib/stores/Auth";
+  import Toaster from "$lib/components/toast/Toaster.svelte";
+  import { getToastStore } from "@skeletonlabs/skeleton";
 
-  const toastStore: ToastStore = getToastStore();
+  const toastStore = getToastStore();
 
   let loading: boolean = false;
   let disabled: boolean = false;
@@ -22,15 +22,6 @@
     name: "",
     image: "",
     bio: "",
-  };
-
-  const triggerClipboardToast = (message: string): void => {
-    toastStore.trigger({
-      message,
-      background: "variant-filled-secondary",
-      classes: "rounded-2xl, font-semibold",
-      timeout: 1000,
-    });
   };
 
   const onIdentityRegisterSubmit = async () => {
@@ -114,16 +105,16 @@
             value={privateKey}
             readonly
           />
-          <button
-            type="button"
-            use:clipboard={{ input: "privateKey" }}
-            class="btn variant-filled rounded-2xl font-semibold"
-            on:click={() =>
-              triggerClipboardToast("Private key copied to clipboard")}
-          >
-            <span>Copy</span>
-            <Copy size="15"></Copy>
-          </button>
+          <Toaster message="Private key copied to clipboard" color="secondary">
+            <button
+              type="button"
+              use:clipboard={{ input: "privateKey" }}
+              class="btn variant-filled rounded-2xl font-semibold"
+            >
+              <span>Copy</span>
+              <Copy size="15"></Copy>
+            </button>
+          </Toaster>
         </div>
       </div>
       <div class="mb-4">
@@ -137,16 +128,16 @@
             value={publicKey}
             readonly
           />
-          <button
-            type="button"
-            use:clipboard={{ input: "publicKey" }}
-            class="btn variant-filled rounded-2xl font-semibold"
-            on:click={() =>
-              triggerClipboardToast("Public key copied to clipboard")}
-          >
-            <span>Copy</span>
-            <Copy size="15"></Copy>
-          </button>
+          <Toaster message="Public key copied to clipboard" color="secondary">
+            <button
+              type="button"
+              use:clipboard={{ input: "publicKey" }}
+              class="btn variant-filled rounded-2xl font-semibold"
+            >
+              <span>Copy</span>
+              <Copy size="15"></Copy>
+            </button>
+          </Toaster>
         </div>
       </div>
       <div class="mb-8">
@@ -168,7 +159,7 @@
       >
         {#if loading}
           <span class="mr-2">
-            <Circle size="15" color="white" unit="px"></Circle>
+            <ProgressRadial width="w-4" />
           </span>
         {/if}
         Create new account with Internet Identity

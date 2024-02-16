@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { getToastStore, clipboard } from "@skeletonlabs/skeleton";
+  import {
+    getToastStore,
+    clipboard,
+    ProgressRadial,
+  } from "@skeletonlabs/skeleton";
   import type { ToastStore } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
   import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
-  import { Circle, Copy } from "svelte-feathers";
+  import { Copy } from "svelte-feathers";
   import { onMount } from "svelte";
 
   const toastStore: ToastStore = getToastStore();
@@ -141,7 +145,7 @@
   >
     {#if loading}
       <span class="mr-2">
-        <Circle size="15" color="white" unit="px"></Circle>
+        <ProgressRadial width="w-4" />
       </span>
     {/if}
     Update your profile

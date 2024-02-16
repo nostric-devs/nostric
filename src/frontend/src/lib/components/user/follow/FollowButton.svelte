@@ -2,8 +2,7 @@
   import { UserMinus, UserPlus } from "svelte-feathers";
   import type { NDKUser } from "@nostr-dev-kit/ndk";
   import { AuthStates, authUser } from "$lib/stores/Auth";
-  import { getToastStore } from "@skeletonlabs/skeleton";
-  import { Circle } from "svelte-loading-spinners";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
   import { followedUsers } from "$lib/stores/FollowedUsers";
 
   let loading: boolean = false;
@@ -76,7 +75,7 @@
     >
       {#if loading}
         <span class="mr-2">
-          <Circle size="15" color="white" unit="px" />
+          <ProgressRadial width="w-4" />
         </span>
       {:else}
         <span>
@@ -96,7 +95,7 @@
     >
       {#if loading}
         <span class="mr-2">
-          <Circle size="15" color="white" unit="px" />
+          <ProgressRadial width="w-4" />
         </span>
       {:else}
         <span>

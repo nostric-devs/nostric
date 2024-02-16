@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Circle } from "svelte-loading-spinners";
   import { nostrHandler } from "$lib/nostr";
   import { authUser } from "$lib/stores/Auth";
   import { goto } from "$app/navigation";
@@ -7,7 +6,7 @@
   import { onMount } from "svelte";
   import { localAuthStorage } from "$lib/stores/LocalStorage";
   import { enhance } from "$app/forms";
-  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
 
   const toastStore = getToastStore();
 
@@ -22,7 +21,7 @@
     return async () => {
       try {
         await authUser.logInAnonymously(undefined, privateKey);
-        await goto(getPath(ROUTES.EXPLORE));
+        await goto(getPath(ROUTES.FEED));
       } catch (error) {
         toastStore.trigger({
           message: error as string,
@@ -85,7 +84,7 @@
       >
         {#if loading}
           <span class="mr-2">
-            <Circle size="15" color="white" unit="px"></Circle>
+            <ProgressRadial width="w-4" />
           </span>
         {/if}
         Log with private and public key

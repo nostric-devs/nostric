@@ -1,15 +1,13 @@
 <script lang="ts">
   import DfinityLogo from "$lib/assets/images/dfinity-logo.svg";
-  import Alert from "$lib/components/alerts/Alert.svelte";
   import {
     AssociatedFetchError,
     authUser,
     NotYetAssociatedError,
   } from "$lib/stores/Auth";
-  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
   import { goto } from "$app/navigation";
   import { getPath, ROUTES } from "$lib/utils/routes";
-  import { Circle } from "svelte-loading-spinners";
   import type { ToastStore } from "@skeletonlabs/skeleton";
   import { enhance } from "$app/forms";
 
@@ -79,9 +77,7 @@
         Try Nostric.
       </span>
     </h1>
-    <div class="mx-6">
-      <Alert />
-    </div>
+
     <div class="xl:flex mt-12">
       <div class="xl:w-1/2 flex flex-col xl:pr-5">
         <h1 class="h1 text-4xl text-center mb-10">
@@ -91,6 +87,7 @@
             Anonymous user
           </span>
         </h1>
+
         <div class="xl:ml-8">
           <ul class="font-semibold list-disc ml-4">
             <li>use Nostric App with limited features</li>
@@ -99,30 +96,30 @@
             <li>your keys will never leave your browser</li>
           </ul>
         </div>
+
         <div class="mt-12">
           <div class="mx-auto w-full xl:px-6 text-center">
-            <button
+            <a
+              href={getPath(ROUTES.SIGN_IN)}
               type="button"
               class="btn bg-gradient-to-r from-blue-800 to-cyan-300 rounded-2xl w-full font-semibold mt-2"
-              {disabled}
-              on:click={() => goto(getPath(ROUTES.SIGN_IN))}
             >
               Log with private and public key
-            </button>
+            </a>
           </div>
+
           <div class="mx-auto w-full xl:px-6 text-center mt-4">
-            <button
+            <a
+              href={getPath(ROUTES.SIGN_IN, ROUTES.REGISTER_ANONYMOUS)}
               type="button"
               class="btn variant-filled rounded-2xl w-full font-semibold"
-              {disabled}
-              on:click={() =>
-                goto(getPath(ROUTES.SIGN_IN, ROUTES.REGISTER_ANONYMOUS))}
             >
               Create new Nostr account
-            </button>
+            </a>
           </div>
         </div>
       </div>
+
       <div class="xl:w-1/2 flex flex-col xl:pl-5 mt-8 xl:mt-0">
         <div class="text-4xl text-center mb-10 font-extrabold">
           <div
@@ -171,7 +168,7 @@
             >
               {#if loading === IdentitySubmits.LOG_IN}
                 <span class="mr-2">
-                  <Circle size="15" color="white" unit="px" />
+                  <ProgressRadial width="w-4" />
                 </span>
               {/if}
               Log in using Internet Identity
@@ -199,7 +196,7 @@
             >
               {#if loading === IdentitySubmits.SIGN_UP}
                 <span class="mr-2">
-                  <Circle size="15" color="black" unit="px" />
+                  <ProgressRadial width="w-4" />
                 </span>
               {/if}
               Create new Nostr account with Internet Identity

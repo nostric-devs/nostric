@@ -17,5 +17,5 @@ export const updateLocalAuth = (privateKey: string, token: AuthState): void => {
 };
 
 export const clearLocalAuth = (): void => {
-  localAuthStorage.update((): null => null);
+  // localAuthStorage.update((): null => null);
 };

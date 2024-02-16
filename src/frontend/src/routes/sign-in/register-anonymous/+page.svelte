@@ -1,8 +1,11 @@
 <script lang="ts">
   import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
-  import { Circle } from "svelte-loading-spinners";
   import { Copy } from "svelte-feathers";
-  import { getToastStore, clipboard } from "@skeletonlabs/skeleton";
+  import {
+    getToastStore,
+    clipboard,
+    ProgressRadial,
+  } from "@skeletonlabs/skeleton";
   import type { ToastStore } from "@skeletonlabs/skeleton";
   import { onMount } from "svelte";
   import { nostrHandler } from "$lib/nostr";
@@ -152,7 +155,7 @@
       >
         {#if loading}
           <span class="mr-2">
-            <Circle size="15" color="white" unit="px"></Circle>
+            <ProgressRadial width="w-4" />
           </span>
         {/if}
         Create new account

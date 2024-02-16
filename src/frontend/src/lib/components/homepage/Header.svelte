@@ -1,9 +1,7 @@
 <script lang="ts">
   import Logo from "$lib/components/logo/Logo.svelte";
   import { ArrowDown } from "svelte-feathers";
-  import { scroll } from "$lib/utils/scroll";
   import { AuthStates, authUser } from "$lib/stores/Auth";
-  import { goto } from "$app/navigation";
   import { ROUTES, getPath } from "$lib/utils/routes";
 
   $: isAuthenticated = $authUser.authState !== AuthStates.ANONYMOUS;
@@ -30,8 +28,7 @@
         Home
       </a>
       <a
-        on:click|preventDefault={() => scroll("#features")}
-        href="/"
+        href="#features"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
       >
         Features
@@ -43,25 +40,19 @@
         Blog
       </a>
       <a
-        on:click|preventDefault={() => scroll("#contact")}
-        href="/"
+        href="#contact"
         class="mr-5 text-white hover:text-gray-400 hover:underline cursor-pointer"
       >
         Contact
       </a>
     </nav>
-    <button
-      on:click|preventDefault={() => {
-        if (isAuthenticated) {
-          goto(getPath(ROUTES.EXPLORE));
-        } else {
-          scroll("#signup");
-        }
-      }}
+    <a
+      type="button"
+      href={isAuthenticated ? getPath(ROUTES.FEED) : "/#signup"}
       class="btn variant-filled-primary inline-flex items-center focus:outline-none rounded mt-4 md:mt-0 font-medium text-md"
     >
       Open App
       <ArrowDown class="m-1" size="18" />
-    </button>
+    </a>
   </div>
 </header>

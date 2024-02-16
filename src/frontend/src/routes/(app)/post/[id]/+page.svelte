@@ -23,21 +23,24 @@
     // fetch the event itself
     event = await nostrHandler.fetchEventById($page.params.id);
 
-    // fetch the parent reply tree if any
-    let parentPath: NodeEvents = {};
-    await recursiveParentLookUp(parentPath, event);
-    // we only want the root, thread component will take care of the rest
-    parentPathPromise = Promise.resolve(
-      Object.values(parentPath).find((node) => node.isRoot()),
-    );
-
     // now we are fetching replies
     // deprecated NIP-10 replies
     let deprecatedReplies: NDKEvent[] = await nostrHandler.fetchEventReplies(
       event,
-      30,
+      5,
     );
+
     let markerReplies: NDKEvent[] = [];
+
+    // fetch the parent reply tree if any
+    let parentPath: NodeEvents = {};
+
+    await recursiveParentLookUp(parentPath, event);
+
+    // we only want the root, thread component will take care of the rest
+    parentPathPromise = Promise.resolve(
+      Object.values(parentPath).find((node) => node.isRoot()),
+    );
 
     if (Object.keys(parentPath).length > 1) {
       // this was a reply, so we need to prune deprecated replies to only contain
@@ -51,7 +54,7 @@
       );
       markerReplies = await nostrHandler.fetchEventReplies(
         event,
-        30,
+        10,
         NDKMarker.REPLY,
       );
     } else {
@@ -63,6 +66,7 @@
           return tags.length === 1 && tags.at(0)[1] === event.id;
         },
       );
+
       markerReplies = await nostrHandler.fetchEventReplies(
         event,
         30,
@@ -93,9 +97,13 @@
 
 <h1 class="h1 m-4">Post detail</h1>
 <div class="mx-4">
-  {#await parentPathPromise then parent}
+  {#await parentPathPromise}
+    <PostLoadingSkeleton />
+  {:then parent}
     {#if parent}
       <PostThread eventNode={parent} />
+    {:else}
+      <PostLoadingSkeleton />
     {/if}
   {/await}
 </div>

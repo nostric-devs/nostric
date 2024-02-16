@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { Circle } from "svelte-feathers";
   import { nostrHandler } from "$lib/nostr";
   import { authUser, AuthStates } from "$lib/stores/Auth";
   import { relays } from "$lib/stores/Relays";
   import RelayCard from "$lib/components/relays/RelayCard.svelte";
-  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
 
   let disabled: boolean = false;
   let loading: boolean = false;
@@ -43,7 +42,7 @@
   >
     {#if loading}
       <span class="mr-2">
-        <Circle size="15" color="white" unit="px"></Circle>
+        <ProgressRadial width="w-4" />
       </span>
     {/if}
     Add Relay
