@@ -50,7 +50,7 @@ actor class Main() = this {
 
   private func isAdmin(p : Principal) : Bool {
     let admin = Array.indexOf<Text>(Principal.toText(p), admins, Text.equal);
-    if (admin == null){
+    if (admin == null) {
       return false;
     } else {
       return true;
@@ -58,25 +58,25 @@ actor class Main() = this {
   };
 
   public shared (msg) func addInvitationCode(invitationCode : Text) : async Result.Result<[Text], Error> {
-    if (isAdmin(msg.caller)){
+    if (isAdmin(msg.caller)) {
       invitationcodes := Array.append<Text>(invitationcodes, [invitationCode]);
       return #ok(invitationcodes);
     } else {
       return #err(#CallerNotAdmin);
     };
-    
+
   };
 
   // for testing only
   public shared (msg) func getInvitationCodes() : async Result.Result<[Text], Error> {
-    if (isAdmin(msg.caller)){
+    if (isAdmin(msg.caller)) {
       return #ok(invitationcodes);
     } else {
       return #err(#CallerNotAdmin);
-    };    
-  };  
+    };
+  };
 
-  public shared (msg) func whoAmI() : async (Principal){
+  public shared (msg) func whoAmI() : async (Principal) {
     return msg.caller;
   };
 
@@ -89,8 +89,8 @@ actor class Main() = this {
     // Check if user has valid invitation code
     let code = Array.indexOf<Text>(invitationCode, invitationcodes, Text.equal);
     // Todo add removal of invitation code after use
-    if (code == null){
-      return #err(#InvalidInvitationCode)
+    if (code == null) {
+      return #err(#InvalidInvitationCode);
     };
 
     let nostrProfile : NostrProfile = {

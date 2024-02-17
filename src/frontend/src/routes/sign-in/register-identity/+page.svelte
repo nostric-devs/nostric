@@ -30,7 +30,11 @@
     disabled = true;
     return async () => {
       try {
-        await authUser.registerWithIdentity(privateKey, userProfile, invitationCode);
+        await authUser.registerWithIdentity(
+          privateKey,
+          userProfile,
+          invitationCode,
+        );
         toastStore.trigger({
           message: `Welcome, ${userProfile.name}. Successfully registered.`,
           background: "variant-filled-success",
@@ -158,7 +162,7 @@
           bind:value={invitationCode}
           {disabled}
         />
-      </div>      
+      </div>
       <button
         type="submit"
         class="btn variant-filled-surface rounded-md w-full font-semibold mb-6"
