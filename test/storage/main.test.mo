@@ -33,7 +33,7 @@ await suite(
     await test(
       "get function - Get a file",
       func() : async () {
-        let result = await storage.download("&id=1xF!S9j)1tBuI!gJLV.jpg");
+        let result = await storage.download("58P-nSvu4iDth78-ry.jpg");
         switch (result) {
           case (#ok(u)) {
             assert u == Blob.fromArray([1, 2, 3]);
@@ -56,7 +56,7 @@ await suite(
         let result = await storage.listFiles(10);
         switch (result) {
           case (#ok(u)) {
-            assert u == ["&id=1xF!S9j)1tBuI!gJLV.jpg"];
+            assert u == ["58P-nSvu4iDth78-ry.jpg"];
           };
           case (#err(_)) {
             assert false;
@@ -80,7 +80,7 @@ await suite(
             ("Access-Control-Allow-Origin", "*"),
           ];
           method = "GET";
-          url = "&id=1xF!S9j)1tBuI!gJLV.jpg";
+          url = "58P-nSvu4iDth78-ry.jpg";
         };
         let result = await storage.http_request(request);
         let expectedResponse = {
@@ -110,8 +110,8 @@ await suite(
     await test(
       "delete function - Delete an existing file",
       func() : async () {
-        // Assuming you have a file with the path "&id=1xF!S9j)1tBuI!gJLV.jpg" that can be deleted
-        let filePath = "&id=1xF!S9j)1tBuI!gJLV.jpg";
+        // Assuming you have a file with the path "58P-nSvu4iDth78-ry.jpg" that can be deleted
+        let filePath = "58P-nSvu4iDth78-ry.jpg";
         let result = await storage.delete(filePath);
         switch (result) {
           case (#ok(_)) {
@@ -128,7 +128,7 @@ await suite(
       "delete function - Attempt to delete a non-existent file",
       func() : async () {
         // Use a file path that does not exist
-        let filePath = "&id=q3gij!vB-7-5l*iaj.png";
+        let filePath = "q3gij!vB-7-5l*iaj.png";
         let result = await storage.delete(filePath);
         switch (result) {
           case (#ok(_)) {
@@ -145,7 +145,7 @@ await suite(
       "delete function - Attempt to delete file from invalid url",
       func() : async () {
         // Use a file path that does not exist
-        let filePath = "&id=not-valid-url.jpg";
+        let filePath = "not-valid-url.jpg";
         let result = await storage.delete(filePath);
         switch (result) {
           case (#ok(_)) {

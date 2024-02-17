@@ -17,12 +17,12 @@ updates:
         patterns:
           - "svelte*"
           - "@sveltejs/*"
+          - "vite"
       development-tools:
         patterns:
           - "eslint*"
           - "prettier*"
           - "typescript"
-          - "vite"
       ui-tools:
         patterns:
           - "tailwindcss"

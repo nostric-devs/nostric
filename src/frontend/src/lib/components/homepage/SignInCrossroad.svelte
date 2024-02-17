@@ -70,20 +70,12 @@
 
 <div class="w-screen flex justify-center items-center" id="signup">
   <div class="w-9/12 flex flex-col mx-auto">
-    <h1 class="text-6xl text-center mb-12 font-extrabold">
-      <span
-        class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"
-      >
-        Try Nostric.
-      </span>
-    </h1>
+    <h1 class="text-center h1 font-extrabold">Try nostric</h1>
 
     <div class="xl:flex mt-12">
       <div class="xl:w-1/2 flex flex-col xl:pr-5">
         <h1 class="h1 text-4xl text-center mb-10">
-          <span
-            class="bg-gradient-to-br from-blue-600 to-cyan-300 bg-clip-text text-transparent box-decoration-clone"
-          >
+          <span class="text-secondary-400 box-decoration-clone">
             Anonymous user
           </span>
         </h1>
@@ -102,9 +94,9 @@
             <a
               href={getPath(ROUTES.SIGN_IN)}
               type="button"
-              class="btn bg-gradient-to-r from-blue-800 to-cyan-300 rounded-2xl w-full font-semibold mt-2"
+              class="btn variant-filled-secondary rounded-md w-full font-semibold mt-2"
             >
-              Log with private and public key
+              Log in with private and public key
             </a>
           </div>
 
@@ -112,7 +104,7 @@
             <a
               href={getPath(ROUTES.SIGN_IN, ROUTES.REGISTER_ANONYMOUS)}
               type="button"
-              class="btn variant-filled rounded-2xl w-full font-semibold"
+              class="btn variant-filled rounded-md w-full font-semibold"
             >
               Create new Nostr account
             </a>
@@ -123,10 +115,10 @@
       <div class="xl:w-1/2 flex flex-col xl:pl-5 mt-8 xl:mt-0">
         <div class="text-4xl text-center mb-10 font-extrabold">
           <div
-            class="bg-gradient-to-br from-pink-600 to-violet-500 bg-clip-text text-transparent box-decoration-clone flex flex-col xl:flex-row justify-center content-center"
+            class="text-surface-400 flex flex-col xl:flex-row justify-center content-center"
           >
             <div class="mr-2">Nostric user</div>
-            <div class="badge variant-soft uppercase rounded-2xl mt-4 xl:mt-0">
+            <div class="badge variant-soft uppercase rounded-md mt-4 xl:mt-0">
               recommended
             </div>
           </div>
@@ -162,7 +154,7 @@
           >
             <button
               type="submit"
-              class="btn bg-gradient-to-r from-pink-600 to-violet-500 rounded-2xl w-full font-semibold mt-2"
+              class="btn variant-filled-surface rounded-md w-full font-semibold mt-2"
               {disabled}
               formaction="/sign-in?/login-identity"
             >
@@ -190,7 +182,7 @@
           >
             <button
               type="submit"
-              class="btn variant-filled rounded-2xl w-full font-semibold"
+              class="btn variant-filled rounded-md w-full font-semibold"
               {disabled}
               formaction="/sign-in?/login-identity"
             >
