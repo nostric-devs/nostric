@@ -28,7 +28,7 @@ actor class Main() = this {
     isPro : Bool;
   };
 
-  private stable var invitationcodes : [Text] = [];
+  private stable var invitationcodes : [Text] = ["hello"]; // "hello hardcoded for testing purposes"
 
   private stable var admins : [Text] = [
     "s5n6f-gw2l4-zzp7o-vkbzw-zqqlh-pa5hs-gyb3w-er6d6-rwiem-t4h6w-vqe" // Lukas local dfx identity
@@ -201,17 +201,17 @@ actor class Main() = this {
     Hex.encode(Blob.toArray(encrypted_key));
   };
 
-  // system func preupgrade() {
-  //   stableprofiles := Iter.toArray(profiles.entries());
-  // };
+  system func preupgrade() {
+    stableprofiles := Iter.toArray(profiles.entries());
+  };
 
-  // system func postupgrade() {
-  //   profiles := Map.fromIter<Principal, Profile>(
-  //     stableprofiles.vals(),
-  //     10,
-  //     Principal.equal,
-  //     Principal.hash,
-  //   );
-  //   stableprofiles := [];
-  // };
+  system func postupgrade() {
+    profiles := Map.fromIter<Principal, Profile>(
+      stableprofiles.vals(),
+      10,
+      Principal.equal,
+      Principal.hash,
+    );
+    stableprofiles := [];
+  };
 };
