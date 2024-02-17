@@ -2,26 +2,27 @@
   import { LogOut } from "svelte-feathers";
   import { getToastStore } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
-  import { goto } from "$app/navigation";
-  import { getPath, ROUTES } from "$lib/utils/routes";
   import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
 
   const toastStore = getToastStore();
 
-  const onLogOut = async () => {
-    authUser.logOut();
-    await goto(getPath(ROUTES.HOMEPAGE));
-    toastStore.trigger({
-      message: "You are now logged out",
-      background: "variant-filled-success",
-    });
+  const onLogOut = () => {
+    return async () => {
+      await authUser.logOut();
+      await goto("/#signup");
+      toastStore.trigger({
+        message: "You are now logged out",
+        background: "variant-filled-secondary",
+      });
+    };
   };
 </script>
 
 <form method="POST" use:enhance={onLogOut} class="w-full xl:px-4">
   <button
     type="submit"
-    formaction="/sign-in?/logout"
+    formaction="/logout"
     class="btn variant-filled-warning my-8 font-medium w-full"
   >
     <span>

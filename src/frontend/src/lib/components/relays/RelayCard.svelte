@@ -3,10 +3,9 @@
   import { nostrHandler } from "$lib/nostr";
   import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
   import { slide } from "svelte/transition";
-  import { Circle } from "svelte-loading-spinners";
   import type { RelayObject } from "$lib/stores/Relays";
   import { AuthStates, authUser } from "$lib/stores/Auth";
-  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
 
   const toastStore = getToastStore();
 
@@ -113,7 +112,7 @@
         >
           {#if loading}
             <span class="mr-2">
-              <Circle size="15" color="white" unit="px"></Circle>
+              <ProgressRadial width="w-4" />
             </span>
           {:else}
             <span><RefreshCcw size="14" /></span>

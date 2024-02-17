@@ -1,1 +1,1 @@
-<h1 class="h1">Pro</h1>
+<div class="m-4">You can open your Pro subscription here.</div>
