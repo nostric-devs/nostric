@@ -1,16 +1,13 @@
 import { writable, get } from "svelte/store";
-import type {
-  Writable,
-  Subscriber,
-  Invalidator,
-  Unsubscriber,
-} from "svelte/store";
+import type { Writable } from "svelte/store";
 import { nostrHandler } from "$lib/nostr";
 import { clearLocalAuth, updateLocalAuth } from "$lib/stores/LocalStorage";
 import { IdentityHandler } from "$lib/identity/IdentityHandler";
 import { NostrUserHandler } from "$lib/nostr/NostrUserHandler";
 import type { Result } from "$declarations/backend/backend.did";
 import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
+import { followedUsers } from "$lib/stores/FollowedUsers";
+import { files } from "$lib/stores/Files";
 
 export enum AuthStates {
   ANONYMOUS,
@@ -24,36 +21,6 @@ export type AuthState =
   | AuthStates.NOSTR_AUTHENTICATED
   | AuthStates.IDENTITY_AUTHENTICATED
   | AuthStates.PRO_AUTHENTICATED;
-
-export interface AuthUserStore {
-  setNostr: (nostr: NostrUserHandler) => void;
-  logInWithIdentity: (
-    identity?: IdentityHandler,
-    nostrUser?: NostrUserHandler,
-  ) => Promise<void>;
-  subscribe: (
-    this: void,
-    run: Subscriber<AuthUser>,
-    invalidate?: Invalidator<AuthUser>,
-  ) => Unsubscriber;
-  setIdentity: (identity: IdentityHandler) => void;
-  logInAnonymously: (
-    nostrUser?: NostrUserHandler,
-    privateKey?: string,
-  ) => Promise<void>;
-  setAuthState: (authState: AuthState) => void;
-  logOut: () => void;
-  registerAnonymously: (
-    privateKey: string,
-    profile: NDKUserProfile,
-  ) => Promise<void>;
-  registerWithIdentity: (
-    privateKey: string,
-    profile: NDKUserProfile,
-  ) => Promise<void>;
-  checkIdentityActiveOnPage: () => Promise<void>;
-  setLoading: (loading: boolean) => void;
-}
 
 export class NotYetAssociatedError extends Error {
   constructor(message: string) {
@@ -76,7 +43,7 @@ export interface AuthUser {
   loading: boolean;
 }
 
-export function getAuthUser(): AuthUserStore {
+export function getAuthUser() {
   const auth: Writable<AuthUser> = writable<AuthUser>({
     nostr: undefined,
     identity: undefined,
@@ -95,8 +62,10 @@ export function getAuthUser(): AuthUserStore {
   const setLoading = (loading: boolean): void =>
     update((auth: AuthUser) => ({ ...auth, loading }));
 
-  const logOut = (): void => {
-    nostrHandler.resetSigner();
+  const logOut = async (): Promise<void> => {
+    await nostrHandler.reset();
+    followedUsers.clear();
+    files.clear();
     set({
       nostr: undefined,
       identity: undefined,
@@ -260,4 +229,4 @@ export function getAuthUser(): AuthUserStore {
   };
 }
 
-export const authUser: AuthUserStore = getAuthUser();
+export const authUser = getAuthUser();

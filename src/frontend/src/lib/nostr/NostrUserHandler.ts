@@ -18,10 +18,14 @@ import type { NostrHandler } from "$lib/nostr";
 import { followedUsers } from "$lib/stores/FollowedUsers";
 import { get } from "svelte/store";
 import { NDKMarker } from "$lib/nostr/NostrHandler";
+import {
+  NDKSubscriptionCacheUsage,
+  type NDKSubscriptionOptions,
+} from "@nostr-dev-kit/ndk";
 
 export class NostrUserHandler {
   private nostrUser: NDKUser;
-  private readonly signer: NDKPrivateKeySigner;
+  private signer: NDKPrivateKeySigner;
   private nostrHandler: NostrHandler;
 
   public static instance: NostrUserHandler;
@@ -53,6 +57,12 @@ export class NostrUserHandler {
     if (!NostrUserHandler.instance) {
       NostrUserHandler.instance = new NostrUserHandler(privateKey);
     }
+    if (NostrUserHandler.instance.signer.privateKey !== privateKey) {
+      NostrUserHandler.instance.signer = new NDKPrivateKeySigner(privateKey);
+      NostrUserHandler.instance.nostrHandler.setSigner(
+        NostrUserHandler.instance.signer,
+      );
+    }
     return NostrUserHandler.instance;
   }
 
@@ -73,21 +83,34 @@ export class NostrUserHandler {
       }
     }
 
-    await this.nostrUser.fetchProfile();
-    followedUsers.init(await this.fetchFollowedUsersWithProfiles());
+    const subscriptionOptions: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
+      groupable: false,
+    };
+
+    await this.nostrUser.fetchProfile(subscriptionOptions);
+
+    followedUsers.init(
+      await this.nostrHandler.fetchUserFollowingByPublicKey(
+        this.nostrUser.pubkey,
+        true,
+      ),
+    );
 
     const filters: NDKFilter = {
       kinds: [
+        NDKKind.Metadata,
         NDKKind.Text,
         NDKKind.Reaction,
         NDKKind.Repost,
-        NDKKind.EncryptedDirectMessage,
+        // NDKKind.EncryptedDirectMessage,
       ],
+      since: Math.floor(Date.now() / 1000) - 60 * 60 * 24,
       authors: [
         this.nostrUser.pubkey,
         ...get(followedUsers).map((user: NDKUser) => user.pubkey),
       ],
-      limit: 5,
     };
     // subscribe to the users in addition to the current user's posts
     await this.nostrHandler.addSubscription(filters);
@@ -108,14 +131,16 @@ export class NostrUserHandler {
 
     const filters: NDKFilter = {
       kinds: [
+        NDKKind.Metadata,
         NDKKind.Text,
         NDKKind.Reaction,
         NDKKind.Repost,
         NDKKind.EncryptedDirectMessage,
       ],
       authors: [this.nostrUser.pubkey],
+      since: Math.floor(Date.now() / 1000) - 60 * 60 * 24,
     };
-    await this.nostrHandler.addSubscription(filters);
+    this.nostrHandler.addSubscription(filters);
   }
 
   /**
@@ -156,6 +181,7 @@ export class NostrUserHandler {
     const userPreferredRelays: NDKRelayList | undefined =
       await this.nostrUser.relayList();
     let relayTags: NDKTag[] = [];
+
     if (userPreferredRelays) {
       relayTags = userPreferredRelays.getMatchingTags("r");
       relayTags = relayTags.filter((tag: NDKTag) => tag[1] !== url);
@@ -169,8 +195,22 @@ export class NostrUserHandler {
    * @param profile - The profile to use for updating.
    */
   public async updateProfile(profile: NDKUserProfile): Promise<void> {
+    const subscriptionOptions: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.ONLY_RELAY,
+      groupable: false,
+    };
+    if (!this.nostrUser.profile) {
+      await this.nostrUser.fetchProfile(subscriptionOptions);
+    }
     this.nostrUser.profile = profile;
     await this.nostrUser.publish();
+    if (this.nostrHandler.nostrKit.cacheAdapter !== undefined) {
+      this.nostrHandler.nostrKit.cacheAdapter.saveProfile(
+        this.nostrUser.pubkey,
+        this.nostrUser.profile,
+      );
+    }
   }
 
   /**
@@ -336,22 +376,6 @@ export class NostrUserHandler {
       }
     }
     return false;
-  }
-
-  /**
-   * Fetch followed users along with their profiles.
-   *
-   * @returns Followed users as values denoted by their public keys as keys in JSON.
-   */
-  public async fetchFollowedUsersWithProfiles(): Promise<NDKUser[]> {
-    const users: NDKUser[] = [...(await this.nostrUser.follows())];
-    const fetchedUsersProfiles: NDKUser[] = [];
-    for (const user of users) {
-      user.ndk = this.nostrHandler.nostrKit;
-      await user.fetchProfile();
-      fetchedUsersProfiles.push(user);
-    }
-    return fetchedUsersProfiles;
   }
 
   /**

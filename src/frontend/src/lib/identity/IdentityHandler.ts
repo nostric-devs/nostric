@@ -39,9 +39,15 @@ export class IdentityHandler {
           ? "https://identity.ic0.app/#authorize"
           : `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:8000/#authorize`;
 
+      const windowOpenerFeatures: string =
+        `left=${window.screen.width / 2 - 200}, ` +
+        `top=${window.screen.height / 2 - 300},` +
+        `toolbar=0,location=0,menubar=0,width=400,height=600`;
+
       return new Promise((resolve, reject): void => {
         this.authClient?.login({
           identityProvider,
+          windowOpenerFeatures,
           onSuccess: () =>
             this.initActors()
               .then(() => resolve())

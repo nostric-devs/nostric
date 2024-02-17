@@ -1,9 +1,10 @@
 <script lang="ts">
   import { Copy, Trash } from "svelte-feathers";
-  import { Circle } from "svelte-loading-spinners";
+
   import {
     clipboard,
     getToastStore,
+    ProgressRadial,
     type ToastStore,
   } from "@skeletonlabs/skeleton";
   import { authUser } from "$lib/stores/Auth";
@@ -75,7 +76,7 @@
     >
       {#if deleting}
         <span class="mr-2">
-          <Circle size="15" color="white" unit="px" />
+          <ProgressRadial width="w-4" />
         </span>
       {:else}
         <span>

@@ -8,33 +8,34 @@
   import PostLoadingSkeleton from "$lib/components/post/PostLoadingSkeleton.svelte";
   import { getPath, ROUTES } from "$lib/utils/routes";
   import { AuthStates, authUser } from "$lib/stores/Auth";
-  import { Circle } from "svelte-loading-spinners";
   import { Share } from "svelte-feathers";
-  import { clipboard } from "@skeletonlabs/skeleton";
+  import { clipboard, ProgressRadial } from "@skeletonlabs/skeleton";
   import { page } from "$app/stores";
   import FollowButton from "$lib/components/user/follow/FollowButton.svelte";
-  import { getToastStore } from "@skeletonlabs/skeleton";
   import InfiniteScrollContainer from "$lib/components/infinite-scroll/InfiniteScrollContainer.svelte";
+  import Toaster from "$lib/components/toast/Toaster.svelte";
 
   let profile: NDKUserProfile | undefined;
-  let userFollowersPromise: Promise<NDKUser[]>;
-  let userFollowingPromise: Promise<NDKUser[]>;
-
-  const toastStore = getToastStore();
+  let userFollowers: NDKUser[] | undefined = undefined;
+  let userFollowing: NDKUser[] | undefined = undefined;
 
   onMount(async () => {
     profile = user?.profile;
     if (events === undefined) {
       events = await nostrHandler.fetchEventsByAuthorPublicKey(user.pubkey);
     }
-    userFollowersPromise = nostrHandler.fetchUserFollowersByPublicKey(
-      user.pubkey,
-      true,
-    );
-    userFollowingPromise = nostrHandler.fetchUserFollowingByPublicKey(
-      user.pubkey,
-      true,
-    );
+    // there is a race condition between fetching user profiles inside Post components
+    // and fetching numbers of followers here, therefore we need to introduce a delay
+    setTimeout(async () => {
+      userFollowers = await nostrHandler.fetchUserFollowersByPublicKey(
+        user.pubkey,
+        true,
+      );
+      userFollowing = await nostrHandler.fetchUserFollowingByPublicKey(
+        user.pubkey,
+        true,
+      );
+    }, 5000);
   });
 
   export let user: NDKUser;
@@ -52,22 +53,19 @@
         {#if $authUser.authState !== AuthStates.ANONYMOUS && $authUser.nostr.getPublicKey() !== $page.params.slug && $page.url.pathname !== getPath(ROUTES.PROFILE)}
           <FollowButton {user} />
         {/if}
-        <div class="w-[130px] ml-2">
-          <button
-            type="button"
-            use:clipboard={$page.url.pathname}
-            on:click={() =>
-              toastStore.trigger({
-                message: "User URL copied to clipboard",
-                background: "variant-filled-success",
-              })}
-            class="btn variant-filled-primary mr-4 font-medium w-full"
-          >
-            <span>
-              <Share size="15" class="lg:mx-auto xl:mx-0" />
-            </span>
-            <span class="text-sm">Share</span>
-          </button>
+        <div class="w-[110px] ml-2">
+          <Toaster message="User URL copied to clipboard" color="secondary">
+            <button
+              type="button"
+              use:clipboard={`${$page.url.host}${getPath(ROUTES.USER, user.pubkey)}`}
+              class="btn variant-filled-primary mr-4 font-medium w-full"
+            >
+              <span>
+                <Share size="15" class="lg:mx-auto xl:mx-0" />
+              </span>
+              <span class="text-sm">Share</span>
+            </button>
+          </Toaster>
         </div>
       </div>
     </div>
@@ -88,19 +86,15 @@
           >
             <span>Followers</span>
             {#if events === undefined}
+              <div class="mt-2">Radial /></div>
+            {:else if userFollowers === undefined}
               <div class="mt-2">
-                <Circle size="25" color="black" unit="px" />
+                <ProgressRadial width="w-4" />
               </div>
             {:else}
-              {#await userFollowersPromise}
-                <div class="mt-2">
-                  <Circle size="25" color="black" unit="px" />
-                </div>
-              {:then userFollowers}
-                <span class="text-4xl font-bold">
-                  {userFollowers ? userFollowers.length : 0}
-                </span>
-              {/await}
+              <span class="text-4xl font-bold">
+                {userFollowers ? userFollowers.length : 0}
+              </span>
             {/if}
           </a>
           <a
@@ -110,18 +104,16 @@
             <span>Following</span>
             {#if events === undefined}
               <div class="mt-2">
-                <Circle size="25" color="black" unit="px" />
+                <ProgressRadial width="w-4" />
+              </div>
+            {:else if userFollowing === undefined}
+              <div class="mt-2">
+                <ProgressRadial width="w-4" />
               </div>
             {:else}
-              {#await userFollowingPromise}
-                <div class="mt-2">
-                  <Circle size="25" color="black" unit="px" />
-                </div>
-              {:then userFollowing}
-                <span class="text-4xl font-bold">
-                  {userFollowing ? userFollowing.length : 0}
-                </span>
-              {/await}
+              <span class="text-4xl font-bold">
+                {userFollowing ? userFollowing.length : 0}
+              </span>
             {/if}
           </a>
         </div>
