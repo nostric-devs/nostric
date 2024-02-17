@@ -191,6 +191,7 @@ export function getAuthUser() {
   const registerWithIdentity = async (
     privateKey: string,
     profile: NDKUserProfile,
+    invitationCode: string,
   ): Promise<void> => {
     const authIdentity: IdentityHandler | undefined = get(auth).identity;
     if (authIdentity === undefined) {
@@ -207,6 +208,7 @@ export function getAuthUser() {
         profile,
         privateKey,
         publicKey,
+        invitationCode,
       );
       setNostr(userHandler);
       updateLocalAuth(privateKey, AuthStates.IDENTITY_AUTHENTICATED);

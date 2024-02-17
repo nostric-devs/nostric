@@ -93,6 +93,7 @@ export class IdentityHandler {
     profile: NDKUserProfile,
     privateKey: string,
     publicKey: string,
+    invitationCode: string,
   ): Promise<void> {
     const result: Result | undefined = await this.backendActor?.addProfile({
       publicKey,
@@ -100,7 +101,7 @@ export class IdentityHandler {
       name: profile.name,
       bio: profile.bio,
       image: profile.image,
-    });
+    }, invitationCode);
     if (result === undefined || "err" in result) {
       throw Error("Unable to associate Internet Identity with new user");
     }

@@ -8,6 +8,7 @@ import Account "./utils/Account";
 import Map "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
+import Bool "mo:base/Bool";
 
 actor class Main() = this {
   public func greet(name : Text) : async Text {
@@ -27,23 +28,69 @@ actor class Main() = this {
     isPro : Bool;
   };
 
+  private stable var invitationcodes : [Text] = [];
+
+  private stable var admins : [Text] = [
+    "s5n6f-gw2l4-zzp7o-vkbzw-zqqlh-pa5hs-gyb3w-er6d6-rwiem-t4h6w-vqe" // Lukas local dfx identity
+  ];
+
   private var profiles = Map.HashMap<Principal, Profile>(0, Principal.equal, Principal.hash);
 
   private stable var stableprofiles : [(Principal, Profile)] = [];
 
   type Error = {
     #NotAuthenticated;
+    #InvalidInvitationCode;
     #ProfileNotFound;
     #UnableToCreate;
     #ProfileAlreadyHasRelay;
     #UnableToCreateRelay;
+    #CallerNotAdmin;
   };
 
-  public shared (msg) func addProfile(p : NostrProfile) : async Result.Result<Profile, Error> {
+  private func isAdmin(p : Principal) : Bool {
+    let admin = Array.indexOf<Text>(Principal.toText(p), admins, Text.equal);
+    if (admin == null){
+      return false;
+    } else {
+      return true;
+    };
+  };
+
+  public shared (msg) func addInvitationCode(invitationCode : Text) : async Result.Result<[Text], Error> {
+    if (isAdmin(msg.caller)){
+      invitationcodes := Array.append<Text>(invitationcodes, [invitationCode]);
+      return #ok(invitationcodes);
+    } else {
+      return #err(#CallerNotAdmin);
+    };
+    
+  };
+
+  // for testing only
+  public shared (msg) func getInvitationCodes() : async Result.Result<[Text], Error> {
+    if (isAdmin(msg.caller)){
+      return #ok(invitationcodes);
+    } else {
+      return #err(#CallerNotAdmin);
+    };    
+  };  
+
+  public shared (msg) func whoAmI() : async (Principal){
+    return msg.caller;
+  };
+
+  public shared (msg) func addProfile(p : NostrProfile, invitationCode : Text) : async Result.Result<Profile, Error> {
     // Only allows signed users to register profile
     if (Principal.isAnonymous(msg.caller)) {
       // If the caller is anonymous Principal "2vxsx-fae" then return an error
       return #err(#NotAuthenticated);
+    };
+    // Check if user has valid invitation code
+    let code = Array.indexOf<Text>(invitationCode, invitationcodes, Text.equal);
+    // Todo add removal of invitation code after use
+    if (code == null){
+      return #err(#InvalidInvitationCode)
     };
 
     let nostrProfile : NostrProfile = {
@@ -154,17 +201,17 @@ actor class Main() = this {
     Hex.encode(Blob.toArray(encrypted_key));
   };
 
-  system func preupgrade() {
-    stableprofiles := Iter.toArray(profiles.entries());
-  };
+  // system func preupgrade() {
+  //   stableprofiles := Iter.toArray(profiles.entries());
+  // };
 
-  system func postupgrade() {
-    profiles := Map.fromIter<Principal, Profile>(
-      stableprofiles.vals(),
-      10,
-      Principal.equal,
-      Principal.hash,
-    );
-    stableprofiles := [];
-  };
+  // system func postupgrade() {
+  //   profiles := Map.fromIter<Principal, Profile>(
+  //     stableprofiles.vals(),
+  //     10,
+  //     Principal.equal,
+  //     Principal.hash,
+  //   );
+  //   stableprofiles := [];
+  // };
 };
