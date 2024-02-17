@@ -7,6 +7,7 @@ import Principal "mo:base/Principal";
 import Account "./utils/Account";
 import Map "mo:base/HashMap";
 import Result "mo:base/Result";
+import Iter "mo:base/Iter";
 
 actor class Main() = this {
   public func greet(name : Text) : async Text {
@@ -151,5 +152,19 @@ actor class Main() = this {
       encryption_public_key;
     });
     Hex.encode(Blob.toArray(encrypted_key));
+  };
+
+  system func preupgrade() {
+    stableprofiles := Iter.toArray(profiles.entries());
+  };
+
+  system func postupgrade() {
+    profiles := Map.fromIter<Principal, Profile>(
+      stableprofiles.vals(),
+      10,
+      Principal.equal,
+      Principal.hash,
+    );
+    stableprofiles := [];
   };
 };
