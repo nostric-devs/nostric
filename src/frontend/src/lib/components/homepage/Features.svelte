@@ -23,17 +23,16 @@
             Private key encryption
           </h2>
           <p class="leading-relaxed text-gray-400">
-            Blue bottle crucifix vinyl post-ironic four dollar toast vegan
-            taxidermy. Gastropub indxgo juice poutine, ramps microdosing banh mi
-            pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
+            Secure your keys with vetKey encryption, ensuring only you have
+            access to your keys, safeguarding your privacy at every step.
           </p>
-          <a
+          <!-- <a
             href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More
             <ArrowRight size="16" class="m-2" />
-          </a>
+          </a> -->
         </div>
       </div>
       <div class="p-4 md:w-1/3 flex">
@@ -47,17 +46,17 @@
             Data backup
           </h2>
           <p class="leading-relaxed text-gray-400">
-            Blue bottle crucifix vinyl post-ironic four dollar toast vegan
-            taxidermy. Gastropub indxgo juice poutine, ramps microdosing banh mi
-            pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
+            With Nostric, never worry about losing valuable information. Our
+            reliable data backup feature ensures your digital footprint is safe,
+            retrievable, and protected.
           </p>
-          <a
+          <!-- <a
             href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More
             <ArrowRight size="16" class="m-2" />
-          </a>
+          </a> -->
         </div>
       </div>
       <div class="p-4 md:w-1/3 flex">
@@ -71,17 +70,17 @@
             Media server
           </h2>
           <p class="leading-relaxed text-gray-400">
-            Blue bottle crucifix vinyl post-ironic four dollar toast vegan
-            taxidermy. Gastropub indxgo juice poutine, ramps microdosing banh mi
-            pug VHS try-hard ugh iceland kickstarter tumblr live-edge tilde.
+            Enhance your Nostr experience with Nostric's integrated media
+            server, allowing seamless sharing and streaming of multimedia
+            content, enriching your interactions.
           </p>
-          <a
+          <!-- <a
             href="/"
             class="mt-3 anchor cursor-pointer inline-flex items-center"
           >
             Learn More
             <ArrowRight size="16" class="m-2" />
-          </a>
+          </a> -->
         </div>
       </div>
     </div>

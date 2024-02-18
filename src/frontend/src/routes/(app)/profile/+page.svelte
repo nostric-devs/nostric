@@ -2,9 +2,10 @@
   import UserProfile from "$lib/components/user/profile/UserProfile.svelte";
   import { authUser } from "$lib/stores/Auth";
   import { feed, type NodeEvent } from "$lib/stores/Feed";
-  import type { NDKEvent } from "@nostr-dev-kit/ndk";
+  import type { NDKEvent, NDKUser } from "@nostr-dev-kit/ndk";
 
   let events: NodeEvent[] = [];
+  let user: NDKUser;
 
   $: {
     let parsedEvents: NodeEvent[] = [];
@@ -21,7 +22,11 @@
     }
     events = parsedEvents;
   }
-  $: user = $authUser.nostr.getUser();
+  $: if ($authUser.nostr) {
+    user = $authUser.nostr?.getUser({ pubkey: $authUser.nostr.getPublicKey() });
+  }
 </script>
 
-<UserProfile {user} {events} />
+{#key user.pubkey}
+  <UserProfile {user} {events} />
+{/key}

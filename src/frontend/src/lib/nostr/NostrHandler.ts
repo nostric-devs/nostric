@@ -10,6 +10,7 @@ import NDK, {
   NDKKind,
   NDKPrivateKeySigner,
   NDKRelay,
+  NDKRelaySet,
   NDKSubscription,
   NDKSubscriptionCacheUsage,
   NDKUser,
@@ -33,23 +34,21 @@ export class NostrHandler {
 
   public explicitRelays: string[] = [
     "wss://relay.nostr.band",
-    "wss://nostr.girino.org",
-    "wss://nostr-pub.wellorder.net",
+    "wss://feeds.nostr.band/nostrhispano",
+    "wss://search.nos.today",
+    "wss://nostr-relay.app",
+    "wss://nostrja-kari-nip50.heguro.com",
+    "wss://nostr.novacisko.cz",
   ];
-
-  private subscriptionOptions: NDKSubscriptionOptions = {
-    closeOnEose: true,
-    cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
-    groupable: true,
-  };
 
   constructor() {
     const dexieAdapter: NDKCacheAdapter = new NDKCacheAdapterDexie({
-      dbName: "nostric",
+      dbName: "nostric-db",
     });
     const options: NDKConstructorParams = {
       explicitRelayUrls: this.explicitRelays,
       cacheAdapter: dexieAdapter,
+      enableOutboxModel: false,
     };
     this.nostrKit = new NDK(options);
   }
@@ -63,8 +62,10 @@ export class NostrHandler {
     this.nostrKit.signer = signer;
   }
 
-  public resetSigner(): void {
-    this.nostrKit.signer = NDKPrivateKeySigner.generate();
+  public async reset(): Promise<void> {
+    this.nostrKit.signer = undefined;
+    this.nostrKit.activeUser = undefined;
+    await this.clearSubscriptions();
   }
 
   /**
@@ -126,16 +127,8 @@ export class NostrHandler {
    *
    * @param filter - Filter for the subscription
    */
-  public async addSubscription(filter: NDKFilter): Promise<void> {
-    const options: NDKSubscriptionOptions = {
-      closeOnEose: false,
-      cacheUsage: NDKSubscriptionCacheUsage.PARALLEL,
-      groupable: true,
-    };
-    const subscription: NDKSubscription = this.nostrKit.subscribe(
-      filter,
-      options,
-    );
+  public addSubscription(filter: NDKFilter): void {
+    const subscription: NDKSubscription = this.nostrKit.subscribe(filter);
 
     subscription.on("event", (event: NDKEvent): void => {
       // if the message is encrypted, decrypt it right away
@@ -166,13 +159,25 @@ export class NostrHandler {
 
   /**
    * @param filter - Filter by which to fetch the events.
+   * @param relays - Relay set to use
    * @returns Events fetched through the filter.
    */
-  public async fetchEventsByFilter(filter: NDKFilter): Promise<NDKEvent[]> {
-    const events: Set<NDKEvent> = await this.nostrKit.fetchEvents(
-      filter,
-      this.subscriptionOptions,
-    );
+  public async fetchEventsByFilter(
+    filter: NDKFilter | NDKFilter[],
+    relays?: NDKRelaySet,
+  ): Promise<NDKEvent[]> {
+    const options: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      groupable: false,
+    };
+    let events: Set<NDKEvent>;
+    if (relays) {
+      events = await this.nostrKit.fetchEvents(filter, options, relays);
+    } else {
+      events = await this.nostrKit.fetchEvents(filter, options);
+    }
+
     return [...events];
   }
 
@@ -182,7 +187,7 @@ export class NostrHandler {
   public async fetchRandomEvents(): Promise<NDKEvent[]> {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
-      limit: 10,
+      limit: 5,
     };
     const events: NDKEvent[] = await this.fetchEventsByFilter(filters);
     return [...events];
@@ -208,33 +213,34 @@ export class NostrHandler {
    */
   public async fetchEventReplies(
     event: NDKEvent,
-    limit: number,
+    limit?: number,
     marker?: NDKMarker,
   ): Promise<NDKEvent[]> {
-    // fetch events with specified relay
-    const filters: NDKFilter = {
-      kinds: [NDKKind.Text],
-      "#e": [event.id, event.relay.url, ...(marker ? [marker] : [])],
-      limit,
-    };
-    const eventsWithRelay: NDKEvent[] = await this.fetchEventsByFilter(filters);
+    const relay: string | undefined = event.relay ? event.relay.url : undefined;
+    const filters: NDKFilter[] = [
+      {
+        kinds: [NDKKind.Text],
+        "#e": [event.id, relay || "", ...(marker ? [marker] : [])],
+        limit,
+      },
+      {
+        kinds: [NDKKind.Text],
+        "#e": [event.id, "", ...(marker ? [marker] : [])],
+        limit,
+      },
+      {
+        kinds: [NDKKind.Text],
+        "#e": [event.id, ...(marker ? [marker] : [])],
+        limit,
+      },
+      {
+        kinds: [NDKKind.Text],
+        "#e": [event.id],
+        limit,
+      },
+    ];
 
-    // now fetch events without specified relay
-    filters["#e"] = [event.id, "", ...(marker ? [marker] : [])];
-    const eventsWithoutRelay: NDKEvent[] =
-      await this.fetchEventsByFilter(filters);
-
-    // now merge these two
-    const finalEvents: NDKEvent[] = eventsWithRelay;
-    for (const event of eventsWithoutRelay) {
-      if (
-        finalEvents.find((e: NDKEvent): boolean => e.id === event.id) ===
-        undefined
-      ) {
-        finalEvents.push(event);
-      }
-    }
-    return finalEvents;
+    return this.fetchEventsByFilter(filters);
   }
 
   /**
@@ -247,7 +253,7 @@ export class NostrHandler {
     const filters: NDKFilter = {
       kinds: [NDKKind.Text],
       authors: [publicKey],
-      limit: 10,
+      limit: 5,
     };
     return await this.fetchEventsByFilter(filters);
   }
@@ -287,7 +293,12 @@ export class NostrHandler {
   ): Promise<NDKUser> {
     const user: NDKUser = new NDKUser({ pubkey: publicKey });
     user.ndk = this.nostrKit;
-    await user.fetchProfile();
+    const subscriptionOptions: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      groupable: false,
+    };
+    await user.fetchProfile(subscriptionOptions);
     return user;
   }
 
@@ -306,14 +317,20 @@ export class NostrHandler {
     const user: NDKUser = new NDKUser({ pubkey: publicKey });
     user.ndk = this.nostrKit;
 
+    const subscriptionOptions: NDKSubscriptionOptions = {
+      closeOnEose: false,
+      cacheUsage: NDKSubscriptionCacheUsage.CACHE_FIRST,
+      groupable: false,
+    };
+
     const followedUsers: NDKUser[] = [
-      ...(await user.follows(this.subscriptionOptions)),
+      ...(await user.follows(subscriptionOptions)),
     ];
 
     if (omitProfiles == undefined || !omitProfiles) {
       for (const followedUser of followedUsers) {
         followedUser.ndk = this.nostrKit;
-        await followedUser.fetchProfile();
+        await followedUser.fetchProfile(subscriptionOptions);
       }
     }
 
@@ -327,15 +344,18 @@ export class NostrHandler {
    *
    * @param publicKey - Public key of the user
    * @param omitProfiles - Flag whether to also fetch the user profiles or not.
+   * @param limit - Limit the number of followers to fetch
    * @returns An array of NDKUsers who follow the user given by the public key.
    */
   public async fetchUserFollowersByPublicKey(
     publicKey: string,
     omitProfiles?: boolean,
+    limit?: number,
   ): Promise<NDKUser[]> {
     const filter: NDKFilter = {
       kinds: [NDKKind.Contacts],
       "#p": [publicKey],
+      limit,
     };
 
     const events: NDKEvent[] = [...(await this.fetchEventsByFilter(filter))];
