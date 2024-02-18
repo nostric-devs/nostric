@@ -45,6 +45,16 @@
     </li>
     <li>
       <a
+        href={getPath(ROUTES.PROFILE)}
+        class:bg-primary-active-token={isActive(getPath(ROUTES.PROFILE))}
+        class="capitalize"
+      >
+        <User size="20" class="lg:mx-auto xl:mx-0"></User>
+        <span class="lg:hidden xl:block ml-3">{ROUTES.PROFILE}</span>
+      </a>
+    </li>
+    <li>
+      <a
         href={getPath(ROUTES.NOTIFICATIONS)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.NOTIFICATIONS))}
         class="capitalize pointer-events-none opacity-50 cursor-not-allowed"
@@ -58,23 +68,14 @@
         <!--        </div>-->
         <Bell size="20" class="lg:mx-auto xl:mx-0"></Bell>
         <span class="lg:hidden xl:block ml-3">{ROUTES.NOTIFICATIONS}</span>
-      </a>
-    </li>
-    <li>
-      <a
-        href={getPath(ROUTES.PROFILE)}
-        class:bg-primary-active-token={isActive(getPath(ROUTES.PROFILE))}
-        class="capitalize"
-      >
-        <User size="20" class="lg:mx-auto xl:mx-0"></User>
-        <span class="lg:hidden xl:block ml-3">{ROUTES.PROFILE}</span>
+        <span class="badge variant-filled">SOON</span>
       </a>
     </li>
     <li>
       <a
         href={getPath(ROUTES.BOOKMARKS)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.BOOKMARKS))}
-        class="capitalize {isAuthenticated
+        class="capitalize pointer-events-none opacity-50 cursor-not-allowed {isAuthenticated
           ? 'pointer-events-none opacity-50 cursor-not-allowed'
           : ''}"
       >

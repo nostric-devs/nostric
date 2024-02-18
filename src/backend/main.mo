@@ -170,6 +170,54 @@ actor class Main() = this {
     return response;
   };
 
+  public shared (msg) func getDepositAddress() : async Text {
+    let acc : AccountType = {
+      owner = Principal.fromActor(this);
+      subaccount = ?Account.toSubaccount(msg.caller);
+    };
+    return Account.toText(acc);
+  };
+
+  // Method for local testing purposes
+  public shared (msg) func getSubaccountForCaller() : async Blob {
+    Account.toSubaccount(msg.caller);
+  };
+
+  // Method for local testing purposes
+  public shared (msg) func getSubaccountForPrincipal(principal : Text) : async Blob {
+    let p : Principal = Principal.fromText(principal);
+    Account.toSubaccount(p);
+  };
+
+  public shared (msg) func verifyPayment() : async Bool {
+    let acc : AccountType = {
+      owner = Principal.fromActor(this);
+      subaccount = ?Account.toSubaccount(msg.caller);
+    };
+    var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+    if (response >= 10) {
+      let result = profiles.get(msg.caller);
+      switch (result) {
+        case null {
+          //return #err(#ProfileNotFound)
+          return false;
+        };
+        case (?profile) {
+          let updatedProfile : Profile = {
+            nostrProfile = profile.nostrProfile;
+            isPro = true;
+          };
+          profiles.put(msg.caller, updatedProfile);
+          //return #ok(true);
+          return true;
+        };
+      };
+    } else {
+      //return return #ok(false);
+      return false;
+    };
+  };
+
   private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
   public shared ({ caller }) func app_vetkd_public_key(derivation_path : [Blob]) : async Text {

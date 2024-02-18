@@ -9,6 +9,7 @@ import type {
   FileUploadResult,
   FileListResult,
 } from "$declarations/storage/storage.did";
+import type { Principal } from "@dfinity/principal";
 import { files } from "$lib/stores/Files";
 
 export class IdentityHandler {
@@ -112,6 +113,18 @@ export class IdentityHandler {
 
   public async getAssociatedUser(): Promise<Result | undefined> {
     return this.backendActor?.getProfile();
+  }
+
+  public async whoAmI(): Promise<Principal | undefined> {
+    return this.backendActor?.whoAmI();
+  }
+
+  public async getDepositAddress(): Promise<string | undefined> {
+    return this.backendActor?.getDepositAddress();
+  }
+
+  public async verifyPayment(): Promise<boolean | undefined> {
+    return this.backendActor?.verifyPayment();
   }
 
   public async uploadFile(file: File): Promise<string> {

@@ -28,11 +28,21 @@
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
       "remote": {
         "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+          "ic": "mxzaz-hqaaa-aaaar-qaada-cai"
         }
       }
-    }
-  },
+    },
+    "ckbtc_ledger" : {
+      "type" : "custom",
+      "candid" : "ledger.did",
+      "wasm" : "ledger_canister.wasm",
+      "local": {
+        "id": {
+          "ic": "mxzaz-hqaaa-aaaar-qaada-cai"
+        }
+      }  
+    }    
+  },  
   "defaults": {
     "build": {
       "args": "",
