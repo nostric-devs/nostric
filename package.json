@@ -30,7 +30,7 @@
     "generate": "dfx generate && node ./update.types.mjs"
   },
   "devDependencies": {
-    "@dfinity/identity-secp256k1": "^0.19.3",
+    "@dfinity/identity-secp256k1": "^1.0.0",
     "@dfinity/ledger": "next",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@rollup/plugin-inject": "^5.0.3",
@@ -66,10 +66,10 @@
   },
   "type": "module",
   "dependencies": {
-    "@dfinity/agent": "^0.19.3",
-    "@dfinity/auth-client": "^0.19.3",
-    "@dfinity/identity": "^0.19.3",
-    "@dfinity/principal": "^0.19.3",
+    "@dfinity/agent": "^1.0.0",
+    "@dfinity/auth-client": "^1.0.0",
+    "@dfinity/identity": "^1.0.0",
+    "@dfinity/principal": "^1.0.0",
     "@dfinity/utils": "next",
     "@floating-ui/dom": "^1.5.4",
     "@nostr-dev-kit/ndk": "^2.2.0",
