@@ -61,5 +61,5 @@ jobs:
           dfx wallet balance --network ic
           dfx canister create internet_identity
           dfx build internet_identity
-          dfx deploy --network ic
+          dfx deploy --network ic --yes
         continue-on-error: false

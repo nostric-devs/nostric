@@ -4,79 +4,90 @@ import Text "mo:base/Text";
 import Blob "mo:base/Blob";
 import Nat "mo:base/Nat";
 import Int "mo:base/Int";
-import Char "mo:base/Char";
 import Principal "mo:base/Principal";
+import SHA256 "mo:sha2/Sha256";
 import CanDB "mo:candb/SingleCanisterCanDB";
 import Entity "mo:candb/Entity";
+import CertTree "mo:ic-certification/CertTree";
+
+import EncodingUtils "utils/EncodingUtils";
 import HttpUtils "utils/HttpUtils";
+import CanDbUtils "utils/CanDbUtils";
+
+import CommonTypes "utils/CommonTypes";
 
 actor class Main() = this {
-  stable let db = CanDB.init();
+  stable let db : CanDB.DB = CanDB.init();
 
   type Request = HttpUtils.Request;
   type Response = HttpUtils.Response;
 
-  type File = {
-    owner : Text;
-    name : Text;
-    extension : Text;
-    content : Blob;
+  stable let cert_store : CertTree.Store = CertTree.newStore();
+  let ct = CertTree.Ops(cert_store);
+
+  var testMode : Bool = false;
+
+  system func postupgrade() {
+    if (ct.lookup(["http_assets", Text.encodeUtf8("/.well-known/ic-domains")]) == null) {
+      ct.put(["http_assets", Text.encodeUtf8("/.well-known/ic-domains")], SHA256.fromBlob(#sha256, Text.encodeUtf8("img.nostric.app\nimg.dev.nostric.app")));
+      ct.setCertifiedData();
+    };
+    if (ct.lookup(["http_assets", Text.encodeUtf8("/favicon.ico")]) == null) {
+      ct.put(["http_assets", Text.encodeUtf8("/favicon.ico")], SHA256.fromBlob(#sha256, HttpUtils.getFavicon()));
+      ct.setCertifiedData();
+    };
   };
 
-  public type FileUploadResult = {
-    #ok : Text;
-    #err : Text;
+  public func setUnitTestMode(mode : Bool) : () {
+    testMode := mode;
   };
 
-  public type FileDownloadResult = {
-    #ok : Blob;
-    #err : Text;
+  public func isUnitTestMode() : async Bool {
+    return testMode;
   };
-
-  public type FileDeleteResult = {
-    #ok;
-    #err : Text;
-  };
-
-  public type FileListResult = {
-    #ok : [Text];
-    #err : Text;
-  };
-
-  let principalCharacterSet = "0123456789abcdefghijklmnopqrstuvwxyz/-";
-  let urlCharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~-_";
-
-  let filenameCharacterSet = "0123456789";
-  let encodingFilenameSet = "0123456789abcdefghijklmnopqrstuvwxyz-";
 
   public query func http_request(request : Request) : async Response {
+    let parsedUrl = Iter.toArray(Text.split(request.url, #char '?'))[0];
+    if (parsedUrl == "/.well-known/ic-domains") {
+      return HttpUtils.httpIcDomainsResponse(request.url, ct);
+    };
+    if (parsedUrl == "/favicon.ico") {
+      return HttpUtils.httpImgResponse(HttpUtils.getFavicon(), request.url, ct);
+    };
     var result = handleDownload(request.url);
     switch (result) {
       case (null) {
-        return HttpUtils.httpNotFoundResponse(?"no picture available");
+        return HttpUtils.httpNotFoundResponse(?"no picture available", request.url, ct);
       };
       case (?picture) {
-        return HttpUtils.httpImgResponse(picture);
+        return HttpUtils.httpImgResponse(picture, request.url, ct);
       };
     };
-    return HttpUtils.httpNotFoundResponse(?"Path not found.");
+    return HttpUtils.httpNotFoundResponse(?"Path not found.", request.url, ct);
   };
 
-  public shared (msg) func upload(fileExtension : Text, content : Blob) : async FileUploadResult {
+  public shared (msg) func upload(fileExtension : Text, content : Blob) : async CommonTypes.FileUploadResult {
     let owner = Principal.toText(msg.caller);
     let fileCount = await currentFileCount(owner);
-    let filename = generateFilename(fileCount +1);
-    await create({
-      owner = owner;
-      name = filename;
-      extension = fileExtension;
-      content = content;
-    });
-    let expectedAddress = encode(owner # "/" # filename) # fileExtension;
+    let filename = generateFileName(fileCount +1);
+    await CanDbUtils.create(
+      {
+        owner = owner;
+        name = filename;
+        extension = fileExtension;
+        content = content;
+      },
+      db,
+    );
+    let expectedAddress = EncodingUtils.encode(owner # "/" # filename) # fileExtension;
     let actualAddress = await searchFiles(owner, 1);
     switch (actualAddress) {
       case (?address) {
         if (address[0] == expectedAddress) {
+          if (testMode == false) {
+            ct.put(["http_assets", Text.encodeUtf8("/" # address[0])], SHA256.fromBlob(#sha256, content));
+            ct.setCertifiedData();
+          };
           #ok(address[0]);
         } else {
           #err("File upload failed");
@@ -88,7 +99,7 @@ actor class Main() = this {
     };
   };
 
-  public shared (msg) func listFiles(limit : Nat) : async FileListResult {
+  public shared (msg) func listFiles(limit : Nat) : async CommonTypes.FileListResult {
     let owner = Principal.toText(msg.caller);
     let results = await searchFiles(owner, limit);
     switch (results) {
@@ -101,7 +112,7 @@ actor class Main() = this {
     };
   };
 
-  public func download(inputPath : Text) : async FileDownloadResult {
+  public func download(inputPath : Text) : async CommonTypes.FileDownloadResult {
     switch (handleDownload(inputPath)) {
       case (?file) {
         #ok(file);
@@ -112,16 +123,20 @@ actor class Main() = this {
     };
   };
 
-  public func delete(inputPath : Text) : async FileDeleteResult {
-    let filePath = extractAddress(inputPath);
+  public func delete(inputPath : Text) : async CommonTypes.FileDeleteResult {
+    let filePath = decodeFileNameFromUrl(inputPath);
     let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
     if (Array.size(filePathSplit) != 2) {
       return #err("Invalid file path");
     };
     let owner = filePathSplit[0];
     let name = filePathSplit[1];
-    switch (await remove({ pk = owner; sk = name })) {
+    switch (await CanDbUtils.remove({ pk = owner; sk = name }, db)) {
       case (?file) {
+        if (testMode == false) {
+          ct.delete(["http_assets", Text.encodeUtf8("/" # inputPath)]);
+          ct.setCertifiedData();
+        };
         #ok();
       };
       case (null) {
@@ -130,11 +145,55 @@ actor class Main() = this {
     };
   };
 
+  private func handleDownload(inputPath : Text) : ?Blob {
+    let filePath = decodeFileNameFromUrl(inputPath);
+    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
+    if (Array.size(filePathSplit) != 2) {
+      return null;
+    };
+    let owner = filePathSplit[0];
+    let name = filePathSplit[1];
+    let result = CanDbUtils.get(owner, name, db);
+    switch (result) {
+      case (?file) {
+        ?file.content;
+      };
+      case (null) {
+        null;
+      };
+    };
+  };
+
+  private func repeatString(count : Nat) : Text {
+    var result = "";
+    for (i in Iter.range(0, count)) {
+      result := "0" # result;
+    };
+    return result;
+  };
+
+  private func generateFileName(index : Nat) : Text {
+    // Calculate the number of digits needed
+    let numZeros = 3; // 1000 * 37 chars = 37000 possible filenames
+    let numDigits = numZeros + 1;
+
+    // Convert the index to text
+    let indexText = EncodingUtils.encodeFileName(Nat.toText(index));
+
+    // Add leading zeros
+    let countedDigits : Int = numZeros - Text.size(indexText);
+    let zerosNeeded = Int.abs((countedDigits + numDigits) % numDigits);
+    let leadingZeros = repeatString(zerosNeeded);
+
+    // Return the formatted filename
+    return leadingZeros # indexText;
+  };
+
   private func currentFileCount(owner : Text) : async Nat {
     let results = await searchFiles(owner, 1);
     switch (results) {
       case (?res) {
-        let decodedAddress = extractAddress(res[0]);
+        let decodedAddress = decodeFileNameFromUrl(res[0]);
         let fileMetadata = Iter.toArray(Text.split(decodedAddress, #char '/'));
         if (Array.size(fileMetadata) != 2) {
           return 0;
@@ -148,101 +207,24 @@ actor class Main() = this {
     };
   };
 
-  private func extractAddress(fileName : Text) : Text {
+  private func decodeFileNameFromUrl(fileName : Text) : Text {
     let filePathSplit = Iter.toArray(Text.split(fileName, #char '.'));
     if (Array.size(filePathSplit) != 2) {
       return "";
     };
-    return decode(filePathSplit[0]);
+    return EncodingUtils.decode(filePathSplit[0]);
   };
 
-  private func handleDownload(inputPath : Text) : ?Blob {
-    let filePath = extractAddress(inputPath);
-    let filePathSplit = Iter.toArray(Text.split(filePath, #char '/'));
-    if (Array.size(filePathSplit) != 2) {
-      return null;
-    };
-    let owner = filePathSplit[0];
-    let name = filePathSplit[1];
-    let result = get(owner, name);
-    switch (result) {
-      case (?file) {
-        ?file.content;
+  func getFilenameIndex(numericString : Text) : Nat {
+    let strippedText = Text.trimStart(numericString, #char '0');
+    let decodedFileName = EncodingUtils.decodeFileName(strippedText);
+    switch (Nat.fromText(decodedFileName)) {
+      case (?count) {
+        count;
       };
-      case (null) {
-        null;
+      case null {
+        0;
       };
-    };
-  };
-
-  private func create(file : File) : async () {
-    CanDB.put(
-      db,
-      {
-        pk = file.owner;
-        sk = file.name;
-        attributes = [
-          ("owner", #text(file.owner)),
-          ("name", #text(file.name)),
-          ("extension", #text(file.extension)),
-          ("content", #blob(file.content)),
-        ];
-      },
-    );
-    ();
-  };
-
-  private func get(owner : Text, name : Text) : ?File {
-    let fileData = switch (CanDB.get(db, { pk = owner; sk = name })) {
-      case null { null };
-      case (?fileEntity) { unwrapFile(fileEntity) };
-    };
-
-    switch (fileData) {
-      case (?u) ?{
-        owner = u.owner;
-        name = u.name;
-        extension = u.extension;
-        content = u.content;
-      };
-      case null { null };
-    };
-
-  };
-
-  private func update({
-    pk : Entity.PK;
-    sk : Entity.SK;
-    attributesToUpdate : [(Entity.AttributeKey, Entity.AttributeValue)];
-  }) : async ?File {
-    func updateAttributes(attributeMap : ?Entity.AttributeMap) : Entity.AttributeMap {
-      switch (attributeMap) {
-        case null { Entity.createAttributeMapFromKVPairs(attributesToUpdate) };
-        case (?map) {
-          Entity.updateAttributeMapWithKVPairs(map, attributesToUpdate);
-        };
-      };
-    };
-
-    switch (
-      CanDB.update(
-        db,
-        {
-          pk = pk;
-          sk = sk;
-          updateAttributeMapFunction = updateAttributes;
-        },
-      )
-    ) {
-      case null { null };
-      case (?entity) { unwrapFile(entity) };
-    };
-  };
-
-  private func remove(options : CanDB.RemoveOptions) : async ?File {
-    switch (CanDB.remove(db, options)) {
-      case null { null };
-      case (?entity) { unwrapFile(entity) };
     };
   };
 
@@ -254,166 +236,6 @@ actor class Main() = this {
       limit = limit;
       ascending = ?false;
     };
-    return await scan(options);
-  };
-
-  private func scan(options : CanDB.ScanOptions) : async ?[Text] {
-    let { entities; nextKey } = CanDB.scan(db, options);
-    let mappedEntities = Array.map<Entity.Entity, Text>(
-      entities,
-      func(entity) : Text {
-        switch (unwrapFileMetadata(entity)) {
-          case null { "" };
-          case (?res) { res };
-        };
-      },
-    );
-
-    if (Array.size(mappedEntities) == 0) {
-      return null;
-    } else {
-      return ?mappedEntities;
-    };
-  };
-
-  private func unwrapFile(entity : Entity.Entity) : ?File {
-    let { sk; pk; attributes } = entity;
-    let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
-    let nameValue = Entity.getAttributeMapValueForKey(attributes, "name");
-    let extensionValue = Entity.getAttributeMapValueForKey(attributes, "extension");
-    let contentValue = Entity.getAttributeMapValueForKey(attributes, "content");
-
-    switch (ownerValue, nameValue, extensionValue, contentValue) {
-      case (
-        ?(#text(owner)),
-        ?(#text(name)),
-        ?(#text(extension)),
-        ?(#blob(content)),
-      ) { ?{ owner; name; extension; content } };
-      case _ { null };
-    };
-  };
-
-  private func unwrapFileMetadata(entity : Entity.Entity) : ?Text {
-    let { sk; pk; attributes } = entity;
-    let nameValue = Entity.getAttributeMapValueForKey(attributes, "name");
-    let extensionValue = Entity.getAttributeMapValueForKey(attributes, "extension");
-    let ownerValue = Entity.getAttributeMapValueForKey(attributes, "owner");
-
-    switch (ownerValue, nameValue, extensionValue) {
-      case (
-        ?(#text(owner)),
-        ?(#text(name)),
-        ?(#text(extension)),
-      ) { ?(encode(owner # "/" # name) # extension) };
-      case _ { null };
-    };
-  };
-
-  func encode(input : Text) : Text {
-    return convBase(input, principalCharacterSet, urlCharacterSet);
-  };
-
-  func decode(input : Text) : Text {
-    return convBase(input, urlCharacterSet, principalCharacterSet);
-  };
-
-  func encodeFilename(input : Text) : Text {
-    return convBase(input, filenameCharacterSet, encodingFilenameSet);
-  };
-
-  func decodeFilename(input : Text) : Text {
-    return convBase(input, encodingFilenameSet, filenameCharacterSet);
-  };
-
-  func convBase(numberInput : Text, fromBaseInput : Text, toBaseInput : Text) : Text {
-    if (fromBaseInput == toBaseInput) return numberInput;
-    let fromBase = Text.toArray(fromBaseInput);
-    let toBase = Text.toArray(toBaseInput);
-    let number = Text.toArray(numberInput);
-    let fromLen = Text.size(fromBaseInput);
-    let toLen = Text.size(toBaseInput);
-    var retval : Text = "";
-    if (toBaseInput == "0123456789") {
-      var retvalNum = 0;
-      for (i in Iter.range(1, Text.size(numberInput))) {
-        let digitValue = indexOf(number[i - 1], fromBase);
-        switch (digitValue) {
-          case null {};
-          case (?dVal) {
-            retvalNum := retvalNum + (dVal * (fromLen ** (Text.size(numberInput) - i)));
-          };
-        };
-      };
-      return Nat.toText(retvalNum);
-    };
-    var base10 : Nat = 0;
-    if (fromBaseInput != "0123456789") {
-      base10 := switch (Nat.fromText(convBase(numberInput, fromBaseInput, "0123456789"))) {
-        case (?num) { num };
-        case null { 0 };
-      };
-    } else {
-      base10 := switch (Nat.fromText(numberInput)) {
-        case (?num) { num };
-        case null { 0 };
-      };
-    };
-    if (base10 < toLen) {
-      return Char.toText(toBase[base10]);
-    };
-    while (base10 != 0) {
-      let index = base10 % toLen;
-      retval := Char.toText(toBase[index]) # retval;
-      base10 := base10 / toLen;
-    };
-    return retval;
-  };
-
-  func indexOf(element : Char, array : [Char]) : ?Nat {
-    for (i in Iter.range(0, Array.size(array) - 1)) {
-      if (array[i] == element) {
-        return ?i;
-      };
-    };
-    return null;
-  };
-
-  func repeatString(count : Nat) : Text {
-    var result = "";
-    for (i in Iter.range(0, count)) {
-      result := "0" # result;
-    };
-    return result;
-  };
-
-  func generateFilename(index : Nat) : Text {
-    // Calculate the number of digits needed
-    let numZeros = 3; // 1000 * 37 chars = 37000 possible filenames
-    let numDigits = numZeros + 1;
-
-    // Convert the index to text
-    let indexText = encodeFilename(Nat.toText(index));
-
-    // Add leading zeros
-    let countedDigits : Int = numZeros - Text.size(indexText);
-    let zerosNeeded = Int.abs((countedDigits + numDigits) % numDigits);
-    let leadingZeros = repeatString(zerosNeeded);
-
-    // Return the formatted filename
-    return leadingZeros # indexText;
-  };
-
-  func getFilenameIndex(numericString : Text) : Nat {
-    let strippedText = Text.trimStart(numericString, #char '0');
-    let decodedFileName = decodeFilename(strippedText);
-    switch (Nat.fromText(decodedFileName)) {
-      case (?count) {
-        count;
-      };
-      case null {
-        0;
-      };
-    };
+    return await CanDbUtils.scan(options, db);
   };
 };
