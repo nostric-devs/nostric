@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Circle } from "svelte-loading-spinners";
   import { nostrHandler } from "$lib/nostr";
   import { authUser } from "$lib/stores/Auth";
   import { goto } from "$app/navigation";
@@ -7,7 +6,7 @@
   import { onMount } from "svelte";
   import { localAuthStorage } from "$lib/stores/LocalStorage";
   import { enhance } from "$app/forms";
-  import { getToastStore } from "@skeletonlabs/skeleton";
+  import { getToastStore, ProgressRadial } from "@skeletonlabs/skeleton";
 
   const toastStore = getToastStore();
 
@@ -22,12 +21,12 @@
     return async () => {
       try {
         await authUser.logInAnonymously(undefined, privateKey);
-        await goto(getPath(ROUTES.EXPLORE));
+        await goto(getPath(ROUTES.FEED));
       } catch (error) {
         toastStore.trigger({
           message: error as string,
           background: "variant-filled-error",
-          classes: "rounded-2xl, font-semibold",
+          classes: "rounded-md, font-semibold",
         });
         console.error(error);
       } finally {
@@ -49,12 +48,8 @@
 <div class="w-screen h-screen flex justify-center items-center">
   <div class="w-1/2 mx-auto">
     <form method="POST" class="w-full" use:enhance={onAnonymousSubmit}>
-      <h2 class="mb-3 pl-1 h2 text-center">
-        <span
-          class="bg-gradient-to-br from-red-700 to-yellow-500 bg-clip-text text-transparent box-decoration-clone"
-        >
-          Nostr login
-        </span>
+      <h2 class="mb-5 pl-1 h2 text-center">
+        <span> Nostr login </span>
       </h2>
       <div class="text-center mb-6">
         Your keys will not be stored in our backend.
@@ -63,7 +58,7 @@
         <div class="font-semibold pl-1 mb-2">Your private key</div>
         <input
           type="text"
-          class="input px-3 py-2 rounded-2xl mb-4"
+          class="input px-3 py-2 rounded-md mb-4"
           placeholder="type your private key"
           {disabled}
           bind:value={privateKey}
@@ -71,7 +66,7 @@
         <div class="font-semibold pl-1 mb-2">Your public key</div>
         <input
           type="text"
-          class="input px-3 py-2 rounded-2xl mb-4"
+          class="input px-3 py-2 rounded-md mb-4"
           placeholder="type your public key"
           {disabled}
           bind:value={publicKey}
@@ -79,13 +74,13 @@
       </div>
       <button
         type="submit"
-        class="btn bg-gradient-to-r from-blue-800 to-cyan-300 rounded-2xl w-full font-semibold mt-2"
+        class="btn variant-filled-secondary rounded-md w-full font-semibold mt-2"
         {disabled}
         formaction="/sign-in?/login-anonymous"
       >
         {#if loading}
           <span class="mr-2">
-            <Circle size="15" color="white" unit="px"></Circle>
+            <ProgressRadial width="w-4" />
           </span>
         {/if}
         Log with private and public key

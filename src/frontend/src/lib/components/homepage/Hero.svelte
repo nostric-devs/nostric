@@ -17,11 +17,10 @@
         The most user-friendly Nostr client
       </h1>
       <p class="mb-8 leading-relaxed text-gray-400">
-        Meggings kinfolk echo park stumptown DIY, kale chips beard jianbing
-        tousled. Chambray dreamcatcher trust fund, kitsch vice godard disrupt
-        ramps hexagon mustache umami snackwave tilde chillwave ugh. Pour-over
-        meditation PBR&amp;B pickled ennui celiac mlkshk freegan photo booth af
-        fingerstache pitchfork.
+        Your Gateway to Secure, User-Friendly Nostr Networking. Experience
+        enhanced privacy, intuitive design, and exclusive features tailored for
+        seamless digital interactions. Dive into Nostric, where innovation meets
+        user-centric security.
       </p>
       <div class="flex justify-center">
         <button
