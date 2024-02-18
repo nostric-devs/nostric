@@ -18,6 +18,7 @@
   let disabled: boolean = false;
   let privateKey: string;
   let publicKey: string;
+  let invitationCode: string;
   let userProfile: NDKUserProfile = {
     name: "",
     image: "",
@@ -29,7 +30,11 @@
     disabled = true;
     return async () => {
       try {
-        await authUser.registerWithIdentity(privateKey, userProfile);
+        await authUser.registerWithIdentity(
+          privateKey,
+          userProfile,
+          invitationCode,
+        );
         toastStore.trigger({
           message: `Welcome, ${userProfile.name}. Successfully registered.`,
           background: "variant-filled-success",
@@ -136,7 +141,7 @@
           </Toaster>
         </div>
       </div>
-      <div class="mb-8">
+      <div class="mb-2">
         <div class="font-semibold pl-1 mb-2">Your bio</div>
         <div>
           <textarea
@@ -146,6 +151,17 @@
             bind:value={userProfile.bio}
           ></textarea>
         </div>
+      </div>
+      <div class="mb-8">
+        <div class="font-semibold pl-1 mb-2">Invitation code</div>
+        <input
+          type="text"
+          name="userName"
+          class="input px-3 py-2 rounded-md mr-2 mb-4"
+          placeholder="type in your invitation code"
+          bind:value={invitationCode}
+          {disabled}
+        />
       </div>
       <button
         type="submit"
