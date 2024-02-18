@@ -210,13 +210,11 @@ actor class Main() = this {
 
   };
 
-  private func update(
-    {
-      pk : Entity.PK;
-      sk : Entity.SK;
-      attributesToUpdate : [(Entity.AttributeKey, Entity.AttributeValue)];
-    }
-  ) : async ?File {
+  private func update({
+    pk : Entity.PK;
+    sk : Entity.SK;
+    attributesToUpdate : [(Entity.AttributeKey, Entity.AttributeValue)];
+  }) : async ?File {
     func updateAttributes(attributeMap : ?Entity.AttributeMap) : Entity.AttributeMap {
       switch (attributeMap) {
         case null { Entity.createAttributeMapFromKVPairs(attributesToUpdate) };
