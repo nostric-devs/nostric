@@ -4,11 +4,12 @@ import Blob "mo:base/Blob";
 import Array "mo:base/Array";
 import Text "mo:base/Text";
 import Principal "mo:base/Principal";
-import Account "./utils/Account";
 import Map "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Bool "mo:base/Bool";
+import CkBtcUtils "utils/CkBtcUtils";
+import CkBtcLedger "canister:ckbtc_ledger";
 
 actor class Main() = this {
   public func greet(name : Text) : async Text {
@@ -155,46 +156,37 @@ actor class Main() = this {
     return #ok(());
   };
 
-  public type AccountType = { owner : Principal; subaccount : ?Blob };
-
-  public type Actor = actor {
-    icrc1_balance_of : (acc : AccountType) -> async Nat;
-  };
-
   public shared (msg) func getBalance() : async Nat {
-    let acc : AccountType = {
-      owner = Principal.fromActor(this);
-      subaccount = ?Account.toSubaccount(msg.caller);
-    };
-    var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+    let acc : CkBtcLedger.Account = CkBtcUtils.toAccount({
+      caller = msg.caller;
+      canister = Principal.fromActor(this);
+    });
+    var response : Nat = await CkBtcLedger.icrc1_balance_of(acc);
     return response;
   };
 
   public shared (msg) func getDepositAddress() : async Text {
-    let acc : AccountType = {
-      owner = Principal.fromActor(this);
-      subaccount = ?Account.toSubaccount(msg.caller);
-    };
-    return Account.toText(acc);
+    let acc = CkBtcUtils.toAccount({
+      caller = msg.caller;
+      canister = Principal.fromActor(this);
+    });
+    return CkBtcUtils.toText(acc);
   };
 
   // Method for local testing purposes
   public shared (msg) func getSubaccountForCaller() : async Blob {
-    Account.toSubaccount(msg.caller);
+    CkBtcUtils.toSubaccount(msg.caller);
   };
 
   // Method for local testing purposes
   public shared (msg) func getSubaccountForPrincipal(principal : Text) : async Blob {
     let p : Principal = Principal.fromText(principal);
-    Account.toSubaccount(p);
+    CkBtcUtils.toSubaccount(p);
   };
 
   public shared (msg) func verifyPayment() : async Bool {
-    let acc : AccountType = {
-      owner = Principal.fromActor(this);
-      subaccount = ?Account.toSubaccount(msg.caller);
-    };
-    var response : Nat = await ledgerActor.icrc1_balance_of(acc);
+    let acc = CkBtcUtils.toAccount({ caller = msg.caller; canister = Principal.fromActor(this) });
+    let response = await CkBtcLedger.icrc1_balance_of(acc);
     if (response >= 10) {
       let result = profiles.get(msg.caller);
       switch (result) {
@@ -217,8 +209,6 @@ actor class Main() = this {
       return false;
     };
   };
-
-  private stable var ledgerActor : Actor = actor ("mxzaz-hqaaa-aaaar-qaada-cai") : Actor;
 
   public shared ({ caller }) func app_vetkd_public_key(derivation_path : [Blob]) : async Text {
     let { public_key } = await vetkd_system_api.vetkd_public_key({

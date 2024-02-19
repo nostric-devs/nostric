@@ -9,9 +9,48 @@ import Nat32 "mo:base/Nat32";
 import Principal "mo:base/Principal";
 import Option "mo:base/Option";
 import Result "mo:base/Result";
+import CkBtcTypes "CkBtcTypes";
 
 module {
-  public type Account = { owner : Principal; subaccount : ?Blob };
+  /// Convert Principal to ICRC1.Subaccount
+  // from https://github.com/research-ag/motoko-lib/blob/2772d029c1c5087c2f57b022c84882f2ac16b79d/src/TokenHandler.mo#L51
+  public func toSubaccount(p : Principal) : CkBtcTypes.Subaccount {
+    // p blob size can vary, but 29 bytes as most. We preserve it'subaccount size in result blob
+    // and it'subaccount data itself so it can be deserialized back to p
+    let bytes = Blob.toArray(Principal.toBlob(p));
+    let size = bytes.size();
+
+    assert size <= 29;
+
+    let a = Array.tabulate<Nat8>(
+      32,
+      func(i : Nat) : Nat8 {
+        if (i + size < 31) {
+          0;
+        } else if (i + size == 31) {
+          Nat8.fromNat(size);
+        } else {
+          bytes[i + size - 32];
+        };
+      },
+    );
+    Blob.fromArray(a);
+  };
+
+  public func toAccount({ caller : Principal; canister : Principal }) : CkBtcTypes.Account {
+    {
+      owner = canister;
+      subaccount = ?toSubaccount(caller);
+    };
+  };
+
+  public func createInvoice(to : CkBtcTypes.Account, amount : Nat) : CkBtcTypes.Invoice {
+    {
+      to;
+      amount;
+    };
+  };
+
   public type ParseError = {
     #malformed : Text;
     #not_canonical;
@@ -19,7 +58,7 @@ module {
   };
 
   /// Converts an account to text.
-  public func toText({ owner; subaccount } : Account) : Text {
+  public func toText({ owner; subaccount } : CkBtcTypes.Account) : Text {
     let ownerText = Principal.toText(owner);
     switch (subaccount) {
       case (null) { ownerText };
@@ -35,7 +74,7 @@ module {
   };
 
   /// Parses account from its textual representation.
-  public func fromText(text : Text) : Result.Result<Account, ParseError> {
+  public func fromText(text : Text) : Result.Result<CkBtcTypes.Account, ParseError> {
     let n = text.size();
 
     if (n == 0) {
@@ -345,28 +384,5 @@ module {
         case (?x) { acc := f(acc, x) };
       };
     };
-  };
-
-  public func toSubaccount(p : Principal) : Blob {
-    // p blob size can vary, but 29 bytes as most. We preserve it'subaccount size in result blob
-    // and it'subaccount data itself so it can be deserialized back to p
-    let bytes = Blob.toArray(Principal.toBlob(p));
-    let size = bytes.size();
-
-    assert size <= 29;
-
-    let a = Array.tabulate<Nat8>(
-      32,
-      func(i : Nat) : Nat8 {
-        if (i + size < 31) {
-          0;
-        } else if (i + size == 31) {
-          Nat8.fromNat(size);
-        } else {
-          bytes[i + size - 32];
-        };
-      },
-    );
-    Blob.fromArray(a);
   };
 };

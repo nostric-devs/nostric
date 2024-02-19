@@ -44,9 +44,10 @@ npm install
 dfx start --clean
 ```
 
-5. Now run in the new shell execute the deploy script:
+5. Now run in the new shell execute the deploy script (if you are going to deploy it locally also run script to deploy `ckbtc_ledger` canister):
 
 ```
+bash deploy-local-ckbtc.sh
 dfx deploy
 ```
 
