@@ -5,9 +5,12 @@ description = " is yet a very simple Nostr client running on the Internet Comput
 repository = "https://github.com/nostric-devs/nostric"
 
 [dependencies]
-base = "0.10.3"
-candb = "1.0.2"
+base = "0.10.4"
+candb = "1.0.3"
 candy = "0.3.0"
+ic-certification = "0.1.3"
+sha2 = "0.0.4"
+"encoding.mo" = "https://github.com/aviate-labs/encoding.mo#v0.4.1@2711d18727e954b11afc0d37945608512b5fbce2"
 
 [dev-dependencies]
 test = "1.2.0"
