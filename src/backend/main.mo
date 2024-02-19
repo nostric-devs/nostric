@@ -185,7 +185,10 @@ actor class Main() = this {
   };
 
   public shared (msg) func verifyPayment() : async Bool {
-    let acc = CkBtcUtils.toAccount({ caller = msg.caller; canister = Principal.fromActor(this) });
+    let acc = CkBtcUtils.toAccount({
+      caller = msg.caller;
+      canister = Principal.fromActor(this);
+    });
     let response = await CkBtcLedger.icrc1_balance_of(acc);
     if (response >= 10) {
       let result = profiles.get(msg.caller);
