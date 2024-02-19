@@ -8,8 +8,7 @@ import Map "mo:base/HashMap";
 import Result "mo:base/Result";
 import Iter "mo:base/Iter";
 import Bool "mo:base/Bool";
-import CkBtcUtils "utils/Account";
-import CkBtcTypes "utils/CkBtcTypes";
+import CkBtcUtils "utils/CkBtcUtils";
 import CkBtcLedger "canister:ckbtc_ledger";
 
 actor class Main() = this {

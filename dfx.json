@@ -52,7 +52,6 @@
     }
   },
   "dfx": "0.17.0",
-  "output_env_file": "test.env.txt",
   "networks": {
     "local": {
       "bind": "localhost:8000",
