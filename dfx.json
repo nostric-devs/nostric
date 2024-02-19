@@ -8,7 +8,7 @@
     "backend": {
       "main": "src/backend/main.mo",
       "type": "motoko",
-      "dependencies": ["vetkd_system_api"]
+      "dependencies": ["vetkd_system_api", "ckbtc_ledger"]
     },
     "storage": {
       "main": "src/storage/main.mo",
@@ -34,14 +34,16 @@
     },
     "ckbtc_ledger" : {
       "type" : "custom",
-      "candid" : "ledger.did",
-      "wasm" : "ledger_canister.wasm",
-      "local": {
+      "candid" : "icrc1.local.did",
+      "wasm" : "icrc1.wasm",
+      "remote": {
+        "candid": "icrc1.public.did",
         "id": {
           "ic": "mxzaz-hqaaa-aaaar-qaada-cai"
         }
-      }  
-    }    
+      },
+      "init_arg": "(variant {Init = record {minting_account = record { owner = principal \"2vxsx-fae\" };transfer_fee = 0;token_symbol = \"ckBTC\";token_name = \"Token ckBTC\";metadata = vec {};initial_balances = vec {};archive_options = record {num_blocks_to_archive = 10_000;trigger_threshold = 20_000;cycles_for_archive_creation = opt 4_000_000_000_000;controller_id = principal \"2vxsx-fae\";};}})"
+    }
   },  
   "defaults": {
     "build": {
@@ -49,7 +51,8 @@
       "packtool": "mops sources"
     }
   },
-  "dfx": "0.15.3",
+  "dfx": "0.17.0",
+  "output_env_file": "test.env.txt",
   "networks": {
     "local": {
       "bind": "localhost:8000",
