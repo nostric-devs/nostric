@@ -149,7 +149,8 @@ export class IdentityHandler {
   }
 
   public async deleteFile(url: string): Promise<void> {
-    const result: Result = await this.storageActor.delete(url);
+    const fileName = new URL(url).pathname.split("/").at(-1);
+    const result: Result = await this.storageActor.delete(fileName);
     if (result !== undefined && "err" in result) {
       throw Error("Unable to delete file");
     } else {
