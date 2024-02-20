@@ -138,5 +138,6 @@ jobs:
 
       - name: Local deployment
         run: |
+          bash deploy-local-ckbtc.sh
           dfx deploy
         continue-on-error: false
