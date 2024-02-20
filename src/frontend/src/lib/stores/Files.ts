@@ -5,9 +5,20 @@ function getFiles() {
   const { subscribe, update, set } = files;
 
   const filePathToUrl = (path: string, host: string): string => {
-    return process.env.DFX_NETWORK === "ic"
-      ? `https://${process.env.STORAGE_CANISTER_ID}.raw.icp0.io/${path}`
-      : `${host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
+    let url;
+    if (process.env.DFX_NETWORK === "ic") {
+      let hostname = location.hostname;
+      if (hostname.includes("dev.nostric.app")) {
+        url = `https://img.dev.nostric.app/${path}`;
+      } else if (hostname.includes("nostric.app")) {
+        url = `https://img.nostric.app/${path}`;
+      } else {
+        url = `https://${process.env.STORAGE_CANISTER_ID}.raw.icp0.io/${path}`;
+      }
+    } else {
+      url = `${host}/?canisterId=${process.env.STORAGE_CANISTER_ID}${path}`;
+    }
+    return url;
   };
 
   const fill = (urls: string[], host?: string): void => {
