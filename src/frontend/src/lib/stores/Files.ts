@@ -7,7 +7,7 @@ function getFiles() {
   const filePathToUrl = (path: string, host: string): string => {
     let url;
     if (process.env.DFX_NETWORK === "ic") {
-      let hostname = location.hostname;
+      const hostname = location.hostname;
       if (hostname.includes("dev.nostric.app")) {
         url = `https://img.dev.nostric.app/${path}`;
       } else if (hostname.includes("nostric.app")) {
