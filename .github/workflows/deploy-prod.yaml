@@ -45,7 +45,7 @@ jobs:
             echo "DFX_VERSION=latest" >> $GITHUB_ENV
           fi
 
-      - uses: aviate-labs/setup-dfx@v0.2.6
+      - uses: dfinity/setup-dfx@main
         with:
           dfx-version: ${{ env.DFX_VERSION }}
         env:
