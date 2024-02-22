@@ -42,9 +42,8 @@ jobs:
 
       - name: Dev environment deployment
         run: |
-          dfx identity new action
-          chmod +w /home/runner/.config/dfx/identity/action/identity.pem
-          echo "${{ secrets.DFX_IDENTITY_PEM }}" > /home/runner/.config/dfx/identity/action/identity.pem
+          echo "${{ secrets.DFX_IDENTITY_PEM }}" > /home/runner/identity.pem
+          dfx identity import action /home/runner/identity.pem
           dfx identity use action
           dfx identity set-wallet ${{ secrets.WALLET_CANISTER_ID }} --network ic
           dfx wallet balance --network ic
