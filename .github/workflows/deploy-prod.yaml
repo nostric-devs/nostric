@@ -31,23 +31,9 @@ jobs:
           npm install -g ic-mops
         continue-on-error: false
 
-      - name: Read DFX Version
-        run: |
-          # Define the path to your JSON file
-          json_file="dfx.json"
-          # Extract the dfx value using jq
-          dfx_version=$(jq -r '.dfx' "$json_file")
-          if [ -n "$dfx_version" ]; then
-            echo "Using the DFX version: $dfx_version"
-            echo "DFX_VERSION=$dfx_version" >> $GITHUB_ENV
-          else
-            echo "Failed to extract DFX version from JSON, using the latest version"
-            echo "DFX_VERSION=latest" >> $GITHUB_ENV
-          fi
-
       - uses: dfinity/setup-dfx@main
         with:
-          dfx-version: ${{ env.DFX_VERSION }}
+          dfx-version: auto
         env:
           DFX_IDENTITY_PEM: ${{ secrets.DFX_IDENTITY_PEM }}
       - run: |
@@ -56,6 +42,9 @@ jobs:
 
       - name: Dev environment deployment
         run: |
+          dfx identity new action
+          chmod +w /home/runner/.config/dfx/identity/action/identity.pem
+          echo "${{ secrets.DFX_IDENTITY_PEM }}" > /home/runner/.config/dfx/identity/action/identity.pem
           dfx identity use action
           dfx identity set-wallet ${{ secrets.WALLET_CANISTER_ID }} --network ic
           dfx wallet balance --network ic
