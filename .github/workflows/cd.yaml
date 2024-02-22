@@ -38,7 +38,7 @@ jobs:
         run: |
           cp canister_ids-dev.json canister_ids.json
           echo "${{ secrets.DFX_IDENTITY_PEM }}" > /home/runner/identity.pem
-          dfx identity import action /home/runner/identity.pem
+          dfx identity import --storage-mode=plaintext --force action /home/runner/identity.pem
           dfx identity use action
           dfx identity set-wallet ${{ secrets.WALLET_CANISTER_ID }} --network ic
           dfx wallet balance --network ic
