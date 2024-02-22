@@ -20,6 +20,7 @@ updates:
           - "@floating-ui/*"
           - "vite"
           - "typescript"
+          - "@types/*"
       development-tools:
         patterns:
           - "*eslint*"
@@ -44,3 +45,4 @@ updates:
           - "autoprefixer"
           - "postcss*"
           - "floating-ui*"
+          - "@types/*"
