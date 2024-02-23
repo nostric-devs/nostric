@@ -71,7 +71,7 @@
     "@dfinity/auth-client": "^1.0.1",
     "@dfinity/identity": "^1.0.0",
     "@dfinity/principal": "^1.0.0",
-    "@dfinity/utils": "next",
+    "@dfinity/utils": "2.1.2",
     "@floating-ui/dom": "^1.6.3",
     "@nostr-dev-kit/ndk": "^2.2.0",
     "@nostr-dev-kit/ndk-cache-dexie": "^2.2.3",
