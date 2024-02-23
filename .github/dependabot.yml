@@ -21,6 +21,7 @@ updates:
           - "vite"
           - "typescript"
           - "@types/*"
+          - "@skeletonlabs/*"
       development-tools:
         patterns:
           - "*eslint*"
@@ -44,5 +45,6 @@ updates:
           - "tailwindcss"
           - "autoprefixer"
           - "postcss*"
-          - "floating-ui*"
+          - "@floating-ui/*"
           - "@types/*"
+          - "@skeletonlabs/*"
