@@ -21,12 +21,21 @@
   }
   type IdentitySubmit = IdentitySubmits.LOG_IN | IdentitySubmits.SIGN_UP;
 
-  const onSubmit = async (submitType: IdentitySubmit, cancel: unknown) => {
+  const onSubmit = async (
+    submitType: IdentitySubmit,
+    cancel: unknown,
+    formData: FormData,
+  ) => {
     loading = submitType;
     disabled = true;
-    return async () => {
-      try {
-        await authUser.logInWithIdentity();
+
+    try {
+      await authUser.logInWithIdentity();
+      formData.append("identityAuthType", String($authUser.authState));
+
+      return async () => {
+        loading = null;
+        disabled = false;
         await goto(getPath(ROUTES.FEED));
         if (submitType === IdentitySubmits.SIGN_UP) {
           toastStore.trigger({
@@ -35,36 +44,36 @@
             background: "variant-filled-warning",
           });
         }
-      } catch (error) {
-        if (error instanceof NotYetAssociatedError) {
-          await goto(getPath(ROUTES.SIGN_IN, ROUTES.REGISTER_IDENTITY));
-          if (submitType === IdentitySubmits.LOG_IN) {
-            toastStore.trigger({
-              message:
-                "This Internet Identity is not yet associated with a user. Register.",
-              background: "variant-filled-warning",
-            });
-          }
-        } else if (error instanceof AssociatedFetchError) {
+      };
+    } catch (error) {
+      if (error instanceof NotYetAssociatedError) {
+        await goto(getPath(ROUTES.SIGN_IN, ROUTES.REGISTER_IDENTITY));
+        if (submitType === IdentitySubmits.LOG_IN) {
           toastStore.trigger({
             message:
-              "Unable to fetch user associated with the Identity. Check your connection.",
+              "This Internet Identity is not yet associated with a user. Register.",
             background: "variant-filled-warning",
           });
-        } else {
-          console.error(error);
-          toastStore.trigger({
-            message: "Unable to verify Internet Identity.",
-            background: "variant-filled-error",
-          });
         }
-        // prevent the submission and creation of auth server side cookie
+      } else if (error instanceof AssociatedFetchError) {
+        toastStore.trigger({
+          message:
+            "Unable to fetch user associated with the Identity. Check your connection.",
+          background: "variant-filled-warning",
+        });
+      } else {
+        console.error(error);
+        toastStore.trigger({
+          message: "Unable to verify Internet Identity.",
+          background: "variant-filled-error",
+        });
+      }
+      return async () => {
         cancel();
-      } finally {
         loading = null;
         disabled = false;
-      }
-    };
+      };
+    }
   };
 </script>
 
@@ -148,8 +157,8 @@
         <div class="mt-12">
           <form
             method="POST"
-            use:enhance={({ cancel }) =>
-              onSubmit(IdentitySubmits.LOG_IN, cancel)}
+            use:enhance={({ cancel, formData }) =>
+              onSubmit(IdentitySubmits.LOG_IN, cancel, formData)}
             class="mx-auto w-full xl:px-6 text-center"
           >
             <button
@@ -176,8 +185,8 @@
           </form>
           <form
             method="POST"
-            use:enhance={({ cancel }) =>
-              onSubmit(IdentitySubmits.SIGN_UP, cancel)}
+            use:enhance={({ cancel, formData }) =>
+              onSubmit(IdentitySubmits.SIGN_UP, cancel, formData)}
             class="mx-auto w-full xl:px-6 text-center mt-4"
           >
             <button

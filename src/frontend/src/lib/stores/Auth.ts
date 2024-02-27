@@ -4,7 +4,7 @@ import { nostrHandler } from "$lib/nostr";
 import { clearLocalAuth, updateLocalAuth } from "$lib/stores/LocalStorage";
 import { IdentityHandler } from "$lib/identity/IdentityHandler";
 import { NostrUserHandler } from "$lib/nostr/NostrUserHandler";
-import type { Result } from "$declarations/backend/backend.did";
+import type { Profile, Result } from "$declarations/backend/backend.did";
 import type { NDKUserProfile } from "@nostr-dev-kit/ndk";
 import { followedUsers } from "$lib/stores/FollowedUsers";
 import { files } from "$lib/stores/Files";
@@ -41,6 +41,7 @@ export interface AuthUser {
   identity: IdentityHandler | undefined;
   authState: AuthState;
   loading: boolean;
+  backendUser: Profile | undefined;
 }
 
 export function getAuthUser() {
@@ -49,6 +50,7 @@ export function getAuthUser() {
     identity: undefined,
     authState: AuthStates.ANONYMOUS,
     loading: true,
+    backendUser: undefined,
   });
   const { subscribe, set, update } = auth;
 
@@ -59,6 +61,9 @@ export function getAuthUser() {
   const setNostr = (nostr: NostrUserHandler): void =>
     update((auth: AuthUser) => ({ ...auth, nostr }));
 
+  const setBackendUser = (backendUser: Profile): void =>
+    update((auth: AuthUser) => ({ ...auth, backendUser }));
+
   const setLoading = (loading: boolean): void =>
     update((auth: AuthUser) => ({ ...auth, loading }));
 
@@ -66,13 +71,14 @@ export function getAuthUser() {
     await nostrHandler.reset();
     followedUsers.clear();
     files.clear();
+    clearLocalAuth();
     set({
       nostr: undefined,
       identity: undefined,
       authState: AuthStates.ANONYMOUS,
       loading: false,
+      backendUser: undefined,
     });
-    clearLocalAuth();
   };
 
   const checkIdentityActiveOnPage = async (): Promise<void> => {
@@ -100,47 +106,49 @@ export function getAuthUser() {
       authIdentity = get(auth).identity;
     }
 
-    // check if any user is associated with the identity
-    if (
-      authIdentity !== undefined &&
-      !(await authIdentity.isIdentityAssociated())
-    ) {
-      throw new NotYetAssociatedError(
-        "Identity not yet associated with a user",
-      );
-    }
-
-    let authNostr: NostrUserHandler | undefined = get(auth).nostr;
-    // if nostrUserHandler was not yet initialized, and it was not passed in a param, create a new one
-    if (
-      authIdentity !== undefined &&
-      nostrUser === undefined &&
-      authNostr === undefined
-    ) {
-      const result: Result | undefined = await authIdentity.getAssociatedUser();
-
-      if (result && "ok" in result) {
-        const userHandler: NostrUserHandler = NostrUserHandler.getInstance(
-          result.ok.nostrProfile.encryptedPrivateKey,
+    if (authIdentity === undefined) {
+      throw Error("Unable to determine Internet Identity");
+    } else {
+      // check if any user is associated with the identity
+      if (!(await authIdentity.isIdentityAssociated())) {
+        throw new NotYetAssociatedError(
+          "Identity not yet associated with a user",
         );
-        await userHandler.initExistingUser();
-        setNostr(userHandler);
-        authNostr = get(auth).nostr;
       } else {
-        throw new AssociatedFetchError(
-          "Unable to fetch user associated with this Internet Identity",
-        );
-      }
-    } else if (nostrUser && authNostr === undefined) {
-      setNostr(nostrUser);
-      authNostr = get(auth).nostr;
-    }
+        let { nostr, backendUser } = get(auth);
 
-    updateLocalAuth(
-      authNostr.getPrivateKey(),
-      AuthStates.IDENTITY_AUTHENTICATED,
-    );
-    setAuthState(AuthStates.IDENTITY_AUTHENTICATED);
+        if (backendUser === undefined) {
+          const result: Result | undefined =
+            await authIdentity.getAssociatedUser();
+          if (result && "ok" in result) {
+            setBackendUser(result.ok);
+            backendUser = result.ok;
+          } else {
+            throw new AssociatedFetchError(
+              "Unable to fetch user associated with this Internet Identity",
+            );
+          }
+        }
+
+        if (nostrUser === undefined && nostr === undefined) {
+          const userHandler: NostrUserHandler = NostrUserHandler.getInstance(
+            backendUser.nostrProfile.encryptedPrivateKey,
+          );
+          await userHandler.initExistingUser();
+          setNostr(userHandler);
+          nostr = get(auth).nostr;
+        } else if (nostrUser && nostr === undefined) {
+          setNostr(nostrUser);
+          nostr = get(auth).nostr;
+        }
+
+        const authState: AuthState = backendUser.isPro
+          ? AuthStates.PRO_AUTHENTICATED
+          : AuthStates.IDENTITY_AUTHENTICATED;
+        updateLocalAuth(nostr.getPrivateKey(), authState);
+        setAuthState(authState);
+      }
+    }
   };
 
   const logInAnonymously = async (

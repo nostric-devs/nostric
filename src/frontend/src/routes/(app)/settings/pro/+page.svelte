@@ -6,52 +6,70 @@
   import { QRCodeImage } from "svelte-qrcode-image";
   import { Copy } from "svelte-feathers";
   import Toaster from "$lib/components/toast/Toaster.svelte";
-  import { Circle } from "svelte-loading-spinners";
+  import { updateLocalAuth } from "$lib/stores/LocalStorage";
+  import { ProgressRadial } from "@skeletonlabs/skeleton";
+  import { enhance } from "$app/forms";
 
-  let initializing: boolean = false;
+  let loading: boolean = false;
   let address: string | undefined;
   let principal: Principal | undefined;
   const toastStore = getToastStore();
 
-  const verify = async () => {
-    initializing = true;
-    let response = await $authUser.identity.verifyPayment();
-    if (response) {
-      authUser.setAuthState(AuthStates.PRO_AUTHENTICATED);
-      toastStore.trigger({
-        message: `You are now a pro user!`,
-        background: "variant-filled-success",
-        classes: "rounded-md, font-semibold",
-      });
-    } else {
-      toastStore.trigger({
-        message: `Unable to verify payment!`,
-        background: "variant-filled-error",
-        classes: "rounded-md, font-semibold",
-      });
-    }
-    initializing = false;
+  const onVerifySubmit = async ({ cancel }) => {
+    loading = true;
+    return async () => {
+      if ($authUser.identity) {
+        try {
+          let response = await $authUser.identity.verifyPayment();
+          if (response) {
+            authUser.setAuthState(AuthStates.PRO_AUTHENTICATED);
+            updateLocalAuth(
+              $authUser.nostr.getPrivateKey(),
+              AuthStates.PRO_AUTHENTICATED,
+            );
+            toastStore.trigger({
+              message: "You are now a pro user",
+              background: "variant-filled-success",
+              classes: "rounded-md, font-semibold",
+            });
+          } else {
+            throw Error("Unable to verify payment");
+          }
+        } catch {
+          toastStore.trigger({
+            message: "Unable to verify payment",
+            background: "variant-filled-error",
+            classes: "rounded-md, font-semibold",
+          });
+          cancel();
+        } finally {
+          loading = false;
+        }
+      } else {
+        cancel();
+      }
+    };
   };
 
   $: isPro = $authUser.authState === AuthStates.PRO_AUTHENTICATED;
 
   onMount(async () => {
-    if (!isPro) {
-      initializing = true;
+    if ($authUser.identity && !isPro) {
+      loading = true;
       address = await $authUser.identity.getDepositAddress();
       principal = await $authUser.identity.whoAmI();
-      initializing = false;
+      loading = false;
     }
   });
 </script>
 
 <div class="m-4">You can manage your Pro subscription here.</div>
-{#if initializing}
+{#if loading}
   <div class="w-full mt-24 flex items-center justify-center">
-    <Circle size="100" color="white" unit="px" duration="2s" />
+    <ProgressRadial />
   </div>
 {:else if isPro}
-  <h3 class="h3">Your Pro subscription is active!</h3>
+  <h3 class="h3 mx-4">Your Pro subscription is active!</h3>
 {:else}
   <div class="m-4">
     <h3 class="h3 mb-4">Open your Pro subscription!</h3>
@@ -91,20 +109,22 @@
       <QRCodeImage
         text={address}
         displayStyle="border-style: dotted;"
-        width="200"
-        displayWidth="200"
+        width={200}
+        displayWidth={200}
         displayClass="mt-8 mx-auto"
       />
     </div>
 
-    <!-- Flex container for the button -->
     <div class="flex justify-center">
-      <button
-        class="btn variant-filled-primary btn-lg font-medium my-8"
-        on:click={async () => await verify()}
-      >
-        Verify payment
-      </button>
+      <form method="POST" use:enhance={onVerifySubmit}>
+        <button
+          type="submit"
+          class="btn variant-filled-primary btn-lg font-medium my-8"
+          formaction="/sign-in?/login-pro"
+        >
+          Verify payment
+        </button>
+      </form>
     </div>
   </div>
 {/if}

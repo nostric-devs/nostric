@@ -18,7 +18,7 @@
   $: includes = (pageName: string) => {
     return $page.url.pathname.includes(pageName);
   };
-  $: isAuthenticated = $authUser.authState < AuthStates.IDENTITY_AUTHENTICATED;
+  $: isPro = $authUser.authState === AuthStates.PRO_AUTHENTICATED;
 </script>
 
 <nav class="list-nav xl:px-4 py-4">
@@ -75,22 +75,20 @@
       <a
         href={getPath(ROUTES.BOOKMARKS)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.BOOKMARKS))}
-        class="capitalize pointer-events-none opacity-50 cursor-not-allowed {isAuthenticated
-          ? 'pointer-events-none opacity-50 cursor-not-allowed'
-          : ''}"
+        class="capitalize pointer-events-none opacity-50 cursor-not-allowed"
       >
         <Bookmark size="20" class="lg:mx-auto xl:mx-0"></Bookmark>
         <span class="lg:hidden xl:block ml-3">{ROUTES.BOOKMARKS}</span>
-        <span class="badge variant-filled">PRO</span>
+        <span class="badge variant-filled">SOON</span>
       </a>
     </li>
     <li>
       <a
         href={getPath(ROUTES.IMAGES)}
         class:bg-primary-active-token={isActive(getPath(ROUTES.IMAGES))}
-        class="capitalize {isAuthenticated
-          ? 'pointer-events-none opacity-50 cursor-not-allowed'
-          : ''}"
+        class="capitalize {isPro
+          ? ''
+          : 'pointer-events-none opacity-50 cursor-not-allowed'}"
       >
         <Image size="20" class="lg:mx-auto xl:mx-0"></Image>
         <span class="lg:hidden xl:block ml-3">{ROUTES.IMAGES}</span>
@@ -108,37 +106,6 @@
       </a>
     </li>
   </ul>
-  <!-- {#if $page.url.pathname.includes(ROUTES.SETTINGS)}
-    <ul class="pl-8 pt-2">
-      <a
-        href={getPath(ROUTES.SETTINGS, ROUTES.PROFILE)}
-        class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.PROFILE),
-        )}
-        class="capitalize"
-      >
-        <span class="lg:hidden xl:block ml-3">{ROUTES.PROFILE}</span>
-      </a>
-      <a
-        href={getPath(ROUTES.SETTINGS, ROUTES.RELAYS)}
-        class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.RELAYS),
-        )}
-        class="capitalize"
-      >
-        <span class="lg:hidden xl:block ml-3">{ROUTES.RELAYS}</span>
-      </a>
-      <a
-        href={getPath(ROUTES.SETTINGS, ROUTES.PRO)}
-        class:bg-primary-active-token={isActive(
-          getPath(ROUTES.SETTINGS, ROUTES.PRO),
-        )}
-        class="capitalize"
-      >
-        <span class="lg:hidden xl:block ml-3">{ROUTES.PRO}</span>
-      </a>
-    </ul>
-  {/if} -->
 </nav>
 
 <style>
