@@ -137,7 +137,7 @@
       </label>
     </form>
 
-    {#if $authUser.authState >= AuthStates.IDENTITY_AUTHENTICATED}
+    {#if $authUser.authState === AuthStates.PRO_AUTHENTICATED}
       <div class="pb-4">
         <div class="text-md mb-2 font-bold mr-4">Images</div>
         <div class="pa-2 flex">

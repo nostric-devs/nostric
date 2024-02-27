@@ -127,7 +127,7 @@ export class IdentityHandler {
     return this.backendActor?.verifyPayment();
   }
 
-  public async uploadFile(file: File): Promise<string> {
+  public async uploadFile(file: File): Promise<void> {
     const blob: Uint8Array | number[] = [
       ...new Uint8Array(await file.arrayBuffer()),
     ];
