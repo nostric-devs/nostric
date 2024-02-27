@@ -12,8 +12,19 @@ export const actions: Actions = {
     });
     return { success: true };
   },
-  "login-identity": async ({ cookies }) => {
-    cookies.set("auth", AuthStates.IDENTITY_AUTHENTICATED.toString(), {
+  "login-identity": async ({ cookies, request }) => {
+    const data: FormData = await request.formData();
+    cookies.set("auth", data.get("identityAuthType"), {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60,
+    });
+    return { success: true };
+  },
+  "login-pro": async ({ cookies }) => {
+    cookies.set("auth", AuthStates.PRO_AUTHENTICATED.toString(), {
       path: "/",
       httpOnly: true,
       sameSite: "strict",

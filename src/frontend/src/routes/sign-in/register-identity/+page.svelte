@@ -167,7 +167,7 @@
         type="submit"
         class="btn variant-filled-surface rounded-md w-full font-semibold mb-6"
         formaction="/sign-in?/login-identity"
-        disabled={disabled || !userProfile.name}
+        disabled={disabled || !(userProfile.name && invitationCode)}
       >
         {#if loading}
           <span class="mr-2">

@@ -37,7 +37,12 @@ export const isPathAccessible = (
     ROUTES.USER,
     ROUTES.SIGN_IN,
   ];
-  const identityAccessible: string[] = [ROUTES.IMAGES, ROUTES.BOOKMARKS];
+  const identityAccessible: string[] = [`${ROUTES.SETTINGS}/${ROUTES.PRO}`];
+  const proAccessible: string[] = [
+    ROUTES.IMAGES,
+    ROUTES.BOOKMARKS,
+    ROUTES.NOTIFICATIONS,
+  ];
 
   if (url === getPath(ROUTES.HOMEPAGE)) {
     // ROUTES.HOMEPAGE is empty string, would match anything
@@ -48,13 +53,18 @@ export const isPathAccessible = (
         url.startsWith(getPath(path)),
       ) !== undefined
     );
-  } else if (status >= AuthStates.IDENTITY_AUTHENTICATED) {
+  } else if (status === AuthStates.PRO_AUTHENTICATED) {
     return true;
-  } else if (status >= AuthStates.NOSTR_AUTHENTICATED) {
+  } else if (status === AuthStates.IDENTITY_AUTHENTICATED) {
     return (
-      identityAccessible.find((path: string) =>
-        url.startsWith(getPath(path)),
-      ) === undefined
+      proAccessible.find((path: string) => url.startsWith(getPath(path))) ===
+      undefined
+    );
+  } else if (status === AuthStates.NOSTR_AUTHENTICATED) {
+    return (
+      proAccessible
+        .concat(identityAccessible)
+        .find((path: string) => url.startsWith(getPath(path))) === undefined
     );
   } else {
     return false;

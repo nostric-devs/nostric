@@ -25,7 +25,6 @@
   import { Circle } from "svelte-loading-spinners";
   import { localAuthStorage } from "$lib/stores/LocalStorage";
   import { get } from "svelte/store";
-  import { getPath, ROUTES } from "$lib/utils/routes";
 
   const drawerStore = getDrawerStore();
 
@@ -40,7 +39,7 @@
   // let autocompleteInputValue: string = "";
 
   let user: NDKUser | undefined;
-  let loading: boolean = false;
+  let loading: boolean = true;
 
   $: isAuthenticated = !loading && $authUser.authState !== AuthStates.ANONYMOUS;
 
@@ -50,23 +49,18 @@
 
   const storageAuth = get(localAuthStorage);
 
-  const isUserRequiredPage = (): boolean => {
-    const currentPath: string = window.location.pathname;
-    return (
-      currentPath !== getPath(ROUTES.HOMEPAGE) &&
-      !currentPath.startsWith(getPath(ROUTES.SIGN_IN))
-    );
-  };
-
   onMount(async () => {
     // on forced, if the user was logged in, data should be in storageAuth,
     // and it should be possible to log in again automatically.
-    if (isUserRequiredPage() && storageAuth && storageAuth.privateKey) {
-      loading = true;
+    if (
+      storageAuth &&
+      storageAuth.privateKey &&
+      $page.data.user !== undefined
+    ) {
       try {
-        if (storageAuth.token === AuthStates.NOSTR_AUTHENTICATED) {
+        if ($page.data.user === AuthStates.NOSTR_AUTHENTICATED) {
           await authUser.logInAnonymously(undefined, storageAuth.privateKey);
-        } else if (storageAuth.token >= AuthStates.IDENTITY_AUTHENTICATED) {
+        } else if ($page.data.user >= AuthStates.IDENTITY_AUTHENTICATED) {
           await authUser.logInWithIdentity();
         } else {
           // even if we are not to be logged in, we at least check if there is an
@@ -78,11 +72,10 @@
       } catch (error) {
         await authUser.logOut();
         await goto("/#signup");
-      } finally {
-        loading = false;
       }
       user = $authUser.nostr.getUser();
     }
+    loading = false;
   });
 </script>
 
