@@ -11,5 +11,6 @@ if [ "$DFX_NETWORK" != "ic" ]; then
   sed $SED_INPLACE 's/service : {/service : (ledger_arg : LedgerArg) -> {/' icrc1.local.did
   dfx deploy ckbtc_ledger
   sed $SED_INPLACE 's/service : (ledger_arg : LedgerArg) -> {/service : {/g' icrc1.local.did
-  rm icrc1.local.did.bak
+  if [ -f "icrc1.local.did.bak" ]; then
+      rm "icrc1.local.did.bak"
 fi
