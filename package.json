@@ -50,7 +50,7 @@
     "eslint-plugin-svelte": "^2.35.1",
     "node-fetch": "^3.3.2",
     "pem-file": "^1.0.1",
-    "postcss": "^8.4.35",
+    "postcss": "^8.4.36",
     "postcss-load-config": "^5.0.3",
     "prettier": "^3.2.5",
     "prettier-plugin-motoko": "^0.8.4",
